@@ -1,0 +1,10 @@
+npm install @capacitor/app @capacitor/camera @capacitor/core @capacitor/filesystem @capacitor/haptics @capacitor/keyboard @capacitor/status-bar
+
+@capacitor/app": "4.1.1",
+"@capacitor/camera": "^4.1.4",
+"@capacitor/core": "^4.7.1",
+"@capacitor/filesystem": "^4.1.4",
+"@capacitor/haptics": "4.1.0",
+"@capacitor/keyboard": "4.1.1",
+"@capacitor/status-bar": "4.1.1",
+"@ionic/storage": "^4.0.0",

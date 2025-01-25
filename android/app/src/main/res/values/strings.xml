@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Graduados Derecho</string>
+    <string name="title_activity_main">Graduados Derecho</string>
+    <string name="package_name">com.kamecode.graduados</string>
+    <string name="custom_url_scheme">com.kamecode.graduados</string>
+</resources>
