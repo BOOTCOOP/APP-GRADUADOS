@@ -1,4 +1,4 @@
-import axios from '@/libs/axios'
+import axios from "@/libs/axios";
 
 export default {
   namespaced: true,
@@ -6,14 +6,21 @@ export default {
   getters: {},
   mutations: {},
   actions: {
-    // Index
+    // Obtener todas las bibliografías con paginación
     fetchAll(ctx, filters = {}) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`bibliographies`, {params: filters})
-          .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
+          .get(`bibliographies`, { params: filters }) // Se mantiene como `bibliographies`
+          .then((response) => {
+            console.log(response.data.data); // ✅ Se accede directamente a `data`
+            console.log(response.data.meta); // ✅ Se accede directamente a `data`
+            resolve({
+              data: response.data.data, // ✅ Extrae los datos correctamente
+              meta: response.data.meta, // ✅ Extrae la paginación dentro de "meta"
+            });
+          }) // ✅ Se accede directamente a `data`
+          .catch((error) => reject(error));
+      });
     },
 
     // Show
@@ -22,12 +29,11 @@ export default {
         axios
           .get(`bibliographies/${id}`)
           .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
+          .catch((error) => reject(error));
+      });
     },
   },
-}
-
+};
 
 // fetch(ctx, id) {
 //   return new Promise((resolve, reject  ) => {
