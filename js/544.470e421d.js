@@ -1,0 +1,6 @@
+"use strict";(self["webpackChunkgraduados_app"]=self["webpackChunkgraduados_app"]||[]).push([[544],{2642:(e,t,s)=>{s.r(t),s.d(t,{startFocusVisible:()=>a});
+/*!
+ * (C) Ionic http://ionicframework.com - MIT License
+ */
+const o="ion-focused",n="ion-focusable",r=["Tab","ArrowDown","Space","Escape"," ","Shift","Enter","ArrowLeft","ArrowRight","ArrowUp","Home","End"],a=e=>{let t=[],s=!0;const a=e?e.shadowRoot:document,c=e||document.body,d=e=>{t.forEach((e=>e.classList.remove(o))),e.forEach((e=>e.classList.add(o))),t=e},i=()=>{s=!1,d([])},u=e=>{s=r.includes(e.key),s||d([])},v=e=>{if(s&&void 0!==e.composedPath){const t=e.composedPath().filter((e=>!!e.classList&&e.classList.contains(n)));d(t)}},E=()=>{a.activeElement===c&&d([])};a.addEventListener("keydown",u),a.addEventListener("focusin",v),a.addEventListener("focusout",E),a.addEventListener("touchstart",i),a.addEventListener("mousedown",i);const L=()=>{a.removeEventListener("keydown",u),a.removeEventListener("focusin",v),a.removeEventListener("focusout",E),a.removeEventListener("touchstart",i),a.removeEventListener("mousedown",i)};return{destroy:L,setFocus:d}}}}]);
+//# sourceMappingURL=544.470e421d.js.map
