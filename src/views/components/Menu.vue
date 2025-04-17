@@ -1,34 +1,66 @@
 <template>
-    <ion-menu side="start" menu-id="main-menu" content-id="main-content" type="overlay">
-      <ion-content class="ion-padding">
-        <ion-img class="logo" src="/assets/logo/logo.png"></ion-img>
+  <ion-menu
+    side="start"
+    menu-id="main-menu"
+    content-id="main-content"
+    type="overlay"
+  >
+    <ion-content class="ion-padding">
+      <ion-img class="logo" src="/assets/logo/logo.png"></ion-img>
 
-        <ion-card class="user-welcome ion-no-margin ion-margin-top">
-          <ion-card-content>
-            <ion-text><h2>Hola, {{User.get()?.firstname}}</h2></ion-text>
-            <ion-text color="primary" @click="openNotificationsMenu">No tenes notificaciones nuevas</ion-text>
-          </ion-card-content>
-        </ion-card>
+      <ion-card class="user-welcome ion-no-margin ion-margin-top">
+        <ion-card-content>
+          <ion-text
+            ><h2>Hola, {{ User.get()?.firstname }}</h2></ion-text
+          >
+          <ion-text color="primary" @click="openNotificationsMenu"
+            >No tenes notificaciones nuevas</ion-text
+          >
+        </ion-card-content>
+      </ion-card>
 
-        <ion-list id="menu-items">
-          <ion-menu-toggle auto-hide="false" v-for="(p, i) in items" :key="i">
-            <ion-item :router-link="p.url" lines="none" detail="false" class="hydrated" :class="{ selected: active === i }">
-              <ion-icon aria-hidden="true" slot="start" color="primary" :ios="p.icon" :md="p.icon"></ion-icon>
-              <ion-label>{{ p.title }}</ion-label>
-            </ion-item>
-          </ion-menu-toggle>
-        </ion-list>
+      <ion-list id="menu-items">
+        <ion-menu-toggle auto-hide="false" v-for="(p, i) in items" :key="i">
+          <ion-item
+            :router-link="p.url"
+            lines="none"
+            detail="false"
+            class="hydrated"
+            :class="{ selected: active === i }"
+          >
+            <ion-icon
+              aria-hidden="true"
+              slot="start"
+              color="primary"
+              :ios="p.icon"
+              :md="p.icon"
+            ></ion-icon>
+            <ion-label>{{ p.title }}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
 
-        <ion-list id="logout-item">
-          <ion-menu-toggle auto-hide="false" >
-            <ion-item @click="logout" lines="none" detail="false" class="hydrated">
-              <ion-icon aria-hidden="true" slot="start" color="primary" :ios="logOutOutline" :md="logOutOutline"></ion-icon>
-              <ion-label>Cerrar sesión</ion-label>
-            </ion-item>
-          </ion-menu-toggle>
-        </ion-list>
-      </ion-content>
-    </ion-menu>
+      <ion-list id="logout-item">
+        <ion-menu-toggle auto-hide="false">
+          <ion-item
+            @click="logout"
+            lines="none"
+            detail="false"
+            class="hydrated"
+          >
+            <ion-icon
+              aria-hidden="true"
+              slot="start"
+              color="primary"
+              :ios="logOutOutline"
+              :md="logOutOutline"
+            ></ion-icon>
+            <ion-label>Cerrar sesión</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
 </template>
 
 <script setup>
@@ -45,28 +77,30 @@ import {
   IonMenu,
   IonMenuToggle,
   menuController,
-  useIonRouter
-} from '@ionic/vue';
-import { ref, watch } from 'vue';
+  useIonRouter,
+} from '@ionic/vue'
+import { ref, watch } from 'vue'
 
 import {
   newspaperOutline,
   bookmarkOutline,
+  giftOutline,
+  megaphoneOutline,
   schoolOutline,
   bagAddOutline,
   shareSocialOutline,
   personOutline,
   logOutOutline,
   homeOutline,
-  gridOutline
-} from 'ionicons/icons';
-import { useRoute } from 'vue-router';
-import { useAuth } from '@/uses/auth';
-import User from '@/utils/user';
+  gridOutline,
+} from 'ionicons/icons'
+import { useRoute } from 'vue-router'
+import { useAuth } from '@/uses/auth'
+import User from '@/utils/user'
 
-const route = useRoute();
-const router = useIonRouter();
-const active = ref(null);
+const route = useRoute()
+const router = useIonRouter()
+const active = ref(null)
 const items = [
   {
     title: 'Inicio',
@@ -104,48 +138,61 @@ const items = [
     icon: shareSocialOutline,
   },
   {
+    title: 'Beneficios',
+    url: '/beneficios',
+    icon: giftOutline, // Importá giftOutline desde ionicons/icons
+  },
+  {
+    title: 'Avisos',
+    url: '/classifieds',
+    icon: megaphoneOutline,
+  },
+  {
     title: 'Mi cuenta',
     url: '/perfil',
     icon: personOutline,
   },
-];
+]
 
-const path = route.path;
-setActiveItem(path);
-watch( route, (r) => setActiveItem(r.path) )
+const path = route.path
+setActiveItem(path)
+watch(route, (r) => setActiveItem(r.path))
 
-function setActiveItem(curr){
-  active.value = items.findIndex((page) => page.url === curr.toLowerCase());
+function setActiveItem(curr) {
+  active.value = items.findIndex((page) => page.url === curr.toLowerCase())
 }
 
-function openNotificationsMenu(){
-  menuController.close("main-menu").then(() => menuController.open("notification-content"));
+function openNotificationsMenu() {
+  menuController
+    .close('main-menu')
+    .then(() => menuController.open('notification-content'))
 }
 
-function logout(){
-  useAuth().logout().then(() => router.push({name:'login'}));
+function logout() {
+  useAuth()
+    .logout()
+    .then(() => router.push({ name: 'login' }))
 }
-
 </script>
 
 <style scoped>
-ion-content{
+ion-content {
   --ion-item-background: #fff;
 }
 
-.logo{
+.logo {
   width: 200px;
 }
 
-.user-welcome{
+.user-welcome {
   background-color: var(--ion-color-step-950);
 }
 
-.user-welcome *{
+.user-welcome * {
   margin-top: 0;
 }
 
-#logout-item{
+#logout-item {
   position: absolute;
   width: 100%;
   bottom: 0;
@@ -198,11 +245,11 @@ ion-menu ion-item:not(.selected) {
   /* --padding-start: 10px; */
   /* --padding-end: 10px; */
   /* border-radius: 4px; */
-  border-top: 1px solid var(--ion-color-step-900)
+  border-top: 1px solid var(--ion-color-step-900);
 }
 
 ion-menu ion-menu-toggle:last-child ion-item:not(.selected) {
-  border-bottom: 1px solid var(--ion-color-step-900)
+  border-bottom: 1px solid var(--ion-color-step-900);
 }
 
 ion-menu ion-item.selected {
@@ -217,11 +264,11 @@ ion-menu ion-item ion-label {
   font-weight: 500;
 }
 
-ion-menu.ios  ion-item{
+ion-menu.ios ion-item {
   font-size: 16px;
 }
 
-ion-menu.ios  ion-icon{
+ion-menu.ios ion-icon {
   font-size: 1.4em;
 }
 

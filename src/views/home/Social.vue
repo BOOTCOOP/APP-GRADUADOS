@@ -61,15 +61,15 @@ import {
 } from '@ionic/vue'
 
 function goToFacebook() {
-  window.open('https://www.facebook.com/centrode.graduados', '_system')
+  window.open('https://www.facebook.com/Centrodegraduadasygraduados', '_system')
 }
 
 function goToTwitter() {
-  window.open('https://x.com/GraduadoDchoUBA', '_system')
+  window.open('https://x.com/graduadodchouba?s=21', '_system')
 }
 
 function goToInstagram() {
-  window.open('https://www.instagram.com/centrodegraduados/', '_system')
+  window.open('https://www.instagram.com/centrodegraduados', '_system')
 }
 </script>
 

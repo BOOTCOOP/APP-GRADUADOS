@@ -16,6 +16,16 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/auth/Login.vue'),
   },
   {
+    path: '/QuizList',
+    name: 'QuizList',
+    component: () => import('../views/entertainment/QuizList.vue'),
+  },
+  {
+    path: '/QuizDetail/:id',
+    name: 'QuizDetail',
+    component: () => import('../views/entertainment/QuizDetail.vue'),
+  },
+  {
     path: '/registro',
     name: 'register',
     component: () => import('../views/auth/register/Register.vue'),
@@ -47,6 +57,37 @@ const routes: Array<RouteRecordRaw> = [
     name: 'feeds.index',
     component: () => import('../views/feeds/Feeds.vue'),
     meta: { auth },
+  },
+  {
+    path: '/beneficios',
+    name: 'benefits',
+    component: () => import('../views/benefits/Benefits.vue'),
+    meta: { auth },
+  },
+  {
+    path: '/beneficios/:id',
+    name: 'benefitDetail',
+    component: () => import('../views/benefits/BenefitDetail.vue'),
+    meta: { auth },
+  },  
+  {
+    path: '/classifieds',
+    name: 'Classifieds',
+    component: () => import('@/views/classifieds/Classifieds.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/classifieds/create',
+    name: 'CreateAviso',
+    component: () => import('@/views/classifieds/CreateAviso.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/classifieds/:id',
+    name: 'AvisoDetail',
+    component: () => import('@/views/classifieds/AvisoDetail.vue'),
+    props: true,
+    meta: { requiresAuth: true }
   },
   {
     path: '/noticia/:slug',

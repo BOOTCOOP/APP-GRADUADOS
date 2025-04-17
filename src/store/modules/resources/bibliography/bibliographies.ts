@@ -6,13 +6,20 @@ export default {
   getters: {},
   mutations: {},
   actions: {
-    // Index
+    // Obtener todas las bibliografías con paginación
     fetchAll(ctx, filters = {}) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`bibliographies`, {params: filters})
-          .then((response) => resolve(response))
-          .catch(error => reject(error))
+          .get(`bibliographies`, { params: filters })
+          .then((response) => {
+            console.log(response.data.data)
+            console.log(response.data.meta)
+            resolve({
+              data: response.data.data,
+              meta: response.data.meta,
+            })
+          })
+          .catch((error) => reject(error))
       })
     },
 
@@ -22,20 +29,19 @@ export default {
         axios
           .get(`bibliographies/${id}`)
           .then((response) => resolve(response))
-          .catch(error => reject(error))
+          .catch((error) => reject(error))
       })
     },
   },
 }
 
-
 // fetch(ctx, id) {
 //   return new Promise((resolve, reject  ) => {
-//     fetch(`http://localhost:8000/bibliographies/${id}`)
+//     fetch(http://localhost:8000/bibliographies/${id})
 //       .then((response) => {
 //         if (!response.ok) {
 //           throw new Error(
-//             `Error ${response.status}: ${response.statusText}`
+//             Error ${response.status}: ${response.statusText}
 //           )
 //         }
 //         return response

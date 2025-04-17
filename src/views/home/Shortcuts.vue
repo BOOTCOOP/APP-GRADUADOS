@@ -25,6 +25,14 @@
                     </ion-card-content>
                 </ion-card>
             </ion-col>
+            <ion-col>
+                <ion-card router-link="/beneficios" class="ion-no-margin cursor-pointer ion-text-center ion-card-square">
+                    <ion-card-content>
+                        <ion-icon size="large" color="primary" :ios="giftOutline" :md="giftOutline"></ion-icon>
+                        <ion-text class="ion-margin-top">Beneficios</ion-text>
+                    </ion-card-content>
+                </ion-card>
+            </ion-col>
         </ion-row>
         <ion-row>
             <ion-col>
@@ -51,23 +59,36 @@
                     </ion-card-content>
                 </ion-card>
             </ion-col>
+            <ion-col>
+                <ion-card router-link="/classifieds" class="ion-no-margin cursor-pointer ion-text-center ion-card-square">
+                    <ion-card-content>
+                        <ion-icon size="large" color="primary" :ios="megaphoneOutline" :md="megaphoneOutline"></ion-icon>
+                        <ion-text class="ion-margin-top">Avisos</ion-text>
+                    </ion-card-content>
+                </ion-card>
+            </ion-col>
         </ion-row>
     </ion-grid>
 </template>
 
 <script setup lang="ts">
     import {
-        newspaperOutline,
-        bookmarkOutline,
-        schoolOutline,
-        bagAddOutline,
-        shareSocialOutline,
-        gridOutline
-    } from 'ionicons/icons';
+bagAddOutline,
+bookmarkOutline,
+giftOutline,
+gridOutline,
+newspaperOutline,
+schoolOutline,
+shareSocialOutline,
+megaphoneOutline
+} from 'ionicons/icons';
 
     import {
-        IonCard, IonCardContent,
-        IonGrid, IonRow, IonCol, IonText,
-        IonIcon,
-    } from '@ionic/vue';
+IonCard, IonCardContent,
+IonCol,
+IonGrid,
+IonIcon,
+IonRow,
+IonText,
+} from '@ionic/vue';
 </script>

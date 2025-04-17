@@ -37,5 +37,11 @@
 </template>
 
 <script setup lang="ts">
-    import { IonList, IonCard, IonCardContent, IonLabel, IonSkeletonText } from '@ionic/vue';
+import {
+  IonCard,
+  IonCardContent,
+  IonLabel,
+  IonList,
+  IonSkeletonText,
+} from '@ionic/vue'
 </script>

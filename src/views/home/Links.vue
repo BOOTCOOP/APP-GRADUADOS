@@ -30,11 +30,11 @@
     } from '@ionic/vue';
 
     function goToWhatsapp(){
-        window.open('https://web.whatsapp.com/send?phone=541126689567', '_system');
+        window.open('https://web.whatsapp.com/send?phone=541138315897', '_system');
     }
 
     function goToYoutube(){
-        window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlCqTrjnDReSRB8uBadiBAiL', '_system');
+        window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy', '_system');
     }
 </script>
 
