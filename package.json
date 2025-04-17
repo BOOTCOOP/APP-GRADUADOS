@@ -8,8 +8,10 @@
     "ionic:build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy": "gh-pages -d dist"
   },
+  "homepage": "https://BOOTCOOP.github.io/APP-GRADUADOS",
   "dependencies": {
     "@capacitor/android": "^5.7.0",
     "@capacitor/app": "^5.0.7",
@@ -33,7 +35,7 @@
     "pinia": "^3.0.0",
     "swiper": "^9.1.1",
     "vee-validate": "^4.8.4",
-    "vue": "^3.2.21",
+    "vue": "^3.5.13",
     "vue-router": "^4.0.12",
     "vue-virtual-scroller": "^2.0.0-beta.8",
     "vuex": "^4.1.0"
@@ -57,6 +59,7 @@
     "cypress": "^8.7.0",
     "eslint": "^8.4.1",
     "eslint-plugin-vue": "^9.8.0",
+    "gh-pages": "^6.3.0",
     "jest": "^27.3.1",
     "ts-jest": "^27.0.7",
     "tsconfig-paths": "^4.2.0",
