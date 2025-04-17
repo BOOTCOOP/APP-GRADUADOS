@@ -1,10 +1,10 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: 'com.kamecode.graduados',
-  appName: 'Graduados Derecho',
-  webDir: 'public',
-  bundledWebRuntime: false
+  appId: "com.kamecode.graduados",
+  appName: "Graduados Derecho",
+  webDir: "dist",
+  bundledWebRuntime: false,
 };
 
 export default config;
