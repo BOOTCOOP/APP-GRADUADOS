@@ -6,7 +6,7 @@
           <ion-icon :icon="refreshOutline"></ion-icon> Actualizar
         </button>
       </div>
-      
+
       <!-- Botón para crear nuevo aviso -->
       <div class="action-container">
         <button @click="goToCreateAviso" class="create-button">
@@ -14,12 +14,12 @@
           Publicar Aviso
         </button>
       </div>
-      
+
       <div v-if="loading" class="loading-container">
         <div class="spinner"></div>
         <p>Cargando avisos...</p>
       </div>
-      
+
       <div v-else class="avisos-container">
         <div v-if="avisos.length" class="avisos-list">
           <div
@@ -29,25 +29,31 @@
             class="aviso-item"
           >
             <div class="aviso-thumbnail">
-              <img v-if="aviso.file" :src="getFileUrl(aviso.file)" alt="Aviso thumbnail" />
+              <img
+                v-if="aviso.file"
+                :src="getImageUrl(aviso.file)"
+                alt="Aviso thumbnail"
+              />
               <div v-else class="placeholder-thumbnail">
                 <ion-icon :icon="documentOutline" size="large"></ion-icon>
               </div>
             </div>
-            
+
             <div class="aviso-content">
               <h2 class="aviso-title">{{ aviso.title }}</h2>
-              <p class="aviso-description">{{ truncateText(aviso.description, 100) }}</p>
+              <p class="aviso-description">
+                {{ truncateText(aviso.description, 100) }}
+              </p>
               <div class="aviso-contact">
                 <ion-icon :icon="callOutline" size="small"></ion-icon>
                 <span>{{ aviso.contact_phone }}</span>
               </div>
             </div>
-            
+
             <div v-if="isMyAviso(aviso)" class="aviso-badge">Mi Aviso</div>
           </div>
         </div>
-        
+
         <div v-else class="empty-state">
           <ion-icon :icon="alertCircleOutline" size="large"></ion-icon>
           <p>No hay avisos publicados en este momento.</p>
@@ -61,16 +67,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import {
+  addOutline,
+  alertCircleOutline,
+  callOutline,
+  documentOutline,
+  refreshOutline,
+} from 'ionicons/icons'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import { 
-  addOutline, 
-  documentOutline, 
-  callOutline, 
-  alertCircleOutline,
-  refreshOutline
-} from 'ionicons/icons'
 
 const store = useStore()
 const router = useRouter()
@@ -99,11 +105,30 @@ function goToCreateAviso() {
   router.push('/classifieds/create')
 }
 
-function getFileUrl(filePath: string) {
-  if (!filePath) return ''
-  // Construir la URL completa para el archivo
-  const baseUrl = process.env.VUE_APP_API_URL?.replace('/api', '') || ''
-  return `${baseUrl}/storage/${filePath}`
+function getImageUrl(logo: string): string {
+  if (!logo) {
+    return '/assets/img/imagen-no-disponible.jpg'
+  }
+
+  // 1) Base de tu API: quita la parte “/api” si existe
+  const raw = process.env.VUE_APP_API_URL || ''
+  const apiBase =
+    raw.replace(/\/api\/?$/, '') || 'https://api.graduados.kame-code.com'
+
+  // 2) Asegúrate de que la ruta venga sin slash repetido
+  //    benefit.logo podría venir como "benefits/originals/…"
+  //    o "/storage/benefits/…", o incluso "storage/benefits/…"
+  let path = logo
+  // Si ya incluye "storage", no lo dupliques
+  if (!/^\/?storage\//.test(path)) {
+    // quita cualquier "/" al inicio y añade "/storage/"
+    path = '/storage/' + path.replace(/^\/+/, '')
+  } else {
+    // si empieza con "/storage", mantenlo y solo quita "/" de más
+    path = '/' + path.replace(/^\/+/, '')
+  }
+
+  return `${apiBase}${path}`
 }
 
 function truncateText(text: string, maxLength: number) {
@@ -116,7 +141,7 @@ function isMyAviso(aviso: any) {
 }
 
 onMounted(() => {
-  console.log('Classifieds component mounted');
+  console.log('Classifieds component mounted')
   loadAvisos()
 })
 </script>
@@ -188,8 +213,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .avisos-container {
@@ -309,14 +338,13 @@ onMounted(() => {
     width: 60px;
     height: 60px;
   }
-  
+
   .aviso-title {
     font-size: 14px;
   }
-  
+
   .aviso-description {
     font-size: 12px;
   }
 }
 </style>
-

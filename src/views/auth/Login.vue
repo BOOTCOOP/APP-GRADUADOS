@@ -1,7 +1,7 @@
 <template>
   <graduados-blank body="white" :hideFabButton="true">
     <Form ref="form" class="content">
-      <ion-img src="/assets/logo/logo.png" />
+      <ion-img :src="logo" alt="Logo Graduados" />
       <div>
         <Field v-model="email" name="email" v-slot="{ field }" rules="required">
           <IonItem>
@@ -58,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+import logo from '@/assets/logo/logo.png'
 import { useAuth } from '@/uses/auth'
 import FormPassword from '@/views/app/components/form/FormPassword.vue'
 import {

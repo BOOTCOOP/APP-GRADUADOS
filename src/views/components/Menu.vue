@@ -6,7 +6,10 @@
     type="overlay"
   >
     <ion-content class="ion-padding">
-      <ion-img class="logo" src="/assets/logo/logo.png"></ion-img>
+      <ion-img
+        class="logo"
+        src="`${process.env.BASE_URL}assets/logo/logo.png`"
+      ></ion-img>
 
       <ion-card class="user-welcome ion-no-margin ion-margin-top">
         <ion-card-content>
