@@ -4,26 +4,32 @@
       <ion-text>
         <strong>{{ file.theme }}</strong>
       </ion-text>
+
       <div class="options ion-margin-top">
         <div class="info">
-          <div v-for="(item, index) in file.files" :key="index">
+          <div
+            v-for="(item, index) in file.files"
+            :key="item.id || index"
+            class="file-item"
+          >
             <ion-icon
               :md="documentTextOutline"
               :ios="documentTextOutline"
               color="medium"
-            ></ion-icon>
+            />
             <ion-text color="medium">
-              {{ item.name }} ({{ item.extension }})</ion-text
-            >
+              {{ item.name }}
+            </ion-text>
           </div>
         </div>
+
         <ion-icon
           style="font-size: 20px; cursor: pointer"
           :md="downloadOutline"
           :ios="downloadOutline"
           color="primary"
           @click="downloadFiles"
-        ></ion-icon>
+        />
       </div>
     </ion-card-content>
   </ion-card>
@@ -39,21 +45,21 @@ const props = defineProps({
 });
 
 const downloadFiles = () => {
-  if (!props.file.files || props.file.files.length === 0) {
-    console.error("No hay archivos para descargar");
+  if (!props.file.files?.length) {
+    console.error("⚠️ No hay archivos para descargar");
     return;
   }
 
   props.file.files.forEach((file) => {
-    if (!file.link) {
-      console.error(`El archivo ${file.name} no tiene un enlace de descarga`);
+    if (!file.src) {
+      console.error(`⚠️ El archivo ${file.name} no tiene una URL de descarga`);
       return;
     }
 
     const a = document.createElement("a");
-    a.href = file.link;
-    a.target = "_blank"; // ✅ Abre cada archivo en una nueva pestaña
-    a.rel = "noopener noreferrer"; // ✅ Seguridad extra
+    a.href = file.src;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -64,26 +70,29 @@ const downloadFiles = () => {
 </script>
 
 <style scoped>
-ion-card .options {
+.options {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 8px;
 }
 
-ion-card .options .info {
+.info {
   flex-grow: 1;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
 }
-ion-card .options .info > div {
+
+.file-item {
   display: flex;
   align-items: center;
   color: var(--ion-color-medium);
   font-size: 12px;
   margin-right: 10px;
 }
-ion-card .options .info ion-text {
-  margin-left: 2px;
+
+.file-item ion-text {
+  margin-left: 4px;
 }
 </style>

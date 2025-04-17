@@ -1,4 +1,4 @@
-import axios from '@/libs/axios'
+import axios from "@/libs/axios";
 
 export default {
   namespaced: true,
@@ -10,10 +10,13 @@ export default {
     fetchAll(ctx, filters = {}) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`feeds`, {params: filters})
-          .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
+          .get(`feeds`, { params: filters })
+          .then((response) => {
+            console.log("📦 Respuesta de feeds:", response); // 🔍 Acá lo logueás
+            resolve(response);
+          })
+          .catch((error) => reject(error));
+      });
     },
 
     // Show
@@ -22,8 +25,8 @@ export default {
         axios
           .get(`feeds/${slug}`)
           .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
+          .catch((error) => reject(error));
+      });
     },
   },
-}
+};

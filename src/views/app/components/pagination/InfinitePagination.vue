@@ -64,14 +64,7 @@ const loadingItems = ref(false);
 const store = useStore();
 const items = ref([]);
 const search = ref("");
-const meta = ref({
-  current_page: 1,
-  last_page: 1,
-  per_page: 10,
-  total: 0,
-  next_page_url: null,
-  prev_page_url: null,
-});
+const meta = ref([]);
 const page = ref(1);
 const hasMorePages = computed(
   () => meta.value?.current_page != meta.value.last_page
@@ -143,10 +136,12 @@ function fetchData() {
         search: search.value,
       })
       .then((response) => {
-        console.log(response);
-        items.value = items.value.concat(response.data || []); // Asegurar que 'data' siempre existe
-        meta.value = response.data.meta || meta.value; // Evitar que 'meta' sea undefined
+        items.value = items.value.concat(response.data.data);
+
+        meta.value = response.data.meta;
+
         firstLoad.value = false;
+
         resolve(true);
       })
       .finally(() => (loadingItems.value = false));
