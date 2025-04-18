@@ -6,10 +6,7 @@
     type="overlay"
   >
     <ion-content class="ion-padding">
-      <ion-img
-        class="logo"
-        src="`${process.env.BASE_URL}assets/logo/logo.png`"
-      ></ion-img>
+      <ion-img class="logo" src="/assets/logo/logo.png"></ion-img>
 
       <ion-card class="user-welcome ion-no-margin ion-margin-top">
         <ion-card-content>
@@ -81,8 +78,8 @@ import {
   IonMenuToggle,
   menuController,
   useIonRouter,
-} from '@ionic/vue'
-import { ref, watch } from 'vue'
+} from "@ionic/vue";
+import { ref, watch } from "vue";
 
 import {
   newspaperOutline,
@@ -96,85 +93,85 @@ import {
   logOutOutline,
   homeOutline,
   gridOutline,
-} from 'ionicons/icons'
-import { useRoute } from 'vue-router'
-import { useAuth } from '@/uses/auth'
-import User from '@/utils/user'
+} from "ionicons/icons";
+import { useRoute } from "vue-router";
+import { useAuth } from "@/uses/auth";
+import User from "@/utils/user";
 
-const route = useRoute()
-const router = useIonRouter()
-const active = ref(null)
+const route = useRoute();
+const router = useIonRouter();
+const active = ref(null);
 const items = [
   {
-    title: 'Inicio',
-    url: '/',
+    title: "Inicio",
+    url: "/",
     icon: homeOutline,
   },
   {
-    title: 'Noticias',
-    url: '/noticias',
+    title: "Noticias",
+    url: "/noticias",
     icon: newspaperOutline,
   },
   {
-    title: 'Talleres',
-    url: '/talleres',
+    title: "Talleres",
+    url: "/talleres",
     icon: schoolOutline,
   },
   {
-    title: 'Programas',
-    url: '/cursos',
+    title: "Programas",
+    url: "/cursos",
     icon: gridOutline,
   },
   {
-    title: 'Material bibliográfico',
-    url: '/material-bibliografico',
+    title: "Material bibliográfico",
+    url: "/material-bibliografico",
     icon: bookmarkOutline,
   },
   {
-    title: 'Búsqueda laboral',
-    url: '/busqueda-laboral',
+    title: "Búsqueda laboral",
+    url: "/busqueda-laboral",
     icon: bagAddOutline,
   },
   {
-    title: 'Información de interés',
-    url: '/informacion-de-interes',
+    title: "Información de interés",
+    url: "/informacion-de-interes",
     icon: shareSocialOutline,
   },
   {
-    title: 'Beneficios',
-    url: '/beneficios',
+    title: "Beneficios",
+    url: "/beneficios",
     icon: giftOutline, // Importá giftOutline desde ionicons/icons
   },
   {
-    title: 'Avisos',
-    url: '/classifieds',
+    title: "Avisos",
+    url: "/classifieds",
     icon: megaphoneOutline,
   },
   {
-    title: 'Mi cuenta',
-    url: '/perfil',
+    title: "Mi cuenta",
+    url: "/perfil",
     icon: personOutline,
   },
-]
+];
 
-const path = route.path
-setActiveItem(path)
-watch(route, (r) => setActiveItem(r.path))
+const path = route.path;
+setActiveItem(path);
+watch(route, (r) => setActiveItem(r.path));
 
 function setActiveItem(curr) {
-  active.value = items.findIndex((page) => page.url === curr.toLowerCase())
+  active.value = items.findIndex((page) => page.url === curr.toLowerCase());
 }
 
 function openNotificationsMenu() {
   menuController
-    .close('main-menu')
-    .then(() => menuController.open('notification-content'))
+    .close("main-menu")
+    .then(() => menuController.open("notification-content"));
 }
 
 function logout() {
   useAuth()
     .logout()
-    .then(() => router.push({ name: 'login' }))
+    .then(() => router.push({ name: "login" }));
 }
 </script>
 
