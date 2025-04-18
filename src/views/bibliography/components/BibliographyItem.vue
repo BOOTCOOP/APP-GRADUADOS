@@ -39,7 +39,8 @@
 <script setup lang="ts">
 import { defineProps, ref } from "vue";
 import { isPlatform } from "@ionic/vue";
-import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 import {
   IonCard,
   IonCardContent,
@@ -54,49 +55,55 @@ const props = defineProps({
   file: { required: true },
 });
 
-const loading = ref(false); // Estado para controlar el spinner
+const loading = ref(false);
 
 const downloadFiles = async () => {
-  if (!props.file.files?.length) {
-    console.error("⚠️ No hay archivos para descargar");
-    return;
-  }
+  if (!props.file.files?.length) return;
 
-  loading.value = true; // Mostrar spinner
+  loading.value = true;
 
   try {
     for (const file of props.file.files) {
-      if (!file.link) {
-        console.error(`⚠️ El archivo ${file.name} no tiene una URL válida`);
-        continue;
-      }
+      if (!file.link) continue;
 
       if (isPlatform("capacitor")) {
-        // 📱 MODO MOBILE (Android/iOS)
-        await Filesystem.downloadFile({
+        // Solución universal para iOS/Android
+        const downloadResult = await Filesystem.downloadFile({
           url: file.link,
           path: file.name,
           directory: Directory.Documents,
+          progress: true,
         });
 
-        showToast(`📁 "${file.name}" descargado correctamente`);
+        // Opcional: Abrir el archivo después de descargar (iOS necesita esto)
+        if (isPlatform("ios")) {
+          try {
+            await Share.share({
+              title: "Abrir archivo",
+              url: downloadResult.path,
+              dialogTitle: "Abrir con...",
+            });
+          } catch (shareError) {
+            console.log("El usuario canceló la apertura");
+          }
+        }
+
+        showToast(`📁 "${file.name}" listo`);
       } else {
-        // 💻 MODO WEB
+        // Código web igual
         const a = document.createElement("a");
         a.href = file.link;
         a.download = file.name;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
       }
     }
   } catch (err) {
-    console.error("❌ Error al descargar archivo:", err);
-    showToast("❌ Error al descargar archivos");
+    console.error("Error:", err);
+    showToast("❌ Error al descargar");
   } finally {
-    loading.value = false; // Ocultar spinner (tanto en éxito como en error)
+    loading.value = false;
   }
 };
 
@@ -109,7 +116,6 @@ const showToast = async (message: string) => {
   await toast.present();
 };
 </script>
-
 <style scoped>
 /* Tus estilos existentes se mantienen igual */
 .options {
