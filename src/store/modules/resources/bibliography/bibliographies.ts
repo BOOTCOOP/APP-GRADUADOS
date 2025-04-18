@@ -1,4 +1,4 @@
-import axios from '@/libs/axios'
+import axios from "@/libs/axios";
 
 export default {
   namespaced: true,
@@ -10,10 +10,13 @@ export default {
     fetchAll(ctx, filters = {}) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`bibliographies`, {params: filters})
-          .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
+          .get(`bibliographies`, { params: filters })
+          .then((response) => {
+            console.log(response);
+            resolve(response);
+          })
+          .catch((error) => reject(error));
+      });
     },
 
     // Show
@@ -22,12 +25,11 @@ export default {
         axios
           .get(`bibliographies/${id}`)
           .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
+          .catch((error) => reject(error));
+      });
     },
   },
-}
-
+};
 
 // fetch(ctx, id) {
 //   return new Promise((resolve, reject  ) => {

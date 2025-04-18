@@ -1,75 +1,147 @@
 <template>
   <ion-card>
-    <ion-card-content @click="() => showDetail(file.src)">
+    <ion-card-content>
       <ion-text>
-        <strong>{{ file.name }}</strong>
+        <strong>{{ file.theme }}</strong>
       </ion-text>
+
       <div class="options ion-margin-top">
         <div class="info">
-          <div>
+          <div
+            v-for="(item, index) in file.files"
+            :key="item.id || index"
+            class="file-item"
+          >
             <ion-icon
               :md="documentTextOutline"
               :ios="documentTextOutline"
               color="medium"
-            ></ion-icon>
-            <ion-text color="medium"> {{ file.extension }}</ion-text>
-          </div>
-          <div class="ion-margin-start" v-if="file.theme">
-            <ion-icon
-              :md="schoolOutline"
-              :ios="schoolOutline"
-              color="medium"
-            ></ion-icon>
-            <ion-text color="medium"> {{ file.theme }}</ion-text>
+            />
+            <ion-text color="medium">
+              {{ item.name }}
+            </ion-text>
           </div>
         </div>
+
         <ion-icon
-          style="font-size: 20px"
+          style="font-size: 20px; cursor: pointer"
           :md="downloadOutline"
           :ios="downloadOutline"
           color="primary"
-        ></ion-icon>
+          @click="downloadFiles"
+        />
       </div>
     </ion-card-content>
   </ion-card>
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
-import { IonCard, IonCardContent, IonText, IonIcon, useIonRouter } from '@ionic/vue';
-import { documentTextOutline, schoolOutline, downloadOutline } from 'ionicons/icons';
-import { HTTP } from '@ionic/native'
+import { defineProps } from "vue";
+import { isPlatform } from "@ionic/vue";
+import { CapacitorHttp } from "@capacitor/core";
+import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
+import {
+  IonCard,
+  IonCardContent,
+  IonText,
+  IonIcon,
+  toastController,
+} from "@ionic/vue";
+import { documentTextOutline, downloadOutline } from "ionicons/icons";
 
-const prop = defineProps({
-    file :{required:true}
-})
+const props = defineProps({
+  file: { required: true },
+});
 
-const router = useIonRouter();
+const downloadFiles = async () => {
+  if (!props.file.files?.length) {
+    console.error("⚠️ No hay archivos para descargar");
+    return;
+  }
 
-function showDetail(url){
-  window.open(url, '_system', 'location=yes');
-}
+  for (const file of props.file.files) {
+    if (!file.link) {
+      console.error(`⚠️ El archivo ${file.name} no tiene una URL válida`);
+      continue;
+    }
+
+    if (isPlatform("capacitor")) {
+      try {
+        const response = await CapacitorHttp.get({
+          url: file.link,
+          responseType: "blob",
+        });
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64Data = reader.result?.toString().split(",")[1];
+
+          if (base64Data) {
+            await Filesystem.writeFile({
+              path: `${file.name}`,
+              data: base64Data,
+              directory: Directory.Documents,
+              encoding: Encoding.UTF8,
+            });
+            showToast(`📁 Archivo "${file.name}" guardado correctamente`);
+          } else {
+            throw new Error("No se pudo convertir a base64");
+          }
+        };
+
+        reader.readAsDataURL(new Blob([response.data]));
+      } catch (err) {
+        console.error("❌ Error al descargar en móvil:", err);
+        showToast("❌ Error al descargar archivo en el dispositivo");
+      }
+    } else {
+      // Web
+      const a = document.createElement("a");
+      a.href = file.link;
+      a.download = file.name;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }
+};
+
+const showToast = async (message: string) => {
+  const toast = await toastController.create({
+    message,
+    duration: 2000,
+    color: "success",
+  });
+  await toast.present();
+};
 </script>
 
 <style scoped>
-ion-card .options{
+.options {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 8px;
 }
 
-ion-card .options .info{
-  flex-grow:1;
+.info {
+  flex-grow: 1;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
-ion-card .options .info > div{
+
+.file-item {
   display: flex;
   align-items: center;
   color: var(--ion-color-medium);
   font-size: 12px;
+  margin-right: 10px;
 }
-ion-card .options .info ion-text{
-  margin-left: 2px;
+
+.file-item ion-text {
+  margin-left: 4px;
 }
 </style>
