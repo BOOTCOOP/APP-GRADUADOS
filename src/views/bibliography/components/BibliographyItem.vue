@@ -11,10 +11,10 @@
               :md="documentTextOutline"
               :ios="documentTextOutline"
               color="medium"
-            ></ion-icon>
+            />
             <ion-text color="medium">
-              {{ item.name }} ({{ item.extension }})</ion-text
-            >
+              {{ item.name }} ({{ item.extension }})
+            </ion-text>
           </div>
         </div>
         <ion-icon
@@ -23,67 +23,102 @@
           :ios="downloadOutline"
           color="primary"
           @click="downloadFiles"
-        ></ion-icon>
+        />
       </div>
     </ion-card-content>
   </ion-card>
 </template>
 
 <script setup lang="ts">
-import { IonCard, IonCardContent, IonIcon, IonText } from "@ionic/vue";
-import { documentTextOutline, downloadOutline } from "ionicons/icons";
 import { defineProps } from "vue";
+import { isPlatform } from "@ionic/vue";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import {
+  IonCard,
+  IonCardContent,
+  IonText,
+  IonIcon,
+  toastController,
+} from "@ionic/vue";
+import { documentTextOutline, downloadOutline } from "ionicons/icons";
 
 const props = defineProps({
   file: { required: true },
 });
 
-const downloadFiles = () => {
-  if (!props.file.files || props.file.files.length === 0) {
-    console.error("No hay archivos para descargar");
+const downloadFiles = async () => {
+  if (!props.file.files?.length) {
+    console.error("⚠️ No hay archivos para descargar");
     return;
   }
 
-  props.file.files.forEach((file) => {
+  for (const file of props.file.files) {
     if (!file.link) {
-      console.error(`El archivo ${file.name} no tiene un enlace de descarga`);
-      return;
+      console.error(`⚠️ El archivo ${file.name} no tiene una URL válida`);
+      continue;
     }
 
-    const a = document.createElement("a");
-    a.href = file.link;
-    a.target = "_blank"; // ✅ Abre cada archivo en una nueva pestaña
-    a.rel = "noopener noreferrer"; // ✅ Seguridad extra
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
+    if (isPlatform("capacitor")) {
+      // 📱 MODO MOBILE (Android/iOS) - Solución mejorada
+      try {
+        await Filesystem.downloadFile({
+          url: file.link,
+          path: file.name,
+          directory: Directory.Documents,
+        });
 
-  console.log("✅ Todos los archivos han sido abiertos en nuevas pestañas.");
+        showToast(`📁 "${file.name}" descargado correctamente`);
+      } catch (err) {
+        console.error("❌ Error al descargar archivo:", err);
+        showToast(`❌ Error al descargar "${file.name}"`);
+      }
+    } else {
+      // 💻 MODO WEB
+      const a = document.createElement("a");
+      a.href = file.link;
+      a.download = file.name;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }
+};
+
+const showToast = async (message: string) => {
+  const toast = await toastController.create({
+    message,
+    duration: 2000,
+    color: "success",
+  });
+  await toast.present();
 };
 </script>
 
 <style scoped>
-ion-card .options {
+.options {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-ion-card .options .info {
+.info {
   flex-grow: 1;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
 }
-ion-card .options .info > div {
+
+.info > div {
   display: flex;
   align-items: center;
   color: var(--ion-color-medium);
   font-size: 12px;
   margin-right: 10px;
 }
-ion-card .options .info ion-text {
-  margin-left: 2px;
+
+ion-text {
+  margin-left: 4px;
 }
 </style>

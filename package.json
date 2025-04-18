@@ -15,6 +15,7 @@
   },
   "homepage": "https://BOOTCOOP.github.io/APP-GRADUADOS",
   "dependencies": {
+    "@capacitor-community/http": "^1.4.1",
     "@capacitor/android": "^5.7.0",
     "@capacitor/app": "^5.0.7",
     "@capacitor/camera": "^5.0.9",
