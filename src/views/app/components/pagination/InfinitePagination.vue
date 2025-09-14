@@ -121,6 +121,14 @@ function filtersChanged() {
 function fetchData() {
   return new Promise((resolve) => {
     loadingItems.value = true
+    console.log('🔍 BÚSQUEDA DE TRABAJOS - Parámetros enviados:', {
+      store_action: prop.fetchDataStore,
+      page: page.value,
+      per_page: prop.perPage,
+      filters: prop.filters,
+      search: search.value,
+    })
+    
     store
       .dispatch(prop.fetchDataStore, {
         page: page.value,
@@ -129,6 +137,14 @@ function fetchData() {
         search: search.value,
       })
       .then((response) => {
+        console.log('📨 RESPUESTA API - Datos recibidos:', response.data)
+        console.log('📊 TRABAJOS ENCONTRADOS - Total:', response.data.data.length)
+        console.log('📄 META INFORMACIÓN:', response.data.meta)
+        
+        if (response.data.data.length > 0) {
+          console.log('🎯 PRIMER TRABAJO DE MUESTRA:', response.data.data[0])
+        }
+
         items.value = items.value.concat(response.data.data)
 
         meta.value = response.data.meta
