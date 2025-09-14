@@ -83,16 +83,16 @@ import { ref, watch } from "vue";
 
 import {
   newspaperOutline,
-  bookmarkOutline,
+  libraryOutline,
   giftOutline,
   megaphoneOutline,
   schoolOutline,
-  bagAddOutline,
-  shareSocialOutline,
+  briefcaseOutline,
+  informationCircleOutline,
   personOutline,
   logOutOutline,
   homeOutline,
-  gridOutline,
+  ribbonOutline,
 } from "ionicons/icons";
 import { useRoute } from "vue-router";
 import { useAuth } from "@/uses/auth";
@@ -102,51 +102,61 @@ const route = useRoute();
 const router = useIonRouter();
 const active = ref(null);
 const items = [
+  // 1. Inicio
   {
     title: "Inicio",
     url: "/",
     icon: homeOutline,
   },
+  // 2. Noticias
   {
     title: "Noticias",
     url: "/noticias",
     icon: newspaperOutline,
   },
-  {
-    title: "Talleres",
-    url: "/talleres",
-    icon: schoolOutline,
-  },
-  {
-    title: "Programas",
-    url: "/cursos",
-    icon: gridOutline,
-  },
-  {
-    title: "Material bibliográfico",
-    url: "/material-bibliografico",
-    icon: bookmarkOutline,
-  },
-  {
-    title: "Búsqueda laboral",
-    url: "/busqueda-laboral",
-    icon: bagAddOutline,
-  },
-  {
-    title: "Información de interés",
-    url: "/informacion-de-interes",
-    icon: shareSocialOutline,
-  },
-  {
-    title: "Beneficios",
-    url: "/beneficios",
-    icon: giftOutline, // Importá giftOutline desde ionicons/icons
-  },
+  // 3. Avisos
   {
     title: "Avisos",
     url: "/classifieds",
     icon: megaphoneOutline,
   },
+  // 4. Talleres
+  {
+    title: "Talleres",
+    url: "/talleres",
+    icon: schoolOutline,
+  },
+  // 5. Programas
+  {
+    title: "Programas",
+    url: "/cursos",
+    icon: ribbonOutline,
+  },
+  // 6. Material bibliográfico
+  {
+    title: "Material bibliográfico",
+    url: "/material-bibliografico",
+    icon: libraryOutline,
+  },
+  // 7. Búsqueda laboral
+  {
+    title: "Búsqueda laboral",
+    url: "/busqueda-laboral",
+    icon: briefcaseOutline,
+  },
+  // 8. Beneficios
+  {
+    title: "Beneficios",
+    url: "/beneficios",
+    icon: giftOutline,
+  },
+  // 9. Información de interés
+  {
+    title: "Información de interés",
+    url: "/informacion-de-interes",
+    icon: informationCircleOutline,
+  },
+  // 10. Mi cuenta
   {
     title: "Mi cuenta",
     url: "/perfil",

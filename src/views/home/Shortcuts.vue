@@ -1,73 +1,149 @@
 <template>
+  <div class="main-logo">
+    <img :src="logoUrl" alt="UBA Derecho" class="logo-img" />
+  </div>
   <ion-grid>
+    <!-- Fila 1: Beneficios - Material Bibliográfico -->
     <ion-row>
       <ion-col size="6">
-        <ion-card router-link="/noticias" class="ion-no-margin cursor-pointer ion-text-center ion-card-square">
+        <ion-card
+          router-link="/beneficios"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
           <ion-card-content>
-            <ion-icon size="large" color="primary" :ios="newspaperOutline" :md="newspaperOutline"></ion-icon>
-            <ion-text class="ion-margin-top">Noticias</ion-text>
+            <ion-icon
+              color="primary"
+              :ios="giftOutline"
+              :md="giftOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary"
+              >Beneficios</ion-text
+            >
           </ion-card-content>
         </ion-card>
       </ion-col>
       <ion-col size="6">
-        <ion-card router-link="/talleres" class="ion-no-margin cursor-pointer ion-text-center ion-card-square">
+        <ion-card
+          router-link="/material-bibliografico"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
           <ion-card-content>
-            <ion-icon size="large" color="primary" :ios="schoolOutline" :md="schoolOutline"></ion-icon>
-            <ion-text class="ion-margin-top">Talleres</ion-text>
+            <ion-icon
+              color="primary"
+              :ios="libraryOutline"
+              :md="libraryOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary"
+              >Material bibliográfico</ion-text
+            >
           </ion-card-content>
         </ion-card>
       </ion-col>
     </ion-row>
+
+    <!-- Fila 2: Información de interés - Avisos -->
     <ion-row>
       <ion-col size="6">
-        <ion-card router-link="/cursos" class="ion-no-margin cursor-pointer ion-text-center ion-card-square">
+        <ion-card
+          router-link="/informacion-de-interes"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
           <ion-card-content>
-            <ion-icon size="large" color="primary" :ios="gridOutline" :md="gridOutline"></ion-icon>
-            <ion-text class="ion-margin-top">Programas</ion-text>
+            <ion-icon
+              color="primary"
+              :ios="informationCircleOutline"
+              :md="informationCircleOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary"
+              >Información de interés</ion-text
+            >
           </ion-card-content>
         </ion-card>
       </ion-col>
       <ion-col size="6">
-        <ion-card router-link="/beneficios" class="ion-no-margin cursor-pointer ion-text-center ion-card-square">
+        <ion-card
+          router-link="/classifieds"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
           <ion-card-content>
-            <ion-icon size="large" color="primary" :ios="giftOutline" :md="giftOutline"></ion-icon>
-            <ion-text class="ion-margin-top">Beneficios</ion-text>
+            <ion-icon
+              color="primary"
+              :ios="megaphoneOutline"
+              :md="megaphoneOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary">Avisos</ion-text>
           </ion-card-content>
         </ion-card>
       </ion-col>
     </ion-row>
+
+    <!-- Fila 3: Noticias - Búsqueda laboral -->
     <ion-row>
       <ion-col size="6">
-        <ion-card router-link="/material-bibliografico" class="ion-no-margin cursor-pointer ion-text-center ion-card-square">
+        <ion-card
+          router-link="/noticias"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
           <ion-card-content>
-            <ion-icon size="large" color="primary" :ios="bookmarkOutline" :md="bookmarkOutline"></ion-icon>
-            <ion-text class="ion-margin-top">Material bibliográfico</ion-text>
+            <ion-icon
+              color="primary"
+              :ios="newspaperOutline"
+              :md="newspaperOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary">Noticias</ion-text>
           </ion-card-content>
         </ion-card>
       </ion-col>
       <ion-col size="6">
-        <ion-card router-link="/busqueda-laboral" class="ion-no-margin cursor-pointer ion-text-center ion-card-square">
+        <ion-card
+          router-link="/busqueda-laboral"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
           <ion-card-content>
-            <ion-icon size="large" color="primary" :ios="bagAddOutline" :md="bagAddOutline"></ion-icon>
-            <ion-text class="ion-margin-top">Búsqueda laboral</ion-text>
+            <ion-icon
+              color="primary"
+              :ios="briefcaseOutline"
+              :md="briefcaseOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary"
+              >Búsqueda laboral</ion-text
+            >
           </ion-card-content>
         </ion-card>
       </ion-col>
     </ion-row>
+
+    <!-- Fila 4: Programas - Talleres -->
     <ion-row>
       <ion-col size="6">
-        <ion-card router-link="/informacion-de-interes" class="ion-no-margin cursor-pointer ion-text-center ion-card-square">
+        <ion-card
+          router-link="/cursos"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
           <ion-card-content>
-            <ion-icon size="large" color="primary" :ios="shareSocialOutline" :md="shareSocialOutline"></ion-icon>
-            <ion-text class="ion-margin-top">Información de interés</ion-text>
+            <ion-icon
+              color="primary"
+              :ios="ribbonOutline"
+              :md="ribbonOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary"
+              >Programas</ion-text
+            >
           </ion-card-content>
         </ion-card>
       </ion-col>
       <ion-col size="6">
-        <ion-card router-link="/classifieds" class="ion-no-margin cursor-pointer ion-text-center ion-card-square">
+        <ion-card
+          router-link="/talleres"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
           <ion-card-content>
-            <ion-icon size="large" color="primary" :ios="megaphoneOutline" :md="megaphoneOutline"></ion-icon>
-            <ion-text class="ion-margin-top">Avisos</ion-text>
+            <ion-icon
+              color="primary"
+              :ios="schoolOutline"
+              :md="schoolOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary">Talleres</ion-text>
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -76,14 +152,16 @@
 </template>
 
 <script setup lang="ts">
+const logoUrl = "/assets/logo/logo.png";
+
 import {
-  bagAddOutline,
-  bookmarkOutline,
+  briefcaseOutline,
+  libraryOutline,
   giftOutline,
-  gridOutline,
+  ribbonOutline,
   newspaperOutline,
   schoolOutline,
-  shareSocialOutline,
+  informationCircleOutline,
   megaphoneOutline,
 } from "ionicons/icons";
 
@@ -97,3 +175,22 @@ import {
   IonText,
 } from "@ionic/vue";
 </script>
+
+<style scoped>
+.main-logo {
+  text-align: center;
+  margin-bottom: 24px;
+  margin-top: 10px;
+}
+.logo-img {
+  width: auto;
+  height: auto;
+  /* margin-bottom: 8px; */
+}
+
+/* Forzar el tamaño de los íconos */
+ion-icon {
+  width: 60px !important;
+  height: 60px !important;
+}
+</style>
