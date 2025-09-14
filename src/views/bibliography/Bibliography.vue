@@ -146,7 +146,7 @@ const showFileTypeFilters = async () => {
   try {
     await store.dispatch("ui/action/show", actions)
   } catch (error) {
-    console.warn("Error mostrando action sheet:", error)
+    // Error silencioso para producción
   }
 }
 
@@ -204,7 +204,7 @@ const showCategoryFilters = async () => {
   try {
     await store.dispatch("ui/action/show", actions)
   } catch (error) {
-    console.warn("Error mostrando action sheet:", error)
+    // Error silencioso para producción
   }
 }
 

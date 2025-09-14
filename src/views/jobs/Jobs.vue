@@ -144,16 +144,6 @@ const filteredJobs = (jobs: any[]) => {
 //   filters.value = newFilters;
 // };
 
-// Agregar watcher para debug
-import { watch } from "vue";
-watch(
-  filters,
-  (newFilters) => {
-    console.log("🔍 FILTROS ENVIADOS A LA BÚSQUEDA:", newFilters);
-  },
-  { deep: true }
-);
-
 function showOptions() {
   store.dispatch("ui/action/show", [
     {

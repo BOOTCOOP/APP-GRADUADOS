@@ -194,7 +194,7 @@ const downloadFiles = async () => {
               dialogTitle: "Abrir con...",
             });
           } catch (shareError) {
-            console.log("El usuario canceló la apertura");
+            // Usuario canceló la apertura - silencioso para producción
           }
         }
 
@@ -212,7 +212,7 @@ const downloadFiles = async () => {
       }
     }
   } catch (err) {
-    console.error("Error:", err);
+    // Error silencioso para producción
     showToast("❌ Error al descargar");
   } finally {
     loading.value = false;
