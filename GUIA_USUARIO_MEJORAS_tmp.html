@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GUIA_USUARIO_MEJORAS.md</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+
+    <style>
+      /* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+      /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+      body {
+        font-family: var(
+          --vscode-markdown-font-family,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe WPC",
+          "Segoe UI",
+          "Ubuntu",
+          "Droid Sans",
+          sans-serif
+        );
+        font-size: var(--vscode-markdown-font-size, 14px);
+        padding: 0 26px;
+        line-height: var(--vscode-markdown-line-height, 22px);
+        word-wrap: break-word;
+      }
+
+      #code-csp-warning {
+        position: fixed;
+        top: 0;
+        right: 0;
+        color: white;
+        margin: 16px;
+        text-align: center;
+        font-size: 12px;
+        font-family: sans-serif;
+        background-color: #444444;
+        cursor: pointer;
+        padding: 6px;
+        box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
+      }
+
+      #code-csp-warning:hover {
+        text-decoration: none;
+        background-color: #007acc;
+        box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
+      }
+
+      body.scrollBeyondLastLine {
+        margin-bottom: calc(100vh - 22px);
+      }
+
+      body.showEditorSelection .code-line {
+        position: relative;
+      }
+
+      body.showEditorSelection .code-active-line:before,
+      body.showEditorSelection .code-line:hover:before {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: -12px;
+        height: 100%;
+      }
+
+      body.showEditorSelection li.code-active-line:before,
+      body.showEditorSelection li.code-line:hover:before {
+        left: -30px;
+      }
+
+      .vscode-light.showEditorSelection .code-active-line:before {
+        border-left: 3px solid rgba(0, 0, 0, 0.15);
+      }
+
+      .vscode-light.showEditorSelection .code-line:hover:before {
+        border-left: 3px solid rgba(0, 0, 0, 0.4);
+      }
+
+      .vscode-light.showEditorSelection .code-line .code-line:hover:before {
+        border-left: none;
+      }
+
+      .vscode-dark.showEditorSelection .code-active-line:before {
+        border-left: 3px solid rgba(255, 255, 255, 0.4);
+      }
+
+      .vscode-dark.showEditorSelection .code-line:hover:before {
+        border-left: 3px solid rgba(255, 255, 255, 0.6);
+      }
+
+      .vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+        border-left: none;
+      }
+
+      .vscode-high-contrast.showEditorSelection .code-active-line:before {
+        border-left: 3px solid rgba(255, 160, 0, 0.7);
+      }
+
+      .vscode-high-contrast.showEditorSelection .code-line:hover:before {
+        border-left: 3px solid rgba(255, 160, 0, 1);
+      }
+
+      .vscode-high-contrast.showEditorSelection
+        .code-line
+        .code-line:hover:before {
+        border-left: none;
+      }
+
+      img {
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      a:focus,
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: 1px solid -webkit-focus-ring-color;
+        outline-offset: -1px;
+      }
+
+      hr {
+        border: 0;
+        height: 2px;
+        border-bottom: 2px solid;
+      }
+
+      h1 {
+        padding-bottom: 0.3em;
+        line-height: 1.2;
+        border-bottom-width: 1px;
+        border-bottom-style: solid;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-weight: normal;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      table > thead > tr > th {
+        text-align: left;
+        border-bottom: 1px solid;
+      }
+
+      table > thead > tr > th,
+      table > thead > tr > td,
+      table > tbody > tr > th,
+      table > tbody > tr > td {
+        padding: 5px 10px;
+      }
+
+      table > tbody > tr + tr > td {
+        border-top: 1px solid;
+      }
+
+      blockquote {
+        margin: 0 7px 0 5px;
+        padding: 0 16px 0 10px;
+        border-left-width: 5px;
+        border-left-style: solid;
+      }
+
+      code {
+        font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New",
+          monospace, "Droid Sans Fallback";
+        font-size: 1em;
+        line-height: 1.357em;
+      }
+
+      body.wordWrap pre {
+        white-space: pre-wrap;
+      }
+
+      pre:not(.hljs),
+      pre.hljs code > div {
+        padding: 16px;
+        border-radius: 3px;
+        overflow: auto;
+      }
+
+      pre code {
+        color: var(--vscode-editor-foreground);
+        tab-size: 4;
+      }
+
+      /** Theming */
+
+      .vscode-light pre {
+        background-color: rgba(220, 220, 220, 0.4);
+      }
+
+      .vscode-dark pre {
+        background-color: rgba(10, 10, 10, 0.4);
+      }
+
+      .vscode-high-contrast pre {
+        background-color: rgb(0, 0, 0);
+      }
+
+      .vscode-high-contrast h1 {
+        border-color: rgb(0, 0, 0);
+      }
+
+      .vscode-light table > thead > tr > th {
+        border-color: rgba(0, 0, 0, 0.69);
+      }
+
+      .vscode-dark table > thead > tr > th {
+        border-color: rgba(255, 255, 255, 0.69);
+      }
+
+      .vscode-light h1,
+      .vscode-light hr,
+      .vscode-light table > tbody > tr + tr > td {
+        border-color: rgba(0, 0, 0, 0.18);
+      }
+
+      .vscode-dark h1,
+      .vscode-dark hr,
+      .vscode-dark table > tbody > tr + tr > td {
+        border-color: rgba(255, 255, 255, 0.18);
+      }
+    </style>
+
+    <style>
+      /* Tomorrow Theme */
+      /* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+      /* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+      /* Tomorrow Comment */
+      .hljs-comment,
+      .hljs-quote {
+        color: #8e908c;
+      }
+
+      /* Tomorrow Red */
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-tag,
+      .hljs-name,
+      .hljs-selector-id,
+      .hljs-selector-class,
+      .hljs-regexp,
+      .hljs-deletion {
+        color: #c82829;
+      }
+
+      /* Tomorrow Orange */
+      .hljs-number,
+      .hljs-built_in,
+      .hljs-builtin-name,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-params,
+      .hljs-meta,
+      .hljs-link {
+        color: #f5871f;
+      }
+
+      /* Tomorrow Yellow */
+      .hljs-attribute {
+        color: #eab700;
+      }
+
+      /* Tomorrow Green */
+      .hljs-string,
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-addition {
+        color: #718c00;
+      }
+
+      /* Tomorrow Blue */
+      .hljs-title,
+      .hljs-section {
+        color: #4271ae;
+      }
+
+      /* Tomorrow Purple */
+      .hljs-keyword,
+      .hljs-selector-tag {
+        color: #8959a8;
+      }
+
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        color: #4d4d4c;
+        padding: 0.5em;
+      }
+
+      .hljs-emphasis {
+        font-style: italic;
+      }
+
+      .hljs-strong {
+        font-weight: bold;
+      }
+    </style>
+
+    <style>
+      /*
+ * Markdown PDF CSS
+ */
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI",
+          "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+        padding: 0 12px;
+      }
+
+      pre {
+        background-color: #f8f8f8;
+        border: 1px solid #cccccc;
+        border-radius: 3px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+      }
+
+      pre:not(.hljs) {
+        padding: 23px;
+        line-height: 19px;
+      }
+
+      blockquote {
+        background: rgba(127, 127, 127, 0.1);
+        border-color: rgba(0, 122, 204, 0.5);
+      }
+
+      .emoji {
+        height: 1.4em;
+      }
+
+      code {
+        font-size: 14px;
+        line-height: 19px;
+      }
+
+      /* for inline code */
+      :not(pre):not(.hljs) > code {
+        color: #c9ae75; /* Change the old color so it seems less like an error */
+        font-size: inherit;
+      }
+
+      /* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+      .page {
+        page-break-after: always;
+      }
+    </style>
+
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+  </head>
+  <body>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme:
+          document.body.classList.contains("vscode-dark") ||
+          document.body.classList.contains("vscode-high-contrast")
+            ? "dark"
+            : "default",
+      });
+    </script>
+    <h1 id="%F0%9F%8E%89-nuevas-mejoras-en-la-app-del-centro-de-graduados">
+      🎉 Nuevas Mejoras en la App del Centro de Graduados
+    </h1>
+    <h2 id="tu-experiencia-mejorada---versi%C3%B3n-septiembre-2024">
+      Tu experiencia mejorada - Versión Septiembre 2024
+    </h2>
+    <hr />
+    <h2 id="%F0%9F%8C%9F-%C2%A1hola-graduado">🌟 ¡Hola Graduado!</h2>
+    <p>
+      Nos complace presentarte las <strong>nuevas mejoras</strong> que hemos
+      implementado en tu aplicación del Centro de Graduados. Hemos escuchado tus
+      sugerencias y trabajado para hacer tu experiencia
+      <strong>más fácil, rápida y agradable</strong>.
+    </p>
+    <hr />
+    <h2 id="%F0%9F%94%8D-%C2%BFqu%C3%A9-hay-de-nuevo">
+      🔍 <strong>¿Qué hay de nuevo?</strong>
+    </h2>
+    <h3
+      id="%F0%9F%8E%93-secci%C3%B3n-programas---ahora-es-s%C3%BAper-f%C3%A1cil-encontrar-lo-que-busc%C3%A1s"
+    >
+      🎓
+      <strong
+        >Sección PROGRAMAS - Ahora es súper fácil encontrar lo que
+        buscás</strong
+      >
+    </h3>
+    <h4 id="%E2%9C%85-buscador-inteligente">
+      ✅ <strong>Buscador inteligente</strong>
+    </h4>
+    <ul>
+      <li>
+        <strong>Antes</strong>: Tenías que scrollear toda la lista para
+        encontrar un programa
+      </li>
+      <li>
+        <strong>Ahora</strong>: ¡Solo escribí el nombre del programa o una
+        palabra clave y aparece al instante!
+      </li>
+    </ul>
+    <h4 id="%E2%9C%85-filtros-%C3%BAtiles">
+      ✅ <strong>Filtros útiles</strong>
+    </h4>
+    <ul>
+      <li>
+        <strong>&quot;Todos&quot;</strong>: Ve todos los programas disponibles
+      </li>
+      <li>
+        <strong>&quot;Disponibles&quot;</strong>: Solo los que están abiertos
+        para inscripción
+      </li>
+      <li>
+        <strong>&quot;Solo Graduados UBA&quot;</strong>: Programas exclusivos
+        para graduados UBA
+      </li>
+    </ul>
+    <h4 id="%E2%9C%85-tarjetas-m%C3%A1s-claras">
+      ✅ <strong>Tarjetas más claras</strong>
+    </h4>
+    <ul>
+      <li>Información mejor organizada y fácil de leer</li>
+      <li>Docentes, fechas y modalidad claramente visibles</li>
+      <li>Botón &quot;Ver detalles&quot; más destacado</li>
+    </ul>
+    <h4 id="%E2%9C%85-p%C3%A1gina-de-detalles-m%C3%A1s-limpia">
+      ✅ <strong>Página de detalles más limpia</strong>
+    </h4>
+    <ul>
+      <li>Eliminamos información confusa que no era relevante</li>
+      <li>Solo mostramos la información que realmente importa</li>
+      <li>Botón de inscripción más claro con información útil</li>
+    </ul>
+    <hr />
+    <h3 id="%F0%9F%93%B0-secci%C3%B3n-noticias---organizadas-como-nunca">
+      📰 <strong>Sección NOTICIAS - Organizadas como nunca</strong>
+    </h3>
+    <h4 id="%E2%9C%85-encuentra-noticias-al-instante">
+      ✅ <strong>Encuentra noticias al instante</strong>
+    </h4>
+    <ul>
+      <li>Buscador que funciona por título y contenido</li>
+      <li>
+        Ya no tenés que leer todas las noticias para encontrar la que te
+        interesa
+      </li>
+    </ul>
+    <h4 id="%E2%9C%85-organizaci%C3%B3n-autom%C3%A1tica-por-categor%C3%ADas">
+      ✅ <strong>Organización automática por categorías</strong>
+    </h4>
+    <ul>
+      <li><strong>Académica</strong>: Cursos, seminarios, talleres</li>
+      <li><strong>Eventos</strong>: Conferencias, jornadas, congresos</li>
+      <li><strong>Institucional</strong>: Noticias oficiales de la facultad</li>
+      <li><strong>General</strong>: Todo lo demás</li>
+    </ul>
+    <h4 id="%E2%9C%85-contador-inteligente">
+      ✅ <strong>Contador inteligente</strong>
+    </h4>
+    <ul>
+      <li>Sabés cuántas noticias hay de cada tipo</li>
+      <li>Podés filtrar fácilmente por categoría</li>
+    </ul>
+    <h4 id="%E2%9C%85-dise%C3%B1o-m%C3%A1s-moderno">
+      ✅ <strong>Diseño más moderno</strong>
+    </h4>
+    <ul>
+      <li>Tarjetas más atractivas y fáciles de leer</li>
+      <li>Fechas más claras</li>
+      <li>Resúmenes mejor organizados</li>
+    </ul>
+    <hr />
+    <h3
+      id="%F0%9F%92%BC-b%C3%BAsqueda-laboral---encontr%C3%A1-el-trabajo-ideal"
+    >
+      💼 <strong>BÚSQUEDA LABORAL - Encontrá el trabajo ideal</strong>
+    </h3>
+    <h4 id="%E2%9C%85-b%C3%BAsqueda-mejorada">
+      ✅ <strong>Búsqueda mejorada</strong>
+    </h4>
+    <ul>
+      <li>Buscá por nombre del puesto o empresa</li>
+      <li>Resultados instantáneos mientras escribís</li>
+    </ul>
+    <h4 id="%E2%9C%85-filtros-por-tipo-de-trabajo">
+      ✅ <strong>Filtros por tipo de trabajo</strong>
+    </h4>
+    <ul>
+      <li><strong>Tiempo completo</strong>: Trabajos de 8 horas</li>
+      <li><strong>Medio tiempo</strong>: Part-time o por horas</li>
+      <li><strong>Freelance</strong>: Trabajos por proyecto</li>
+      <li><strong>Prácticas</strong>: Oportunidades de aprendizaje</li>
+    </ul>
+    <h4 id="%E2%9C%85-informaci%C3%B3n-m%C3%A1s-clara">
+      ✅ <strong>Información más clara</strong>
+    </h4>
+    <ul>
+      <li>Salario destacado y visible</li>
+      <li>Ubicación y modalidad (presencial/remoto) clara</li>
+      <li>Estado de tu aplicación visible</li>
+    </ul>
+    <hr />
+    <h3
+      id="%F0%9F%93%9A-material-bibliogr%C3%A1fico---encontr%C3%A1-lo-que-necesit%C3%A1s"
+    >
+      📚 <strong>MATERIAL BIBLIOGRÁFICO - Encontrá lo que necesitás</strong>
+    </h3>
+    <h4 id="%E2%9C%85-buscador-potente">
+      ✅ <strong>Buscador potente</strong>
+    </h4>
+    <ul>
+      <li>Buscá por título del libro, autor o materia</li>
+      <li>Múltiples filtros para afinar tu búsqueda</li>
+    </ul>
+    <h4 id="%E2%9C%85-descarga-mejorada">
+      ✅ <strong>Descarga mejorada</strong>
+    </h4>
+    <ul>
+      <li>Botones de descarga más claros</li>
+      <li>Mejor organización de los materiales</li>
+      <li>Estado de disponibilidad visible</li>
+    </ul>
+    <h4 id="%E2%9C%85-organizaci%C3%B3n-inteligente">
+      ✅ <strong>Organización inteligente</strong>
+    </h4>
+    <ul>
+      <li>Filtros por tipo de material</li>
+      <li>Ordenamiento por fecha de publicación</li>
+      <li>Paginación que no te hace esperar</li>
+    </ul>
+    <hr />
+    <h3
+      id="%F0%9F%8E%AF-talleres-y-actividades---particip%C3%A1-m%C3%A1s-f%C3%A1cil"
+    >
+      🎯 <strong>TALLERES Y ACTIVIDADES - Participá más fácil</strong>
+    </h3>
+    <h4 id="%E2%9C%85-encuentra-talleres-r%C3%A1pidamente">
+      ✅ <strong>Encuentra talleres rápidamente</strong>
+    </h4>
+    <ul>
+      <li>Buscador por nombre de taller</li>
+      <li>Información de disponibilidad clara</li>
+    </ul>
+    <h4 id="%E2%9C%85-estados-visuales-claros">
+      ✅ <strong>Estados visuales claros</strong>
+    </h4>
+    <ul>
+      <li><strong>Disponible</strong>: Podés inscribirte ahora</li>
+      <li><strong>Próximamente</strong>: Estate atento a la apertura</li>
+      <li><strong>Completo</strong>: Ya no hay cupos</li>
+    </ul>
+    <h4 id="%E2%9C%85-informaci%C3%B3n-organizada">
+      ✅ <strong>Información organizada</strong>
+    </h4>
+    <ul>
+      <li>Fechas de inicio destacadas</li>
+      <li>Docentes y modalidad claramente visibles</li>
+      <li>Botones de acción más intuitivos</li>
+    </ul>
+    <hr />
+    <h3
+      id="%E2%84%B9%EF%B8%8F-informaci%C3%B3n-de-inter%C3%A9s---todo-organizado"
+    >
+      ℹ️ <strong>INFORMACIÓN DE INTERÉS - Todo organizado</strong>
+    </h3>
+    <h4 id="%E2%9C%85-categorizaci%C3%B3n-autom%C3%A1tica">
+      ✅ <strong>Categorización automática</strong>
+    </h4>
+    <ul>
+      <li>La app organiza automáticamente la información por tipo</li>
+      <li><strong>Académica</strong>: Info sobre estudios y formación</li>
+      <li><strong>Eventos</strong>: Actividades y encuentros</li>
+      <li><strong>Convocatorias</strong>: Concursos y oportunidades</li>
+      <li><strong>General</strong>: Información variada</li>
+    </ul>
+    <h4 id="%E2%9C%85-b%C3%BAsqueda-inteligente">
+      ✅ <strong>Búsqueda inteligente</strong>
+    </h4>
+    <ul>
+      <li>Encontrá información específica al instante</li>
+      <li>Busca en títulos y contenido</li>
+    </ul>
+    <h4 id="%E2%9C%85-contadores-%C3%BAtiles">
+      ✅ <strong>Contadores útiles</strong>
+    </h4>
+    <ul>
+      <li>Sabés cuánta información hay de cada tipo</li>
+      <li>Navegación más eficiente</li>
+    </ul>
+    <hr />
+    <h3 id="%F0%9F%94%94-notificaciones---mejor-organizadas">
+      🔔 <strong>NOTIFICACIONES - Mejor organizadas</strong>
+    </h3>
+    <h4 id="%E2%9C%85-tipos-de-notificaciones-claros">
+      ✅ <strong>Tipos de notificaciones claros</strong>
+    </h4>
+    <ul>
+      <li>Organizadas por categoría (cursos, trabajos, general)</li>
+      <li>Colores diferentes para cada tipo</li>
+      <li>Estado de leído/no leído más visible</li>
+    </ul>
+    <h4 id="%E2%9C%85-filtros-%C3%BAtiles">
+      ✅ <strong>Filtros útiles</strong>
+    </h4>
+    <ul>
+      <li>Podés ver solo las notificaciones que te interesan</li>
+      <li>Menos ruido, más información relevante</li>
+    </ul>
+    <hr />
+    <h3 id="%F0%9F%8F%A0-inicio---navegaci%C3%B3n-mejorada">
+      🏠 <strong>INICIO - Navegación mejorada</strong>
+    </h3>
+    <h4 id="%E2%9C%85-men%C3%BA-lateral-reorganizado">
+      ✅ <strong>Menú lateral reorganizado</strong>
+    </h4>
+    <ul>
+      <li>Secciones agrupadas de forma más lógica</li>
+      <li>Iconos más claros y comprensibles</li>
+      <li>Navegación más intuitiva</li>
+    </ul>
+    <h4 id="%E2%9C%85-atajos-mejorados">
+      ✅ <strong>Atajos mejorados</strong>
+    </h4>
+    <ul>
+      <li>Acceso rápido a las secciones más usadas</li>
+      <li>Diseño más moderno y atractivo</li>
+    </ul>
+    <hr />
+    <h2 id="%F0%9F%9A%80-%C2%BFc%C3%B3mo-aprovechar-estas-mejoras">
+      🚀 <strong>¿Cómo aprovechar estas mejoras?</strong>
+    </h2>
+    <h3 id="para-encontrar-informaci%C3%B3n-m%C3%A1s-r%C3%A1pido">
+      <strong>Para encontrar información más rápido:</strong>
+    </h3>
+    <ol>
+      <li>
+        <strong>Usá los buscadores</strong> - Están en todas las secciones
+        principales
+      </li>
+      <li>
+        <strong>Aprovechá los filtros</strong> - Te ahorran tiempo navegando
+      </li>
+      <li>
+        <strong>Explorá las categorías</strong> - Todo está mejor organizado
+      </li>
+    </ol>
+    <h3 id="para-una-mejor-experiencia">
+      <strong>Para una mejor experiencia:</strong>
+    </h3>
+    <ol>
+      <li>
+        <strong>Navegá con confianza</strong> - Los botones son más claros
+      </li>
+      <li>
+        <strong>Revisá las notificaciones</strong> - Están mejor organizadas
+      </li>
+      <li>
+        <strong>Explorá los nuevos diseños</strong> - Son más fáciles de usar
+      </li>
+    </ol>
+    <hr />
+    <h2 id="%F0%9F%92%A1-consejos-para-sacarle-el-m%C3%A1ximo-provecho">
+      💡 <strong>Consejos para sacarle el máximo provecho</strong>
+    </h2>
+    <h3 id="%F0%9F%94%8D-en-las-b%C3%BAsquedas">
+      <strong>🔍 En las búsquedas:</strong>
+    </h3>
+    <ul>
+      <li>No necesitás escribir la palabra completa</li>
+      <li>Podés buscar por cualquier palabra clave</li>
+      <li>Los resultados aparecen mientras escribís</li>
+    </ul>
+    <h3 id="%F0%9F%8F%B7%EF%B8%8F-con-los-filtros">
+      <strong>🏷️ Con los filtros:</strong>
+    </h3>
+    <ul>
+      <li>Combiná búsqueda + filtros para resultados precisos</li>
+      <li>Los contadores te muestran cuántos resultados hay</li>
+      <li>Podés cambiar filtros sin perder tu búsqueda</li>
+    </ul>
+    <h3 id="%F0%9F%93%B1-en-la-navegaci%C3%B3n">
+      <strong>📱 En la navegación:</strong>
+    </h3>
+    <ul>
+      <li>El menú lateral está reorganizado por temas</li>
+      <li>
+        Los botones &quot;Ver detalles&quot; te llevan a información completa
+      </li>
+      <li>Podés volver atrás fácilmente desde cualquier sección</li>
+    </ul>
+    <hr />
+    <h2 id="%F0%9F%8E%AF-lo-m%C3%A1s-importante">
+      🎯 <strong>Lo más importante</strong>
+    </h2>
+    <h3 id="%E2%9C%85-todo-es-m%C3%A1s-r%C3%A1pido">
+      <strong>✅ TODO ES MÁS RÁPIDO</strong>
+    </h3>
+    <p>
+      Ya no tenés que scrollear listas largas. Con los buscadores y filtros,
+      encontrás lo que necesitás en segundos.
+    </p>
+    <h3 id="%E2%9C%85-todo-est%C3%A1-mejor-organizado">
+      <strong>✅ TODO ESTÁ MEJOR ORGANIZADO</strong>
+    </h3>
+    <p>
+      La información está categorizada automáticamente. No más buscar entre
+      contenido mezclado.
+    </p>
+    <h3 id="%E2%9C%85-todo-es-m%C3%A1s-claro">
+      <strong>✅ TODO ES MÁS CLARO</strong>
+    </h3>
+    <p>
+      Botones más visibles, información mejor presentada, navegación más
+      intuitiva.
+    </p>
+    <h3 id="%E2%9C%85-todo-funciona-mejor">
+      <strong>✅ TODO FUNCIONA MEJOR</strong>
+    </h3>
+    <p>
+      Corrección de errores, páginas que cargan más rápido, menos problemas
+      técnicos.
+    </p>
+    <hr />
+  </body>
+</html>
