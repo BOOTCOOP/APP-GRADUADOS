@@ -32,102 +32,120 @@
       ></ion-skeleton-text>
     </div>
     <div v-if="course && loaded">
-      <ion-text color="medium"
-        ><small>{{ course.date }}</small></ion-text
-      >
-      <h4 class="ion-no-margin">{{ course.title }}</h4>
-      <div class="ion-margin-top">
-        <ion-icon
-          :md="personCircleOutline"
-          :ios="personCircleOutline"
-          color="primary"
-        ></ion-icon>
-        <ion-text color="medium"
-          ><strong>Docentes:</strong> {{ course.teachers }}</ion-text
-        >
+      <div class="course-header ion-margin-bottom">
+        <h4 class="ion-no-margin course-title">{{ course.title }}</h4>
+        <ion-text color="medium" v-if="course.date">
+          <small>{{ course.date }}</small>
+        </ion-text>
       </div>
-      <div class="ion-margin-top">
-        <ion-icon
-          :md="calendarOutline"
-          :ios="calendarOutline"
-          color="primary"
-        ></ion-icon>
-        <ion-text color="medium"
-          ><strong>Inicio:</strong> {{ course.start }}</ion-text
-        >
+
+      <!-- Información básica del curso -->
+      <div class="course-info">
+        <div class="info-item ion-margin-top">
+          <ion-icon
+            :md="personCircleOutline"
+            :ios="personCircleOutline"
+            color="primary"
+          ></ion-icon>
+          <ion-text color="medium">
+            <strong>Docentes:</strong> {{ course.teachers }}
+          </ion-text>
+        </div>
+        
+        <div class="info-item ion-margin-top">
+          <ion-icon
+            :md="calendarOutline"
+            :ios="calendarOutline"
+            color="primary"
+          ></ion-icon>
+          <ion-text color="medium">
+            <strong>Inicio:</strong> {{ course.start }}
+          </ion-text>
+        </div>
+
+        <div class="info-item ion-margin-top" v-if="course.beginning">
+          <ion-icon
+            :md="timeOutline"
+            :ios="timeOutline"
+            color="primary"
+          ></ion-icon>
+          <ion-text color="medium">
+            <strong>Estado:</strong> {{ course.beginning }}
+          </ion-text>
+        </div>
+
+        <!-- Solo mostrar si realmente existe la información -->
+        <div class="info-item ion-margin-top" v-if="course.days_and_hours">
+          <ion-icon
+            :md="timeOutline"
+            :ios="timeOutline"
+            color="primary"
+          ></ion-icon>
+          <ion-text color="medium">
+            <strong>Horario:</strong> {{ course.days_and_hours }}
+          </ion-text>
+        </div>
+
+        <div class="info-item ion-margin-top" v-if="course.classes_count">
+          <ion-icon
+            :md="hourglassOutline"
+            :ios="hourglassOutline"
+            color="primary"
+          ></ion-icon>
+          <ion-text color="medium">
+            <strong>Duración:</strong> {{ course.classes_count }} clases
+          </ion-text>
+        </div>
+
+        <div class="info-item ion-margin-top" v-if="course.price && course.price.value">
+          <ion-icon
+            :md="journalOutline"
+            :ios="journalOutline"
+            color="primary"
+          ></ion-icon>
+          <ion-text color="medium" v-if="course.price.value > 0">
+            <strong>Costo:</strong> {{ course.price.value }}
+          </ion-text>
+          <ion-text color="medium" v-else>
+            <strong>Costo:</strong> Gratuito
+          </ion-text>
+        </div>
       </div>
-      <div class="ion-margin-top">
-        <ion-icon
-          :md="timeOutline"
-          :ios="timeOutline"
-          color="primary"
-        ></ion-icon>
-        <ion-text color="medium"
-          ><strong>Horario:</strong> {{ course.days_and_hours }}</ion-text
-        >
+
+      <!-- Contenido/Descripción del curso -->
+      <div class="course-description ion-margin-top" v-if="course.content && course.content.trim()">
+        <h5>Programa del Curso</h5>
+        <div class="content" v-html="course.content"></div>
       </div>
-      <div class="ion-margin-top">
-        <ion-icon
-          :md="hourglassOutline"
-          :ios="hourglassOutline"
-          color="primary"
-        ></ion-icon>
-        <ion-text color="medium"
-          ><strong>Duración:</strong>
-          {{ course.classes_count }} clases</ion-text
-        >
+
+      <!-- Mensaje si no hay programa disponible -->
+      <div class="course-description ion-margin-top" v-else>
+        <h5>Información del Programa</h5>
+        <div class="content">
+          <p>El programa detallado de este curso estará disponible próximamente.</p>
+          <p>Para más información, puedes contactar directamente con el centro de graduados.</p>
+        </div>
       </div>
-      <div class="ion-margin-top" v-if="course.can_enroll">
-        <ion-icon
-          :md="journalOutline"
-          :ios="journalOutline"
-          color="primary"
-        ></ion-icon>
-        <ion-text color="medium" v-if="course.price.value > 0"
-          ><strong>Costo:</strong> {{ course.price.value }}</ion-text
-        >
-        <ion-text color="medium" v-else
-          ><strong>Costo:</strong> Gratuito</ion-text
-        >
-      </div>
-      <div class="content ion-margin-top" v-html="course.content"></div>
-      <ion-list
-        class="ion-margin-top"
-        v-if="course.files && course.files.length && course.is_enrolled"
-      >
-        <h6 class="ion-margin-start ion-no-margin">Bibliografía</h6>
-        <BibliographyItem
-          v-for="file in course.files"
-          :file="file"
-          :key="file.id"
-        ></BibliographyItem>
-      </ion-list>
     </div>
     <template v-if="course && loaded" #footer>
-      <div v-if="course.can_enroll">
+      <div class="footer-actions">
+        <!-- Botón informativo - sin funcionalidad real de inscripción -->
         <ion-button
-          @click="confirm()"
-          id="present-alert"
+          @click="showInscriptionInfo"
           shape="round"
           expand="full"
           color="primary"
-          >Inscribirse</ion-button
+          class="main-action-btn"
         >
-      </div>
-      <div v-else>
-        <p class="ion-text-center">
-          El curso es apto sólo para: [listar usuarios]
-        </p>
-      </div>
-      <div v-if="course.can_unenroll && !mustPay()">
-        <ion-button
-          @click="unenroll"
-          id="present-alert"
-          shape="round"
-          expand="full"
-          color="primary"
-          >Desincribirse</ion-button
-        >
+          Información sobre inscripción
+        </ion-button>
+        
+        <!-- Mensaje informativo -->
+        <div class="info-message ion-text-center ion-margin-top">
+          <ion-text color="medium">
+            <p><small>Para inscribirte, contacta con el centro de graduados o espera más información sobre el proceso de inscripción.</small></p>
+          </ion-text>
+        </div>
       </div>
     </template>
   </graduados-app>
@@ -138,9 +156,9 @@ import {
   IonSkeletonText,
   IonText,
   IonIcon,
-  IonList,
   IonButton,
   useIonRouter,
+  alertController,
 } from '@ionic/vue'
 import {
   personCircleOutline,
@@ -150,93 +168,145 @@ import {
   journalOutline,
   arrowBackOutline,
 } from 'ionicons/icons'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
-import User from '@/utils/user'
-import BibliographyItem from '../bibliography/components/BibliographyItem.vue'
 
-const ionRouter = useIonRouter()
 const loaded = ref(false)
 const store = useStore()
 const route = useRoute()
-const course = ref({})
-const myActivities = ref([])
+const course = ref<any>({})
 const router = useIonRouter()
 
-function mustPay() {
-  return course.value.price.raw > 0
-}
 function goBack() {
   router.replace({ name: 'courses.index' })
 }
-const confirm = () =>
-  store.dispatch('ui/alert/confirm', {
-    header: 'Inscripción',
-    subHeader: '¿Estás seguro de que deseas inscribirte a este curso?',
-    handler: mustPay() ? preEnroll : enroll,
+
+// Función para mostrar información sobre inscripción
+async function showInscriptionInfo() {
+  const alert = await alertController.create({
+    header: 'Información de Inscripción',
+    subHeader: course.value.title,
+    message: 'Para obtener información sobre el proceso de inscripción, horarios y requisitos, contacta con el centro de graduados.',
+    buttons: [
+      {
+        text: 'Entendido',
+        role: 'confirm'
+      }
+    ]
   })
 
-const enroll = function () {
-  store
-    .dispatch('courses/enroll', course.value.id)
-    .then((response) => {
-      console.log('Inscripción exitosa')
-      ionRouter.navigate('/cursos/inscripcion-exitosa', 'forward', 'replace')
-    })
-    .catch((response) => {
-      console.log(response)
-    })
-}
-
-const unenroll = () =>
-  store.dispatch('ui/alert/confirm', {
-    header: 'Desinscripción',
-    subHeader: '¿Estás seguro de que deseas darte de baje de este curso?',
-    handler: store
-      .dispatch('workshops/preEnroll', course.value.id)
-      .then((response) => {
-        ionRouter.navigate(
-          `/tallers/desinscripcion-exitosa`,
-          'forward',
-          'replace'
-        )
-      })
-      .catch((response) => {
-        console.log(response)
-      }),
-  })
-
-const preEnroll = function () {
-  store
-    .dispatch('courses/preEnroll', course.value.id)
-    .then((response) => {
-      ionRouter.navigate(
-        `/inscripciones/${response.data.data.id}/datos-bancarios`,
-        'forward',
-        'replace'
-      )
-    })
-    .catch((response) => {
-      console.log(response)
-    })
+  await alert.present()
 }
 
 onMounted(() => {
   const { slug } = route.params
-  store.dispatch('courses/fetch', slug).then((response) => {
+  store.dispatch('courses/fetch', slug).then((response: any) => {
     course.value = response.data.data
     loaded.value = true
-  })
-  store.dispatch('courses/own').then((response) => {
-    myActivities.value = response.data.data
+    console.log('Course data structure:', course.value)
+    console.log('Available properties:', Object.keys(course.value))
+    console.log('Price:', course.value.price)
+    console.log('Content:', course.value.content)
+    console.log('Classes count:', course.value.classes_count)
+    console.log('Days and hours:', course.value.days_and_hours)
+  }).catch((error) => {
+    console.error('Error fetching course:', error)
+    loaded.value = true
   })
 })
 </script>
 
 <style scoped>
+.course-header {
+  border-bottom: 1px solid var(--ion-color-light);
+  padding-bottom: 16px;
+}
+
+.course-title {
+  color: var(--ion-color-dark);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+
+.course-info {
+  margin: 24px 0;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.info-item ion-icon {
+  flex-shrink: 0;
+  font-size: 20px;
+  margin-top: 2px;
+}
+
+.info-item ion-text {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.course-description {
+  background: var(--ion-color-light, #f8f9fa);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 24px 0;
+}
+
+.course-description h5 {
+  color: var(--ion-color-dark);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
 .content {
-  color: var(--ion-color-step-500);
-  font-size: 14px;
+  color: var(--ion-color-step-600);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.footer-actions {
+  padding: 16px 0;
+}
+
+.main-action-btn {
+  --border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  height: 56px;
+}
+
+.info-message {
+  padding: 16px;
+  background: var(--ion-color-light, #f8f9fa);
+  border-radius: 8px;
+}
+
+.info-message p {
+  margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .course-title {
+    font-size: 1.25rem;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .info-item ion-icon {
+    align-self: flex-start;
+  }
 }
 </style>

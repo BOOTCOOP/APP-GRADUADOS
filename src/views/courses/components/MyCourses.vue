@@ -1,18 +1,18 @@
 <template>
-    <ion-text>Actividades Inscriptas</ion-text>
+    <ion-text>Mis Programas Inscriptos</ion-text>
     <swiper
         class="swiper-overflowed"
         :class="['items-' + perView]"
         :slides-per-view="perView"
     >
-        <swiper-slide v-for="course in items" :key="course.id">
-            <ion-card @click="() => showDetail(course.id)" color="primary">
+        <swiper-slide v-for="course in items" :key="(course as any).id">
+            <ion-card @click="() => showDetail((course as any).id)" color="primary">
                 <p>
-                    <ion-text>{{ course.title }}</ion-text>
+                    <ion-text>{{ (course as any).title }}</ion-text>
                 </p>
                 <p>
                   <ion-icon :md="timeOutline" :ios="timeOutline" color="light"></ion-icon>
-                    <ion-text>{{ course.beginning }}</ion-text>
+                    <ion-text>{{ (course as any).beginning || 'Próximamente' }}</ion-text>
                 </p>
             </ion-card>
         </swiper-slide>
@@ -30,7 +30,8 @@ import "@ionic/vue/css/ionic-swiper.css";
 
 const perView = 1;
 
-const prop = defineProps({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const props = defineProps({
     items:{
         type: Array,
         required: true
@@ -39,8 +40,8 @@ const prop = defineProps({
 
 const router = useIonRouter();
 
-function showDetail(id) {
-    router.replace({name:'courses.show', params: {slug: id}})
+function showDetail(id: any) {
+    router.push({name:'courses.show', params: {slug: id}})
 }
 
 </script>
