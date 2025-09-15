@@ -8,12 +8,15 @@
       </div>
 
       <!-- Botón para crear nuevo aviso -->
+      <!-- TEMPORALMENTE COMENTADO - No funciona la funcionalidad de crear avisos -->
+      <!--
       <div class="action-container">
         <button @click="goToCreateAviso" class="create-button">
           <ion-icon :icon="addOutline"></ion-icon>
           Publicar Aviso
         </button>
       </div>
+      -->
 
       <div v-if="loading" class="loading-container">
         <div class="spinner"></div>
@@ -42,11 +45,17 @@
             <div class="aviso-content">
               <h2 class="aviso-title">{{ aviso.title }}</h2>
               <p class="aviso-description">
-                {{ truncateText(aviso.description, 100) }}
+                {{ truncateText(aviso.description, 120) }}
               </p>
-              <div class="aviso-contact">
-                <ion-icon :icon="callOutline" size="small"></ion-icon>
-                <span>{{ aviso.contact_phone }}</span>
+              <div class="aviso-footer">
+                <div v-if="aviso.contact_phone" class="contact-info">
+                  <ion-icon :icon="callOutline"></ion-icon>
+                  <span>{{ aviso.contact_phone }}</span>
+                </div>
+                <div v-if="aviso.created_at" class="date-info">
+                  <ion-icon :icon="timeOutline"></ion-icon>
+                  <span>{{ formatDate(aviso.created_at) }}</span>
+                </div>
               </div>
             </div>
 
@@ -57,9 +66,12 @@
         <div v-else class="empty-state">
           <ion-icon :icon="alertCircleOutline" size="large"></ion-icon>
           <p>No hay avisos publicados en este momento.</p>
+          <!-- TEMPORALMENTE COMENTADO - No funciona la funcionalidad de crear avisos -->
+          <!--
           <button @click="goToCreateAviso" class="create-button">
             Publicar mi primer aviso
           </button>
+          -->
         </div>
       </div>
     </div>
@@ -67,12 +79,14 @@
 </template>
 
 <script lang="ts" setup>
+import { IonIcon } from '@ionic/vue'
 import {
-  addOutline,
+  // addOutline, // Comentado temporalmente - No funciona la funcionalidad
   alertCircleOutline,
   callOutline,
   documentOutline,
   refreshOutline,
+  timeOutline,
 } from 'ionicons/icons'
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -100,10 +114,13 @@ function goToDetail(id: number) {
   router.push(`/classifieds/${id}`)
 }
 
+// FUNCIÓN COMENTADA TEMPORALMENTE - No funciona la funcionalidad de crear avisos
+/*
 function goToCreateAviso() {
   // Use direct path navigation instead of named route
   router.push('/classifieds/create')
 }
+*/
 
 function getImageUrl(logo: string): string {
   if (!logo) {
@@ -138,6 +155,16 @@ function truncateText(text: string, maxLength: number) {
 
 function isMyAviso(aviso: any) {
   return currentUser.value && aviso.user_id === currentUser.value.id
+}
+
+function formatDate(dateString: string): string {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  })
 }
 
 onMounted(() => {
@@ -233,23 +260,28 @@ onMounted(() => {
 
 .aviso-item {
   display: flex;
-  background-color: white;
-  border-radius: 10px;
+  background: white;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
 }
 
 .aviso-item:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .aviso-thumbnail {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 16px;
 }
 
 .aviso-thumbnail img {
@@ -264,53 +296,82 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f5f5f5;
+  background: #f8f9fa;
+  color: #9ca3af;
 }
 
 .aviso-content {
   flex: 1;
-  padding: 12px;
-  overflow: hidden;
+  padding: 20px 20px 20px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .aviso-title {
-  margin: 0 0 5px 0;
-  font-size: 16px;
+  margin: 0 0 8px 0;
+  font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: #1f2937;
+  line-height: 1.3;
 }
 
 .aviso-description {
-  margin: 0 0 8px 0;
+  margin: 0 0 16px 0;
   font-size: 14px;
-  color: #666;
+  color: #6b7280;
+  line-height: 1.5;
   overflow: hidden;
-  text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
+  flex-grow: 1;
 }
 
-.aviso-contact {
+.aviso-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.contact-info {
   display: flex;
   align-items: center;
-  font-size: 12px;
-  color: #888;
+  gap: 6px;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
 }
 
-.aviso-contact ion-icon {
-  margin-right: 5px;
+.contact-info ion-icon {
+  font-size: 16px;
+  color: #9ca3af;
+}
+
+.date-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.date-info ion-icon {
+  font-size: 14px;
 }
 
 .aviso-badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: var(--ion-color-success);
+  top: 16px;
+  right: 16px;
+  background: #10b981;
   color: white;
-  font-size: 12px;
-  padding: 3px 8px;
-  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 8px;
 }
 
 .empty-state {
@@ -334,17 +395,42 @@ onMounted(() => {
 }
 
 @media (max-width: 480px) {
+  .aviso-item {
+    margin-bottom: 12px;
+  }
+
   .aviso-thumbnail {
-    width: 60px;
-    height: 60px;
+    width: 90px;
+    height: 90px;
+    margin: 12px;
+  }
+
+  .aviso-content {
+    padding: 16px 16px 16px 0;
   }
 
   .aviso-title {
-    font-size: 14px;
+    font-size: 16px;
+    margin-bottom: 6px;
   }
 
   .aviso-description {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .aviso-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .contact-info {
     font-size: 12px;
+  }
+
+  .date-info {
+    font-size: 11px;
   }
 }
 </style>
