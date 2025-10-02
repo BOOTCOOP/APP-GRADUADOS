@@ -93,6 +93,7 @@ import {
   logOutOutline,
   homeOutline,
   ribbonOutline,
+  callOutline,
 } from "ionicons/icons";
 import { useRoute } from "vue-router";
 import { useAuth } from "@/uses/auth";
@@ -108,59 +109,65 @@ const items = [
     url: "/",
     icon: homeOutline,
   },
-  // 2. Noticias
+  // 2. Cursos
+  {
+    title: "Cursos",
+    url: "/cursos",
+    icon: ribbonOutline,
+  },
+  // 3. Talleres y Jornadas
+  {
+    title: "Talleres y Jornadas",
+    url: "/talleres",
+    icon: schoolOutline,
+  },
+  // 4. Actividades Online
+  {
+    title: "Actividades Online",
+    url: "/classifieds",
+    icon: megaphoneOutline,
+  },
+  // 5. Búsquedas Laborales
+  {
+    title: "Búsquedas Laborales",
+    url: "/busqueda-laboral",
+    icon: briefcaseOutline,
+  },
+  // 6. Bibliografía
+  {
+    title: "Bibliografía",
+    url: "/material-bibliografico",
+    icon: libraryOutline,
+  },
+  // 7. Noticias
   {
     title: "Noticias",
     url: "/noticias",
     icon: newspaperOutline,
   },
-  // 3. Avisos
-  {
-    title: "Avisos",
-    url: "/classifieds",
-    icon: megaphoneOutline,
-  },
-  // 4. Talleres
-  {
-    title: "Talleres",
-    url: "/talleres",
-    icon: schoolOutline,
-  },
-  // 5. Programas
-  {
-    title: "Programas",
-    url: "/cursos",
-    icon: ribbonOutline,
-  },
-  // 6. Material bibliográfico
-  {
-    title: "Material bibliográfico",
-    url: "/material-bibliografico",
-    icon: libraryOutline,
-  },
-  // 7. Búsqueda laboral
-  {
-    title: "Búsqueda laboral",
-    url: "/busqueda-laboral",
-    icon: briefcaseOutline,
-  },
-  // 8. Beneficios
-  {
-    title: "Beneficios",
-    url: "/beneficios",
-    icon: giftOutline,
-  },
-  // 9. Información de interés
+  // 8. Información de interés
   {
     title: "Información de interés",
     url: "/informacion-de-interes",
     icon: informationCircleOutline,
+  },
+  // 9. Beneficios
+  {
+    title: "Beneficios",
+    url: "/beneficios",
+    icon: giftOutline,
   },
   // 10. Mi cuenta
   {
     title: "Mi cuenta",
     url: "/perfil",
     icon: personOutline,
+  },
+  // 11. Contacto
+  {
+    title: "Contacto",
+    url: "/contacto",
+    icon: callOutline,
   },
 ];
 
