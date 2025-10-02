@@ -1,5 +1,5 @@
 <template>
-    <graduados-app header-title="Talleres">
+    <graduados-app header-title="Talleres y Jornadas">
         <template #header-end>
             <ion-button color="primary" @click="goToHistory()">
                 <ion-icon src="/assets/icons/history-2.svg"></ion-icon>
@@ -12,7 +12,7 @@
         <div class="search-filter-container ion-margin-bottom">
             <FormSearchBar 
                 v-model="searchQuery"
-                placeholder="Buscar talleres por nombre, descripción o docente..."
+                placeholder="Buscar talleres y jornadas por nombre, descripción o docente..."
                 class="search-bar"
             />
             
@@ -41,7 +41,7 @@
             </template>
 
             <template #default="{ items }">
-                <ion-text>Próximos talleres</ion-text>
+                <ion-text>Próximos talleres y jornadas</ion-text>
                 <ion-list class="ion-margin-top">
                     <Activity
                         :activity="activity"
@@ -96,7 +96,7 @@ const activeFiltersCount = computed(() => {
 // Función para abrir filtros
 async function openFilters() {
     const actionSheet = await actionSheetController.create({
-        header: 'Filtrar talleres',
+        header: 'Filtrar talleres y jornadas',
         cssClass: 'custom-action-sheet',
         buttons: [
             {

@@ -104,19 +104,53 @@
       </ion-list>
     </div>
     <template v-if="workshop && loaded" #footer>
-      <div v-if="workshop.can_enroll">
-        <ion-button @click="confirm" shape="round" expand="full" color="primary"
-          >Inscribirse</ion-button
+      <!-- Botón de inscripción -->
+      <div v-if="workshop.can_enroll || (!workshop.is_enrolled && !workshop.can_unenroll)">
+        <ion-button 
+          @click="confirm" 
+          shape="round" 
+          expand="full" 
+          color="primary"
+          :disabled="!canEnrollNow()"
         >
+          <ion-icon :icon="schoolOutline" slot="start"></ion-icon>
+          {{ getEnrollButtonText() }}
+        </ion-button>
+        <ion-text 
+          v-if="!canEnrollNow() && enrollmentMessage" 
+          color="medium" 
+          class="ion-text-center ion-margin-top"
+        >
+          <small>{{ enrollmentMessage }}</small>
+        </ion-text>
       </div>
-      <div v-if="workshop.can_unenroll && !mustPay()">
+      
+      <!-- Botón de desinscripción -->
+      <div v-else-if="workshop.can_unenroll && !mustPay()">
         <ion-button
           @click="unenroll"
           shape="round"
           expand="full"
-          color="primary"
-          >Desincribirse</ion-button
+          color="danger"
+          fill="outline"
         >
+          <ion-icon :icon="exitOutline" slot="start"></ion-icon>
+          Desincribirse
+        </ion-button>
+      </div>
+      
+      <!-- Estado ya inscrito -->
+      <div v-else-if="workshop.is_enrolled">
+        <ion-button
+          shape="round"
+          expand="full"
+          color="success"
+          fill="outline"
+          disabled
+        >
+          <ion-icon :icon="checkmarkCircleOutline" slot="start"></ion-icon>
+          Ya estás inscrito
+        </ion-button>
       </div>
     </template>
   </graduados-app>
@@ -138,8 +172,11 @@ import {
   hourglassOutline,
   journalOutline,
   arrowBackOutline,
+  schoolOutline,
+  exitOutline,
+  checkmarkCircleOutline,
 } from 'ionicons/icons'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import BibliographyItem from '../bibliography/components/BibliographyItem.vue'
@@ -148,11 +185,51 @@ const ionRouter = useIonRouter()
 const loaded = ref(false)
 const store = useStore()
 const route = useRoute()
-const workshop = ref({})
+const workshop = ref<any>({})
 const router = useIonRouter()
 
+// Mensaje para estados de inscripción
+const enrollmentMessage = computed(() => {
+  if (!workshop.value) return '';
+  
+  if (workshop.value.is_full) return 'Taller completo - Sin cupos disponibles';
+  if (workshop.value.is_ended) return 'Taller finalizado';
+  if (workshop.value.registration_closed) return 'Inscripciones cerradas';
+  
+  return '';
+})
+
+// Verificar si se puede inscribir ahora
+function canEnrollNow() {
+  if (!workshop.value) return false;
+  
+  // Si el backend permite explícitamente la inscripción
+  if (workshop.value.can_enroll) return true;
+  
+  // Si no está inscrito y no está lleno/cerrado
+  if (!workshop.value.is_enrolled && 
+      !workshop.value.is_full && 
+      !workshop.value.is_ended && 
+      !workshop.value.registration_closed) {
+    return true;
+  }
+  
+  return false;
+}
+
+// Texto dinámico para el botón de inscripción
+function getEnrollButtonText() {
+  if (!workshop.value) return 'Inscribirse';
+  
+  if (workshop.value.price && workshop.value.price.raw > 0) {
+    return `Inscribirse - $${workshop.value.price.value}`;
+  }
+  
+  return 'Inscribirse';
+}
+
 function mustPay() {
-  return workshop.value.price.raw > 0
+  return workshop.value?.price?.raw > 0 || false
 }
 function goBack() {
   router.replace({ name: 'activities.index' })
@@ -167,10 +244,10 @@ const confirm = () =>
 const unenroll = () =>
   store.dispatch('ui/alert/confirm', {
     header: 'Desinscripción',
-    subHeader: '¿Estás seguro de que deseas darte de baje de este taller?',
+    subHeader: '¿Estás seguro de que deseas darte de baja de este taller?',
     handler: () =>
       store
-        .dispatch('workshops/unenroll', workshop.value.id)
+        .dispatch('workshops/unenroll', workshop.value?.id)
         .then(() => {
           ionRouter.navigate(
             `/talleres/desinscripcion-exitosa`,
@@ -186,7 +263,7 @@ const unenroll = () =>
 const enroll = function () {
   console.log('enroll')
   store
-    .dispatch('workshops/enroll', workshop.value.id)
+    .dispatch('workshops/enroll', workshop.value?.id)
     .then(() => {
       const route = mustPay() ? 'pago-exitoso' : 'inscripcion-exitosa'
       ionRouter.navigate(`/talleres/${route}`, 'forward', 'replace')
@@ -199,7 +276,7 @@ const enroll = function () {
 const preEnroll = function () {
   console.log('preEnroll')
   store
-    .dispatch('workshops/preEnroll', workshop.value.id)
+    .dispatch('workshops/preEnroll', workshop.value?.id)
     .then((response) => {
       ionRouter.navigate(
         `/inscripciones/${response.data.data.id}/datos-bancarios`,
@@ -225,5 +302,22 @@ onMounted(() => {
 .content {
   color: var(--ion-color-step-500);
   font-size: 14px;
+}
+
+/* Estilos para los botones de inscripción */
+ion-button[expand="full"] {
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Mensaje de estado de inscripción */
+.ion-text-center small {
+  display: block;
+  padding: 8px;
+  background-color: var(--ion-color-light);
+  border-radius: 8px;
+  border-left: 3px solid var(--ion-color-medium);
 }
 </style>
