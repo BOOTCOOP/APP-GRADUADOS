@@ -19,13 +19,13 @@
                 <ion-img src="/assets/jobs/job.png"></ion-img>
             </ion-thumbnail>
 
-            <ion-text><h3>A{{ job.title }}</h3></ion-text>
+            <ion-text><h3>{{ job.title }}</h3></ion-text>
 
             <div class="tabs">
                 <div class="tab" :class="{selected: tab == 'information'}" @click="tab = 'information'">Información</div>
                 <div class="tab" :class="{selected: tab == 'requirements'}" @click="tab = 'requirements'">Requisitos</div>
                 <div class="tab" :class="{selected: tab == 'about'}" @click="tab = 'about'">La empresa</div>
-                <!-- <div class="tab" :class="{selected: tab == 'goals'}" @click="tab = 'goals'">Objetivos</div> -->
+                <div class="tab" :class="{selected: tab == 'contact'}" @click="tab = 'contact'">Contacto</div>
             </div>
 
             <div class="ion-padding-top ion-margin-top content">
@@ -58,6 +58,29 @@
                         <p><strong>Cant. vacantes: </strong> {{ job.vacancies_amount }}</p>
                     </ion-text>
                 </template>
+                <template v-if="tab == 'contact'">
+                    <ion-text>
+                        <div v-if="job.phone || job.email" class="contact-info">
+                            <h4>📞 Información de contacto</h4>
+                            <div v-if="job.phone" class="contact-item">
+                                <p><strong>Teléfono: </strong> 
+                                    <a :href="`tel:${job.phone}`" class="contact-link">{{ job.phone }}</a>
+                                </p>
+                            </div>
+                            <div v-if="job.email" class="contact-item">
+                                <p><strong>Email: </strong> 
+                                    <a :href="`mailto:${job.email}`" class="contact-link">{{ job.email }}</a>
+                                </p>
+                            </div>
+                            <p class="contact-note">
+                                <small>💡 También puedes usar el botón "Contactar" para comunicarte directamente.</small>
+                            </p>
+                        </div>
+                        <div v-else class="no-contact">
+                            <p>ℹ️ No hay información de contacto disponible para esta publicación.</p>
+                        </div>
+                    </ion-text>
+                </template>
             </div>
         </div>
 
@@ -78,7 +101,7 @@
     const loading = ref(true);
     const route = useRoute();
     const store = useStore();
-    const job = ref({})
+    const job = ref<any>({})
     const tab = ref('information');
 
     onMounted(() => {
@@ -89,12 +112,42 @@
     })
 
     function contact(){
-        let contact = "";
+        const contactOptions: Array<{text: string, handler: () => void}> = [];
 
-        if(job.value.email) contact = 'mailto:' + job.value.email;
-        if(job.value.phone) contact = 'tel:' + job.value.phone;
+        // Priorizar teléfono si está disponible
+        if(job.value.phone) {
+            contactOptions.push({
+                text: `📞 Llamar: ${job.value.phone}`,
+                handler: () => {
+                    window.open(`tel:${job.value.phone}`, '_system');
+                }
+            });
+        }
 
-        window.open(contact, '_system');
+        // Agregar email si está disponible
+        if(job.value.email) {
+            contactOptions.push({
+                text: `📧 Enviar email: ${job.value.email}`,
+                handler: () => {
+                    window.open(`mailto:${job.value.email}`, '_system');
+                }
+            });
+        }
+
+        // Si no hay opciones de contacto
+        if(contactOptions.length === 0) {
+            store.dispatch("ui/toastr/create", "No hay información de contacto disponible");
+            return;
+        }
+
+        // Si solo hay una opción, ejecutarla directamente
+        if(contactOptions.length === 1) {
+            contactOptions[0].handler();
+            return;
+        }
+
+        // Si hay múltiples opciones, mostrar menú
+        store.dispatch("ui/action/show", contactOptions);
     }
 
     function saveFavorite(){
@@ -147,5 +200,45 @@
     .content{
         font-size: 14px;
         color: var(--ion-color-step-550)
+    }
+
+    .contact-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 8px;
+    }
+
+    .contact-info h4 {
+        margin: 0 0 12px 0;
+        color: var(--ion-color-primary);
+        font-size: 16px;
+    }
+
+    .contact-item {
+        margin-bottom: 8px;
+    }
+
+    .contact-link {
+        color: var(--ion-color-primary);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .contact-link:hover {
+        text-decoration: underline;
+    }
+
+    .contact-note {
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px solid #e0e0e0;
+        color: var(--ion-color-medium);
+    }
+
+    .no-contact {
+        text-align: center;
+        padding: 20px;
+        color: var(--ion-color-medium);
     }
 </style>
