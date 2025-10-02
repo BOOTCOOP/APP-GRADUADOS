@@ -11,8 +11,8 @@
 
     <Banner />
     <Shortcuts />
-    <!-- <Links /> -->
-    <!-- <Social /> -->
+    <!-- <Links />
+    <Social /> -->
   </graduados-app>
 </template>
 

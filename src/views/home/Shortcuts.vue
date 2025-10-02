@@ -148,6 +148,25 @@
         </ion-card>
       </ion-col>
     </ion-row>
+
+    <!-- Fila 5: Contacto (ocupa toda la fila) -->
+    <ion-row>
+      <ion-col size="12">
+        <ion-card
+          router-link="/contacto"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-full-width"
+        >
+          <ion-card-content>
+            <ion-icon
+              color="primary"
+              :ios="callOutline"
+              :md="callOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary">Contacto</ion-text>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
   </ion-grid>
 </template>
 
@@ -163,6 +182,7 @@ import {
   schoolOutline,
   informationCircleOutline,
   megaphoneOutline,
+  callOutline,
 } from "ionicons/icons";
 
 import {
@@ -192,5 +212,20 @@ import {
 ion-icon {
   width: 60px !important;
   height: 60px !important;
+}
+
+/* Estilo para el botón de contacto que ocupa toda la fila */
+.ion-card-full-width {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+}
+
+.ion-card-full-width ion-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 </style>

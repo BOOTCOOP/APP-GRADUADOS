@@ -226,6 +226,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/inscriptions/AttachProof.vue'),
     meta: { auth },
   },
+  {
+    path: '/contacto',
+    name: 'contacto',
+    component: () => import('../views/contacto/Contacto.vue'),
+    meta: { auth },
+  },
 ]
 
 const router = createRouter({
