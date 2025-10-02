@@ -45,7 +45,7 @@ import '@ionic/vue/css/ionic-swiper.css'
 const router = useIonRouter()
 const filters = ref({})
 
-// Función para regresar a la vista anterior (Programas)
+// Función para regresar a la vista anterior (Cursos)
 function goBack() {
   router.replace({ name: 'courses.index' })
 }

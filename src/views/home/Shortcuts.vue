@@ -113,7 +113,7 @@
       </ion-col>
     </ion-row>
 
-    <!-- Fila 4: Programas - Talleres -->
+    <!-- Fila 4: Cursos - Talleres -->
     <ion-row>
       <ion-col size="6">
         <ion-card
@@ -127,7 +127,7 @@
               :md="ribbonOutline"
             ></ion-icon>
             <ion-text class="ion-margin-top" color="primary"
-              >Programas</ion-text
+              >Cursos</ion-text
             >
           </ion-card-content>
         </ion-card>

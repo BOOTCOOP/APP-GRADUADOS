@@ -23,7 +23,7 @@
                 color="primary"
                 class="success-button"
               >
-                Volver a Programas
+                Volver a Cursos
               </ion-button>
         </template>
     </graduados-app>

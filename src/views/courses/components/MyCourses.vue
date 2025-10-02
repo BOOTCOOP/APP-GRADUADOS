@@ -1,5 +1,5 @@
 <template>
-    <ion-text>Mis Programas Inscriptos</ion-text>
+    <ion-text>Mis Cursos Inscriptos</ion-text>
     <swiper
         class="swiper-overflowed"
         :class="['items-' + perView]"

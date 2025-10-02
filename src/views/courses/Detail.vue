@@ -129,21 +129,57 @@
     </div>
     <template v-if="course && loaded" #footer>
       <div class="footer-actions">
-        <!-- Botón informativo - sin funcionalidad real de inscripción -->
+        <!-- Botón de inscripción real -->
         <ion-button
-          @click="showInscriptionInfo"
+          v-if="!course.is_enrolled && course.can_enroll"
+          @click="enroll"
           shape="round"
           expand="full"
           color="primary"
           class="main-action-btn"
+          :disabled="enrolling"
         >
-          Información sobre inscripción
+          <ion-spinner v-if="enrolling" name="crescent"></ion-spinner>
+          <span v-else>INSCRIPCIÓN</span>
+        </ion-button>
+
+        <!-- Si ya está inscripto -->
+        <ion-button
+          v-else-if="course.is_enrolled"
+          shape="round"
+          expand="full"
+          color="success"
+          class="main-action-btn"
+          disabled
+        >
+          <ion-icon :icon="checkmarkCircleOutline" slot="start"></ion-icon>
+          Ya estás inscripto
+        </ion-button>
+
+        <!-- Si no puede inscribirse -->
+        <ion-button
+          v-else
+          @click="showInscriptionInfo"
+          shape="round"
+          expand="full"
+          color="medium"
+          class="main-action-btn"
+        >
+          No disponible para inscripción
         </ion-button>
         
         <!-- Mensaje informativo -->
         <div class="info-message ion-text-center ion-margin-top">
           <ion-text color="medium">
-            <p><small>Para inscribirte, contacta con el centro de graduados o espera más información sobre el proceso de inscripción.</small></p>
+            <p v-if="course.can_enroll && !course.is_enrolled">
+              <small>Al hacer clic en "INSCRIPCIÓN" te registrarás en este curso.</small>
+            </p>
+            <p v-else-if="course.is_enrolled">
+              <small>¡Felicitaciones! Ya estás inscripto en este curso.</small>
+            </p>
+            <p v-else>
+              <small>Este curso no está disponible para inscripción en este momento.</small>
+            </p>
           </ion-text>
         </div>
       </div>
@@ -157,6 +193,7 @@ import {
   IonText,
   IonIcon,
   IonButton,
+  IonSpinner,
   useIonRouter,
   alertController,
 } from '@ionic/vue'
@@ -167,12 +204,14 @@ import {
   hourglassOutline,
   journalOutline,
   arrowBackOutline,
+  checkmarkCircleOutline,
 } from 'ionicons/icons'
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 const loaded = ref(false)
+const enrolling = ref(false)
 const store = useStore()
 const route = useRoute()
 const course = ref<any>({})
@@ -180,6 +219,43 @@ const router = useIonRouter()
 
 function goBack() {
   router.replace({ name: 'courses.index' })
+}
+
+// Función para inscribirse al curso
+async function enroll() {
+  enrolling.value = true
+  
+  try {
+    await store.dispatch('courses/enroll', course.value.id)
+    
+    // Actualizar el estado del curso
+    course.value.is_enrolled = true
+    course.value.can_enroll = false
+    
+    // Mostrar mensaje de éxito
+    const alert = await alertController.create({
+      header: '¡Inscripción exitosa!',
+      subHeader: course.value.title,
+      message: 'Te has inscripto correctamente en este curso. Recibirás más información por email.',
+      buttons: ['Entendido']
+    })
+    
+    await alert.present()
+    
+  } catch (error: any) {
+    console.error('Error al inscribirse:', error)
+    
+    // Mostrar error al usuario
+    const alert = await alertController.create({
+      header: 'Error en la inscripción',
+      message: error.response?.data?.message || 'Hubo un problema al procesar tu inscripción. Por favor, intenta nuevamente.',
+      buttons: ['Entendido']
+    })
+    
+    await alert.present()
+  } finally {
+    enrolling.value = false
+  }
 }
 
 // Función para mostrar información sobre inscripción
@@ -282,6 +358,20 @@ onMounted(() => {
   font-weight: 600;
   font-size: 1rem;
   height: 56px;
+  transition: all 0.3s ease;
+}
+
+.main-action-btn:not([disabled]):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.main-action-btn[disabled] {
+  opacity: 0.6;
+}
+
+.main-action-btn ion-spinner {
+  margin-right: 8px;
 }
 
 .info-message {

@@ -1,5 +1,5 @@
 <template>
-    <graduados-app header-title="Programas de Perfeccionamiento">
+    <graduados-app header-title="Cursos de Perfeccionamiento">
         <template #header-end>
             <ion-button color="primary" @click="goToHistory()">
                 <ion-icon src="/assets/icons/history-2.svg"></ion-icon>
@@ -13,7 +13,7 @@
         <div class="search-filter-section ion-padding">
             <ion-searchbar
                 v-model="searchTerm"
-                placeholder="Buscar programas por nombre o palabra clave..."
+                placeholder="Buscar cursos por nombre o palabra clave..."
                 :debounce="500"
                 @ionInput="onSearchChange"
                 show-clear-button="focus"
@@ -51,7 +51,7 @@
             fetch-data-store="courses/fetchAll"
             :filters="filters"
             :key="filterKey"
-            empty-results-text="No se encontraron programas que coincidan con tu búsqueda"
+            empty-results-text="No se encontraron cursos que coincidan con tu búsqueda"
         >
             <template #skeleton>
                 <Skeleton></Skeleton>
@@ -168,7 +168,7 @@ function getSectionTitle(itemsCount: number) {
         case 'graduados_uba':
             return `Solo para Graduados UBA (${itemsCount})`;
         default:
-            return `Próximos programas (${itemsCount})`;
+            return `Próximos cursos (${itemsCount})`;
     }
 }
 </script>
