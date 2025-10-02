@@ -68,43 +68,26 @@ const selectedCategories = ref<string[]>([])
 const fileFilterButton = ref()
 const categoryFilterButton = ref()
 
-// Función para categorizar bibliografías basado en el theme
+// Función para categorizar bibliografías basado en la primera palabra del theme
 const categorizeBibliography = (theme: string) => {
-  if (!theme) return 'Material General';
+  if (!theme) return 'OTROS';
   
-  const themeUpper = theme.toUpperCase().trim();
+  // Tomar la primera palabra y convertir a mayúscula
+  const firstWord = theme.trim().split(' ')[0].toUpperCase();
   
-  // Basado en los datos reales que vimos - más específico
-  if (themeUpper.includes('JURISPRUDENCIA')) {
-    return 'Jurisprudencia';
+  // Verificar si es una de las categorías válidas (con y sin tilde)
+  if (firstWord === 'LEGISLACIÓN' || firstWord === 'LEGISLACION') {
+    return 'LEGISLACIÓN';
+  }
+  if (firstWord === 'DOCTRINA') {
+    return 'DOCTRINA';
+  }
+  if (firstWord === 'JURISPRUDENCIA') {
+    return 'JURISPRUDENCIA';
   }
   
-  if (themeUpper.includes('DEFENSA') && themeUpper.includes('CONSUMIDOR')) {
-    return 'Defensa del Consumidor';
-  }
-  
-  if (themeUpper.includes('BOOTCOOP')) {
-    return 'BootCoop';
-  }
-  
-  if (themeUpper.includes('FALLO')) {
-    return 'Fallos Judiciales';
-  }
-  
-  if (themeUpper.includes('TALLER') || themeUpper.includes('WORKSHOP')) {
-    return 'Talleres';
-  }
-  
-  if (themeUpper.includes('CURSO')) {
-    return 'Cursos';
-  }
-  
-  if (themeUpper.includes('PROGRAMA')) {
-    return 'Programas';
-  }
-  
-  // Si no coincide con ninguna categoría específica, usar el theme original
-  return theme.trim();
+  // Si no coincide con ninguna, va a "OTROS"
+  return 'OTROS';
 }
 
 // Función para mostrar filtros de tipo de archivo
@@ -118,7 +101,7 @@ const showFileTypeFilters = async () => {
   await new Promise(resolve => setTimeout(resolve, 50))
   
   // Obtenemos todos los tipos de archivo únicos de los datos
-  const fileTypes = ['pdf', 'png', 'doc', 'docx', 'jpg', 'jpeg']
+  const fileTypes = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'txt', 'rtf', 'odt']
   
   const actions = fileTypes.map(fileType => ({
     text: selectedFileTypes.value.includes(fileType) 
@@ -160,25 +143,10 @@ const showCategoryFilters = async () => {
   // Pequeño delay para permitir que el blur tome efecto
   await new Promise(resolve => setTimeout(resolve, 50))
   
-  // Obtener todas las bibliografías para analizar qué categorías existen
-  const allBibliographies = store.state.bibliographies.items || []
+  // Mostrar siempre las categorías fijas, independientemente de si tienen datos
+  const fixedCategories = ['LEGISLACIÓN', 'DOCTRINA', 'JURISPRUDENCIA', 'OTROS']
   
-  // Obtener todas las categorías que realmente existen en los datos
-  const existingCategories = new Set<string>()
-  allBibliographies.forEach(bibliography => {
-    const category = categorizeBibliography(bibliography.theme)
-    existingCategories.add(category)
-  })
-  
-  // Convertir a array y ordenar
-  const availableCategories: string[] = Array.from(existingCategories).sort()
-  
-  // Si no hay categorías, no mostrar nada
-  if (availableCategories.length === 0) {
-    return
-  }
-  
-  const actions = availableCategories.map(category => ({
+  const actions = fixedCategories.map(category => ({
     text: selectedCategories.value.includes(category) 
       ? `✓ ${category}` 
       : category,
