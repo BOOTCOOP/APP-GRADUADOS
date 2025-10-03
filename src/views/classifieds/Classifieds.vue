@@ -1,77 +1,52 @@
 <template>
-  <graduados-app header-title="Avisos">
+  <graduados-app header-title="Actividades Online">
     <div class="ion-padding">
-      <div class="refresh-container">
-        <button @click="loadAvisos" class="refresh-button">
-          <ion-icon :icon="refreshOutline"></ion-icon> Actualizar
-        </button>
-      </div>
-
-      <!-- Botón para crear nuevo aviso -->
-      <!-- TEMPORALMENTE COMENTADO - No funciona la funcionalidad de crear avisos -->
-      <!--
-      <div class="action-container">
-        <button @click="goToCreateAviso" class="create-button">
-          <ion-icon :icon="addOutline"></ion-icon>
-          Publicar Aviso
-        </button>
-      </div>
-      -->
-
-      <div v-if="loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Cargando avisos...</p>
-      </div>
-
-      <div v-else class="avisos-container">
-        <div v-if="avisos.length" class="avisos-list">
-          <div
-            v-for="aviso in avisos"
-            :key="aviso.id"
-            @click="goToDetail(aviso.id)"
-            class="aviso-item"
-          >
-            <div class="aviso-thumbnail">
-              <img
-                v-if="aviso.file"
-                :src="getImageUrl(aviso.file)"
-                alt="Aviso thumbnail"
-              />
-              <div v-else class="placeholder-thumbnail">
-                <ion-icon :icon="documentOutline" size="large"></ion-icon>
-              </div>
-            </div>
-
-            <div class="aviso-content">
-              <h2 class="aviso-title">{{ aviso.title }}</h2>
-              <p class="aviso-description">
-                {{ truncateText(aviso.description, 120) }}
-              </p>
-              <div class="aviso-footer">
-                <div v-if="aviso.contact_phone" class="contact-info">
-                  <ion-icon :icon="callOutline"></ion-icon>
-                  <span>{{ aviso.contact_phone }}</span>
-                </div>
-                <div v-if="aviso.created_at" class="date-info">
-                  <ion-icon :icon="timeOutline"></ion-icon>
-                  <span>{{ formatDate(aviso.created_at) }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div v-if="isMyAviso(aviso)" class="aviso-badge">Mi Aviso</div>
+      <div class="youtube-redirect-container">
+        <div class="youtube-card">
+          <div class="youtube-header">
+            <ion-icon :icon="logoYoutube" class="youtube-icon"></ion-icon>
+            <h2>Canal Oficial de YouTube</h2>
           </div>
-        </div>
-
-        <div v-else class="empty-state">
-          <ion-icon :icon="alertCircleOutline" size="large"></ion-icon>
-          <p>No hay avisos publicados en este momento.</p>
-          <!-- TEMPORALMENTE COMENTADO - No funciona la funcionalidad de crear avisos -->
-          <!--
-          <button @click="goToCreateAviso" class="create-button">
-            Publicar mi primer aviso
-          </button>
-          -->
+          
+          <div class="youtube-content">
+            <p class="youtube-description">
+              Accede a todas nuestras <strong>actividades online</strong>, seminarios, conferencias 
+              y contenido exclusivo del Centro de Graduados de la Facultad de Derecho de la UBA.
+            </p>
+            
+            <div class="youtube-features">
+              <div class="feature-item">
+                <ion-icon :icon="playCircleOutline"></ion-icon>
+                <span>Conferencias en vivo</span>
+              </div>
+              <div class="feature-item">
+                <ion-icon :icon="libraryOutline"></ion-icon>
+                <span>Material académico</span>
+              </div>
+              <div class="feature-item">
+                <ion-icon :icon="schoolOutline"></ion-icon>
+                <span>Seminarios especializados</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="youtube-actions">
+            <ion-button 
+              expand="block" 
+              color="danger" 
+              size="large"
+              @click="openYouTubeChannel"
+              class="youtube-button"
+            >
+              <ion-icon :icon="logoYoutube" slot="start"></ion-icon>
+              Ver Canal de YouTube
+            </ion-button>
+            
+            <p class="youtube-url">
+              <ion-icon :icon="linkOutline"></ion-icon>
+              youtube.com/@centrodegraduadosDerechoUBA
+            </p>
+          </div>
         </div>
       </div>
     </div>

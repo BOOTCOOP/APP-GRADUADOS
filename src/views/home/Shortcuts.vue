@@ -62,16 +62,16 @@
       </ion-col>
       <ion-col size="6">
         <ion-card
-          router-link="/classifieds"
+          @click="openYouTubeChannel"
           class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
         >
           <ion-card-content>
             <ion-icon
               color="primary"
-              :ios="megaphoneOutline"
-              :md="megaphoneOutline"
+              :ios="logoYoutube"
+              :md="logoYoutube"
             ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary">Avisos</ion-text>
+            <ion-text class="ion-margin-top" color="primary">Actividades Online</ion-text>
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -143,7 +143,7 @@
               :ios="schoolOutline"
               :md="schoolOutline"
             ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary">Talleres</ion-text>
+            <ion-text class="ion-margin-top" color="primary">Talleres y Jornadas</ion-text>
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -173,6 +173,11 @@
 <script setup lang="ts">
 const logoUrl = "/assets/logo/logo.png";
 
+// Función para abrir el canal de YouTube
+function openYouTubeChannel() {
+  window.open('https://www.youtube.com/@centrodegraduadosDerechoUBA', '_blank');
+}
+
 import {
   briefcaseOutline,
   libraryOutline,
@@ -181,7 +186,7 @@ import {
   newspaperOutline,
   schoolOutline,
   informationCircleOutline,
-  megaphoneOutline,
+  logoYoutube,
   callOutline,
 } from "ionicons/icons";
 
