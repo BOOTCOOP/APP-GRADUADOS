@@ -153,6 +153,16 @@
         </ion-button>
       </div>
     </template>
+    
+    <!-- Componente de compartir social -->
+    <SocialShare
+      v-if="workshop && loaded"
+      :share-data="{
+        title: workshop.title,
+        text: `${workshop.teachers ? 'Docentes: ' + workshop.teachers + ' - ' : ''}${workshop.start ? 'Inicio: ' + workshop.start : ''}`,
+        type: 'taller'
+      }"
+    />
   </graduados-app>
 </template>
 
@@ -180,6 +190,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import BibliographyItem from '../bibliography/components/BibliographyItem.vue'
+import SocialShare from '@/components/SocialShare.vue'
 
 const ionRouter = useIonRouter()
 const loaded = ref(false)

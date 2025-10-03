@@ -184,6 +184,16 @@
         </div>
       </div>
     </template>
+    
+    <!-- Componente de compartir social -->
+    <SocialShare
+      v-if="course && loaded"
+      :share-data="{
+        title: course.title,
+        text: `${course.teachers ? 'Docentes: ' + course.teachers + ' - ' : ''}${course.duration ? 'Duración: ' + course.duration : ''}`,
+        type: 'curso'
+      }"
+    />
   </graduados-app>
 </template>
 
@@ -209,6 +219,7 @@ import {
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
+import SocialShare from '@/components/SocialShare.vue'
 
 const loaded = ref(false)
 const enrolling = ref(false)

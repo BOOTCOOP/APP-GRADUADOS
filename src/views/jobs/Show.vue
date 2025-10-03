@@ -82,6 +82,16 @@
                     </ion-text>
                 </template>
             </div>
+            
+            <!-- Componente de compartir social -->
+            <SocialShare
+              v-if="job && !loading"
+              :share-data="{
+                title: job.title,
+                text: `Compañía: ${job.company} - ${job.description ? job.description.replace(/<[^>]*>/g, '').substring(0, 100) + '...' : ''}`,
+                type: 'empleo'
+              }"
+            />
         </div>
 
         <template #footer v-if="!loading && !job.from_auth">
@@ -97,6 +107,7 @@
     import { ref, onMounted } from 'vue';
     import { useStore } from 'vuex';
     import { useRoute } from 'vue-router';
+    import SocialShare from '@/components/SocialShare.vue';
 
     const loading = ref(true);
     const route = useRoute();

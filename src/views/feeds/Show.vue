@@ -48,6 +48,15 @@
         <h4 class="ion-no-margin">{{ feed.title }}</h4>
         <div class="content ion-margin-top" v-html="feed.content"></div>
       </ion-text>
+      
+      <!-- Componente de compartir social -->
+      <SocialShare
+        :share-data="{
+          title: feed.title,
+          text: getPlainTextContent(feed.content),
+          type: 'noticia'
+        }"
+      />
     </div>
   </graduados-app>
 </template>
@@ -61,6 +70,7 @@ import {
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
+import SocialShare from '@/components/SocialShare.vue'
 
 interface FeedItem {
   title: string;
@@ -75,6 +85,18 @@ const loaded = ref(false)
 const store = useStore()
 const route = useRoute()
 const feed = ref<FeedItem>({} as FeedItem)
+
+// Función para extraer texto plano del HTML
+const getPlainTextContent = (htmlContent: string): string => {
+  if (!htmlContent) return ''
+  
+  // Crear un elemento temporal para extraer texto
+  const temp = document.createElement('div')
+  temp.innerHTML = htmlContent
+  
+  // Obtener solo el texto, sin etiquetas HTML
+  return temp.textContent || temp.innerText || ''
+}
 
 onMounted(() => {
   const { slug } = route.params
