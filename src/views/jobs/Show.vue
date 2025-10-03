@@ -96,8 +96,24 @@
 
         <template #footer v-if="!loading && !job.from_auth">
             <ion-button class="ion-margin-bottom" color="primary" shape="round" expand="full" @click="contact">Contactar</ion-button>
-            <ion-button v-if="!job.has_user_favorite" color="light-primary" shape="round" @click="saveFavorite" expand="full">Guardar en favoritos</ion-button>
-            <ion-button v-else color="light-primary" shape="round" expand="full" @click="removeFavorite" >Eliminar de favoritos</ion-button>
+            <ion-button 
+                v-if="!job.has_user_favorite" 
+                color="light-primary" 
+                shape="round" 
+                @click="(event) => { console.log('🔍 [MOBILE DEBUG] Click event triggered:', event); saveFavorite(); }" 
+                expand="full"
+            >
+                Guardar en favoritos
+            </ion-button>
+            <ion-button 
+                v-else 
+                color="light-primary" 
+                shape="round" 
+                expand="full" 
+                @click="(event) => { console.log('🔍 [MOBILE DEBUG] Remove click triggered:', event); removeFavorite(); }"
+            >
+                Eliminar de favoritos
+            </ion-button>
         </template>
     </graduados-app>
 </template>
@@ -162,17 +178,82 @@
     }
 
     function saveFavorite(){
-        store.dispatch("jobs/addFavorite", job.value.id).then(() => {
-            job.value.has_user_favorite = true;
-            store.dispatch("ui/toastr/create", "Búsqueda guardada.")
-        })
+        console.log('🔍 [MOBILE DEBUG] Iniciando saveFavorite');
+        console.log('🔍 [MOBILE DEBUG] Job ID:', job.value.id);
+        
+        // Función para intentar guardar favorito
+        const attemptSave = (attempt = 1, maxAttempts = 2) => {
+            console.log(`🔄 [ANDROID DEBUG] Intento ${attempt}/${maxAttempts}`);
+            
+            store.dispatch("jobs/addFavorite", job.value.id)
+                .then((response) => {
+                    console.log('✅ [MOBILE DEBUG] Respuesta exitosa:', response);
+                    job.value.has_user_favorite = true;
+                    store.dispatch("ui/toastr/create", "Búsqueda guardada ✓")
+                })
+                .catch((error) => {
+                    console.error(`❌ [MOBILE DEBUG] Error intento ${attempt}:`, error);
+                    console.error('❌ [MOBILE DEBUG] Error status:', error.response?.status);
+                    
+                    // ERROR 419: Token CSRF expirado - específico de Android
+                    if (error.response?.status === 419) {
+                        console.log('🔄 [ANDROID 419] Token CSRF expirado');
+                        
+                        if (attempt < maxAttempts) {
+                            console.log('🔄 [ANDROID 419] Reintentando en 1 segundo...');
+                            setTimeout(() => attemptSave(attempt + 1, maxAttempts), 1000);
+                        } else {
+                            store.dispatch("ui/toastr/create", "Error de sesión (419). Intenta cerrar y abrir la app, o reloguéate.");
+                        }
+                    } else if (error.response?.status === 401) {
+                        // Error de autenticación
+                        store.dispatch("ui/toastr/create", "Sesión expirada. Por favor, inicia sesión nuevamente.");
+                    } else {
+                        // Otros errores
+                        store.dispatch("ui/toastr/create", `Error: ${error.response?.status || error.message}`);
+                    }
+                });
+        };
+        
+        attemptSave();
     }
 
     function removeFavorite(){
-        store.dispatch("jobs/removeFavorite", job.value.id).then(() => {
-            job.value.has_user_favorite = false;
-            store.dispatch("ui/toastr/create", "Búsqueda eliminada de tus favoritos.")
-        })
+        console.log('🔍 [MOBILE DEBUG] Iniciando removeFavorite');
+        console.log('🔍 [MOBILE DEBUG] Job ID:', job.value.id);
+        
+        const attemptRemove = (attempt = 1, maxAttempts = 2) => {
+            console.log(`🔄 [ANDROID DEBUG] Remove intento ${attempt}/${maxAttempts}`);
+            
+            store.dispatch("jobs/removeFavorite", job.value.id)
+                .then((response) => {
+                    console.log('✅ [MOBILE DEBUG] Remove exitoso:', response);
+                    job.value.has_user_favorite = false;
+                    store.dispatch("ui/toastr/create", "Búsqueda eliminada de favoritos ✓")
+                })
+                .catch((error) => {
+                    console.error(`❌ [MOBILE DEBUG] Error remove intento ${attempt}:`, error);
+                    console.error('❌ [MOBILE DEBUG] Error status:', error.response?.status);
+                    
+                    // ERROR 419: Token CSRF expirado
+                    if (error.response?.status === 419) {
+                        console.log('🔄 [ANDROID 419] Token CSRF expirado en remove');
+                        
+                        if (attempt < maxAttempts) {
+                            console.log('🔄 [ANDROID 419] Reintentando remove en 1 segundo...');
+                            setTimeout(() => attemptRemove(attempt + 1, maxAttempts), 1000);
+                        } else {
+                            store.dispatch("ui/toastr/create", "Error de sesión (419). Intenta cerrar y abrir la app, o reloguéate.");
+                        }
+                    } else if (error.response?.status === 401) {
+                        store.dispatch("ui/toastr/create", "Sesión expirada. Por favor, inicia sesión nuevamente.");
+                    } else {
+                        store.dispatch("ui/toastr/create", `Error: ${error.response?.status || error.message}`);
+                    }
+                });
+        };
+        
+        attemptRemove();
     }
 </script>
 
