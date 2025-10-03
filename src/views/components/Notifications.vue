@@ -105,20 +105,29 @@
   
   onMounted(() => {
     if (User.isSet()) {
+      console.log('🔍 INVESTIGACIÓN: Cargando notificaciones desde el backend...');
       store.dispatch("notifications/fetchAll").then((response) => {
+        console.log('📡 RESPUESTA COMPLETA del backend:', response);
+        console.log('📊 DATOS de notificaciones:', response?.data);
+        
         // Verificación más segura de la respuesta
         if (response && response.data && Array.isArray(response.data.data)) {
           notifications.value = response.data.data;
+          console.log('✅ Notificaciones procesadas:', notifications.value);
         } else if (response && Array.isArray(response.data)) {
           notifications.value = response.data;
+          console.log('✅ Notificaciones procesadas (formato alternativo):', notifications.value);
         } else {
           notifications.value = [];
-          console.warn('Respuesta de notificaciones no tiene el formato esperado:', response);
+          console.warn('⚠️ Respuesta de notificaciones no tiene el formato esperado:', response);
         }
       }).catch((e) => {
-        console.error('Error cargando notificaciones:', e.message);
+        console.error('❌ Error cargando notificaciones:', e.message);
+        console.error('🔴 Error completo:', e);
         notifications.value = []; // Asegurar que sea un array vacío en caso de error
       });
+    } else {
+      console.log('👤 Usuario no autenticado, no se cargan notificaciones');
     }
   });
 
@@ -180,13 +189,28 @@
   // Formatear fecha
   const formatDate = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    
+    // Si ya viene formateada como "hace X tiempo", devolverla tal como está
+    if (typeof dateString === 'string' && dateString.includes('hace')) {
+      return dateString;
+    }
+    
+    // Si es una fecha válida, formatearla
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return dateString; // Devolver tal como viene si no es válida
+      }
+      
+      return date.toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateString || 'Fecha no disponible';
+    }
   };
 
   // Obtener etiqueta de prioridad
@@ -211,27 +235,64 @@
     // Cerrar menú
     await menuController.close();
     
-    // Navegar según el tipo
+    // Navegar según el tipo o link
     const type = notification.type || 'general';
+    let targetRoute: string | null = null;
+    
     try {
-      switch(type) {
-        case 'news':
-          router.push('/feeds');
-          break;
-        case 'workshop':
-          router.push('/activities');
-          break;
-        case 'classified':
-          router.push('/classifieds');
-          break;
-        case 'course':
-          router.push('/courses');
-          break;
-        default:
-          if (notification.link) {
-            router.push(notification.link);
-          }
+      // Primero intentar usar el link si existe
+      if (notification.link) {
+        // Convertir route names a URLs reales
+        switch(notification.link) {
+          case 'activities.index':
+            targetRoute = '/talleres';
+            break;
+          case 'courses.index': 
+            targetRoute = '/cursos';
+            break;
+          case 'news.index':
+            targetRoute = '/noticias';
+            break;
+          case 'classifieds.index':
+            targetRoute = '/classifieds';
+            break;
+          default:
+            // Si es una URL válida, usarla directamente
+            if (notification.link.startsWith('/')) {
+              targetRoute = notification.link;
+            }
+        }
       }
+      
+      // Si no hay link válido, usar el tipo
+      if (!targetRoute) {
+        switch(type) {
+          case 'news':
+            targetRoute = '/noticias';
+            break;
+          case 'workshop':
+            targetRoute = '/talleres';
+            break;
+          case 'classified':
+            targetRoute = '/classifieds';
+            break;
+          case 'course':
+            targetRoute = '/cursos';
+            break;
+          default:
+            targetRoute = '/'; // Home por defecto
+        }
+      }
+      
+      if (targetRoute) {
+        router.push(targetRoute);
+        console.log(`📍 Navegando a: ${targetRoute} (conversión automática desde backend)`);
+      } else {
+        // Fallback: ir al home si no hay ruta válida
+        router.push('/');
+        console.log('🏠 Navegando al home (fallback)');
+      }
+      
     } catch (error) {
       console.error('Error navegando:', error);
     }
