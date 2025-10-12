@@ -37,13 +37,15 @@ import {
   IonButton,
   IonIcon,
   IonText,
-  toastController
+  toastController,
+  isPlatform
 } from '@ionic/vue'
 import { 
   logoWhatsapp, 
   mailOutline, 
   copyOutline 
 } from 'ionicons/icons'
+import { Share } from '@capacitor/share'
 
 interface ShareData {
   title: string
@@ -85,12 +87,51 @@ const getCurrentUrl = (): string => {
   return props.shareData.url || window.location.href
 }
 
-const shareWhatsApp = () => {
-  const text = encodeURIComponent(generateShareText())
-  const url = encodeURIComponent(getCurrentUrl())
-  const whatsappUrl = `https://api.whatsapp.com/send?text=${text}%20${url}`
+const shareWhatsApp = async () => {
+  const text = generateShareText()
+  const url = getCurrentUrl()
+  const fullText = `${text}\n\n${url}`
   
-  window.open(whatsappUrl, '_blank')
+  // Verificar si estamos en dispositivo móvil con Capacitor
+  if (isPlatform('capacitor')) {
+    try {
+      // Usar API nativa de Capacitor Share
+      await Share.share({
+        title: props.shareData.title,
+        text: fullText,
+        url: url,
+        dialogTitle: 'Compartir vía WhatsApp'
+      })
+    } catch (error) {
+      console.error('Error sharing with Capacitor:', error)
+      // Fallback: intento con intent de Android
+      fallbackWhatsAppShare(text, url)
+    }
+  } else {
+    // Web: usar WhatsApp Web
+    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullText)}`
+    window.open(whatsappWebUrl, '_blank')
+  }
+}
+
+// Función de fallback para casos donde Capacitor Share no funciona
+const fallbackWhatsAppShare = (text: string, url: string) => {
+  const encodedText = encodeURIComponent(text)
+  const encodedUrl = encodeURIComponent(url)
+  
+  if (isPlatform('android')) {
+    // Android: usar intent específico de WhatsApp
+    const androidIntent = `intent://send/?text=${encodedText}%20${encodedUrl}#Intent;scheme=whatsapp;package=com.whatsapp;end`
+    window.location.href = androidIntent
+  } else if (isPlatform('ios')) {
+    // iOS: URL scheme
+    const whatsappUrl = `whatsapp://send?text=${encodedText}%20${encodedUrl}`
+    window.location.href = whatsappUrl
+  } else {
+    // Web fallback
+    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`
+    window.open(whatsappWebUrl, '_blank')
+  }
 }
 
 const shareEmail = () => {
