@@ -44,7 +44,7 @@
             
             <p class="youtube-url">
               <ion-icon :icon="linkOutline"></ion-icon>
-              youtube.com/@centrodegraduadosDerechoUBA
+              youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy
             </p>
           </div>
         </div>
@@ -65,7 +65,7 @@ import {
 
 // Función para abrir el canal de YouTube
 function openYouTubeChannel() {
-  window.open('https://www.youtube.com/@centrodegraduadosDerechoUBA', '_blank');
+  window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy', '_system');
 }
 </script>
 

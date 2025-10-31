@@ -3,117 +3,7 @@
     <img :src="logoUrl" alt="UBA Derecho" class="logo-img" />
   </div>
   <ion-grid>
-    <!-- Fila 1: Beneficios - Material Bibliográfico -->
-    <ion-row>
-      <ion-col size="6">
-        <ion-card
-          router-link="/beneficios"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="giftOutline"
-              :md="giftOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary"
-              >Beneficios</ion-text
-            >
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6">
-        <ion-card
-          router-link="/material-bibliografico"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="libraryOutline"
-              :md="libraryOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary"
-              >Material bibliográfico</ion-text
-            >
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-
-    <!-- Fila 2: Información de interés - Avisos -->
-    <ion-row>
-      <ion-col size="6">
-        <ion-card
-          router-link="/informacion-de-interes"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="informationCircleOutline"
-              :md="informationCircleOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary"
-              >Información de interés</ion-text
-            >
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6">
-        <ion-card
-          @click="openYouTubeChannel"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="logoYoutube"
-              :md="logoYoutube"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary">Actividades Online</ion-text>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-
-    <!-- Fila 3: Noticias - Búsqueda laboral -->
-    <ion-row>
-      <ion-col size="6">
-        <ion-card
-          router-link="/noticias"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="newspaperOutline"
-              :md="newspaperOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary">Noticias</ion-text>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6">
-        <ion-card
-          router-link="/busqueda-laboral"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="briefcaseOutline"
-              :md="briefcaseOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary"
-              >Búsqueda laboral</ion-text
-            >
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-
-    <!-- Fila 4: Cursos - Talleres -->
+    <!-- Fila 1: Cursos - Talleres -->
     <ion-row>
       <ion-col size="6">
         <ion-card
@@ -149,6 +39,116 @@
       </ion-col>
     </ion-row>
 
+    <!-- Fila 2: Actividades Online - Búsqueda laboral -->
+    <ion-row>
+      <ion-col size="6">
+        <ion-card
+          @click="openYouTubeChannel"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
+          <ion-card-content>
+            <ion-icon
+              color="primary"
+              :ios="logoYoutube"
+              :md="logoYoutube"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary">Actividades Online</ion-text>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card
+          router-link="/busqueda-laboral"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
+          <ion-card-content>
+            <ion-icon
+              color="primary"
+              :ios="briefcaseOutline"
+              :md="briefcaseOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary"
+              >Búsqueda laboral</ion-text
+            >
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <!-- Fila 3: Biblioteca - Noticias -->
+    <ion-row>
+      <ion-col size="6">
+        <ion-card
+          router-link="/material-bibliografico"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
+          <ion-card-content>
+            <ion-icon
+              color="primary"
+              :ios="libraryOutline"
+              :md="libraryOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary"
+              >Biblioteca</ion-text
+            >
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card
+          router-link="/noticias"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
+          <ion-card-content>
+            <ion-icon
+              color="primary"
+              :ios="newspaperOutline"
+              :md="newspaperOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary">Noticias</ion-text>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <!-- Fila 4: Información de interés - Beneficios -->
+    <ion-row>
+      <ion-col size="6">
+        <ion-card
+          router-link="/informacion-de-interes"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
+          <ion-card-content>
+            <ion-icon
+              color="primary"
+              :ios="informationCircleOutline"
+              :md="informationCircleOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary"
+              >Información de interés</ion-text
+            >
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card
+          router-link="/beneficios"
+          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
+        >
+          <ion-card-content>
+            <ion-icon
+              color="primary"
+              :ios="giftOutline"
+              :md="giftOutline"
+            ></ion-icon>
+            <ion-text class="ion-margin-top" color="primary"
+              >Beneficios</ion-text
+            >
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
     <!-- Fila 5: Contacto (ocupa toda la fila) -->
     <ion-row>
       <ion-col size="12">
@@ -175,7 +175,7 @@ const logoUrl = "/assets/logo/logo.png";
 
 // Función para abrir el canal de YouTube
 function openYouTubeChannel() {
-  window.open('https://www.youtube.com/@centrodegraduadosDerechoUBA', '_blank');
+  window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy', '_system');
 }
 
 import {

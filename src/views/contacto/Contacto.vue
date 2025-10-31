@@ -7,17 +7,21 @@
           <h2>Enlaces de interés</h2>
         </ion-text>
 
-        <ion-card @click="goToWhatsapp" color="dark" class="ion-no-margin ion-margin-top link-whatsapp">
+        <ion-card @click="goToWhatsapp" class="ion-no-margin ion-margin-top link-whatsapp">
           <ion-card-content>
-            Atención y consultas
-            <ion-icon :md="logoWhatsapp" size="large" :ios="logoWhatsapp"></ion-icon>
+            <div class="link-content">
+              <ion-text color="dark">Atención y consultas</ion-text>
+              <ion-icon :md="logoWhatsapp" size="large" :ios="logoWhatsapp" color="medium"></ion-icon>
+            </div>
           </ion-card-content>
         </ion-card>
 
-        <ion-card @click="goToYoutube" color="dark" class="ion-no-margin ion-margin-top link-youtube">
+        <ion-card @click="goToYoutube" class="ion-no-margin ion-margin-top link-youtube">
           <ion-card-content>
-            Canal de Youtube
-            <ion-icon :md="logoYoutube" size="large" :ios="logoYoutube"></ion-icon>
+            <div class="link-content">
+              <ion-text color="dark">Canal de Youtube</ion-text>
+              <ion-icon :md="logoYoutube" size="large" :ios="logoYoutube" color="medium"></ion-icon>
+            </div>
           </ion-card-content>
         </ion-card>
       </div>
@@ -136,24 +140,49 @@ function goToInstagram() {
 }
 
 /* Estilos para Enlaces de interés */
+.links ion-card {
+  background-color: var(--ion-color-light);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.links ion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .links ion-card-content {
+  position: relative;
+  padding: 16px;
+}
+
+.link-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: relative;
+  width: 100%;
+}
+
+.link-content ion-text {
+  font-weight: 500;
+  font-size: 1rem;
 }
 
 .links ion-card-content:after {
   content: "";
   display: block;
   height: 100%;
-  width: 10px;
+  width: 6px;
   position: absolute;
   right: 0px;
+  top: 0;
+  border-radius: 0 12px 12px 0;
 }
 
 .links .link-whatsapp ion-card-content::after {
-  background-color: #11AE09;
+  background-color: #25D366;
 }
 
 .links .link-youtube ion-card-content::after {
@@ -162,10 +191,35 @@ function goToInstagram() {
 
 /* Estilos para Redes sociales */
 ion-card.social {
-  background-color: var(--ion-color-step-900);
+  background-color: var(--ion-color-light);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+ion-card.social:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+ion-card.social ion-card-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+ion-card.social ion-icon {
+  color: var(--ion-color-medium);
 }
 
 .share-button font-awesome-icon {
   font-size: 42px;
+  color: var(--ion-color-medium);
 }
 </style>

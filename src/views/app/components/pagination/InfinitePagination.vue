@@ -58,6 +58,7 @@ import {
   watch,
 } from "vue";
 import { useStore } from "vuex";
+import { analyzeCoursesListForModality } from "@/utils/modalityDetector";
 
 const firstLoad = ref(true);
 const loadingItems = ref(false);
@@ -128,7 +129,7 @@ function filtersChanged() {
 function fetchData() {
   return new Promise((resolve) => {
     loadingItems.value = true;
-    console.log("🔍 BÚSQUEDA DE TRABAJOS - Parámetros enviados:", {
+    console.log("🔍 BÚSQUEDA - Parámetros enviados:", {
       store_action: prop.fetchDataStore,
       page: page.value,
       per_page: prop.perPage,
@@ -145,8 +146,15 @@ function fetchData() {
       })
       .then((response) => {
         console.log("📨 RESPUESTA API - Datos recibidos:", response.data);
+        
+        // 🔍 DIAGNÓSTICO DE MODALIDAD EN LISTA DE CURSOS
+        if (prop.fetchDataStore.includes('courses') && response.data.data?.length > 0) {
+          console.log('\n🎯 DIAGNÓSTICO MODALIDAD - LISTA DE CURSOS:')
+          analyzeCoursesListForModality(response.data.data);
+        }
+        
         console.log(
-          "📊 TRABAJOS ENCONTRADOS - Total:",
+          "📊 ELEMENTOS ENCONTRADOS - Total:",
           response.data.data.length
         );
         console.log("📄 META INFORMACIÓN:", response.data.meta);

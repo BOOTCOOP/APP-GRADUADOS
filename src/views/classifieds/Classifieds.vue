@@ -44,7 +44,7 @@
             
             <p class="youtube-url">
               <ion-icon :icon="linkOutline"></ion-icon>
-              youtube.com/@centrodegraduadosDerechoUBA
+              youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy
             </p>
           </div>
         </div>
@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import { IonIcon } from '@ionic/vue'
+import { IonIcon, IonButton } from '@ionic/vue'
 import {
   // addOutline, // Comentado temporalmente - No funciona la funcionalidad
   alertCircleOutline,
@@ -62,6 +62,11 @@ import {
   documentOutline,
   refreshOutline,
   timeOutline,
+  logoYoutube,
+  playCircleOutline,
+  libraryOutline,
+  schoolOutline,
+  linkOutline,
 } from 'ionicons/icons'
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -82,6 +87,11 @@ async function loadAvisos() {
   } catch (err) {
     console.error('Error al cargar avisos:', err)
   }
+}
+
+// Función para abrir el canal de YouTube
+function openYouTubeChannel() {
+  window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy', '_system');
 }
 
 function goToDetail(id: number) {
@@ -149,6 +159,150 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Estilos para la sección de YouTube */
+.youtube-redirect-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.youtube-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  text-align: center;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.youtube-header {
+  margin-bottom: 24px;
+}
+
+.youtube-icon {
+  font-size: 64px;
+  color: #ff0000;
+  margin-bottom: 16px;
+}
+
+.youtube-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.youtube-content {
+  margin-bottom: 32px;
+}
+
+.youtube-description {
+  font-size: 16px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.youtube-features {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.feature-item ion-icon {
+  font-size: 20px;
+  color: var(--ion-color-primary);
+}
+
+.youtube-actions {
+  margin-top: 32px;
+}
+
+.youtube-button {
+  --border-radius: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 16px;
+  --box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.youtube-button:hover {
+  transform: translateY(-2px);
+}
+
+.youtube-url {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.youtube-url ion-icon {
+  font-size: 16px;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .youtube-redirect-container {
+    padding: 16px 0;
+  }
+  
+  .youtube-card {
+    padding: 24px 20px;
+    margin: 0 8px;
+  }
+  
+  .youtube-header h2 {
+    font-size: 24px;
+  }
+  
+  .youtube-icon {
+    font-size: 48px;
+  }
+  
+  .youtube-features {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .youtube-description {
+    font-size: 15px;
+  }
+}
+
+/* Estilos originales para otros elementos */
 .refresh-container {
   margin-bottom: 15px;
 }

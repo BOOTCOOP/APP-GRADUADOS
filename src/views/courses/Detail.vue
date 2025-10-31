@@ -220,6 +220,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import SocialShare from '@/components/SocialShare.vue'
+import { analyzeCourseForModality } from '@/utils/modalityDetector'
 
 const loaded = ref(false)
 const enrolling = ref(false)
@@ -291,6 +292,52 @@ onMounted(() => {
   store.dispatch('courses/fetch', slug).then((response: any) => {
     course.value = response.data.data
     loaded.value = true
+    
+    // 🔍 DIAGNÓSTICO COMPLETO DE CAMPOS DISPONIBLES
+    console.log('='.repeat(60))
+    console.log('🎯 DIAGNÓSTICO COMPLETO - CURSO:', course.value.title)
+    console.log('='.repeat(60))
+    console.log('📊 TODOS LOS CAMPOS DISPONIBLES:')
+    Object.keys(course.value).forEach(key => {
+      console.log(`  ✓ ${key}:`, course.value[key])
+    })
+    
+    // 🔍 BÚSQUEDA ESPECÍFICA DE MODALIDAD
+    console.log('\n🎯 BÚSQUEDA DE MODALIDAD:')
+    const modalityFields = Object.keys(course.value).filter(key => 
+      key.toLowerCase().includes('modalit') || 
+      key.toLowerCase().includes('mode') ||
+      key.toLowerCase().includes('delivery') ||
+      key.toLowerCase().includes('format') ||
+      key.toLowerCase().includes('virtual') ||
+      key.toLowerCase().includes('online') ||
+      key.toLowerCase().includes('presencial') ||
+      key.toLowerCase().includes('distance')
+    )
+    
+    if (modalityFields.length > 0) {
+      console.log('🎉 ¡CAMPOS DE MODALIDAD ENCONTRADOS!:')
+      modalityFields.forEach(field => {
+        console.log(`  ✅ ${field}:`, course.value[field])
+      })
+    } else {
+      console.log('❌ NO se encontraron campos de modalidad obvios')
+      console.log('💡 Campos que podrían contener modalidad:')
+      Object.keys(course.value).forEach(key => {
+        if (typeof course.value[key] === 'string' && course.value[key]) {
+          const value = course.value[key].toLowerCase()
+          if (value.includes('virtual') || value.includes('presencial') || 
+              value.includes('online') || value.includes('distancia') ||
+              value.includes('remoto') || value.includes('híbrido')) {
+            console.log(`  🔍 ${key}:`, course.value[key])
+          }
+        }
+      })
+    }
+    // 🔍 ANÁLISIS PROFESIONAL DE MODALIDAD
+    const modalityAnalysis = analyzeCourseForModality(course.value)
+    
+    // Console logs originales
     console.log('Course data structure:', course.value)
     console.log('Available properties:', Object.keys(course.value))
     console.log('Price:', course.value.price)
