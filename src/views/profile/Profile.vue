@@ -100,21 +100,30 @@
           ></ErrorMessage
         >
       </Field>
+
+      <Field v-model="profile.phone" name="phone" v-slot="{ field }">
+        <IonItem>
+          <IonLabel position="floating">Teléfono</IonLabel>
+          <IonInput v-bind="field" type="tel" />
+        </IonItem>
+      </Field>
+
+      <Field v-model="profile.type_id" name="type_id" v-slot="{ field }">
+        <IonItem>
+          <!-- Quitar IonLabel -->
+          <IonSelect v-bind="field" placeholder="Categoría">
+            <!-- Usar placeholder -->
+            <ion-select-option
+              v-for="type in userTypes"
+              :key="type.id"
+              :value="type.id"
+            >
+              {{ type.name }}
+            </ion-select-option>
+          </IonSelect>
+        </IonItem>
+      </Field>
     </Form>
-
-    <Field v-model="profile.phone" name="phone" v-slot="{ field }">
-      <IonItem>
-        <IonLabel position="floating">Teléfono</IonLabel>
-        <IonInput v-bind="field" type="tel" />
-      </IonItem>
-    </Field>
-
-    <Field>
-      <IonItem>
-        <IonLabel position="floating">Categoría</IonLabel>
-        <IonInput :value="getUserTypeName(profile.type_id)" readonly />
-      </IonItem>
-    </Field>
 
     <template #footer>
       <ion-button
@@ -150,6 +159,7 @@ import { useStore } from "vuex";
 import { Form, Field, ErrorMessage } from "vee-validate";
 import { useProfile } from "@/uses/profile";
 import ProfilePicture from "./ProfilePicture.vue";
+import { IonSelect } from "@ionic/vue";
 
 const sending = ref(false);
 const loading = ref(true);
@@ -178,6 +188,14 @@ const getUserTypeName = (typeId) => {
   };
   return types[typeId] || "Desconocido";
 };
+
+const userTypes = [
+  { id: 1, name: "Estudiante" },
+  { id: 2, name: "Graduado UBA" },
+  { id: 3, name: "Graduado otra universidad" },
+  { id: 4, name: "Docente" },
+  { id: 5, name: "Investigador" },
+];
 
 setTimeout(() => {
   loading.value = false;
@@ -285,6 +303,26 @@ function setImage(data) {
   object-fit: cover;
   object-position: center;
   height: 100%;
+  width: 100%;
+}
+
+.profile ion-item {
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+  --border-color: var(--ion-color-light-shade);
+  --background: white;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile ion-item.item-has-focus {
+  --border-color: var(--ion-color-primary);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.profile ion-select {
+  --placeholder-color: var(--ion-color-medium);
   width: 100%;
 }
 </style>
