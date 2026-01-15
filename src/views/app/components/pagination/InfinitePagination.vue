@@ -54,6 +54,7 @@ import {
   defineExpose,
   defineProps,
   onMounted,
+  PropType,
   ref,
   watch,
 } from "vue";
@@ -63,9 +64,9 @@ import { analyzeCoursesListForModality } from "@/utils/modalityDetector";
 const firstLoad = ref(true);
 const loadingItems = ref(false);
 const store = useStore();
-const items = ref([]);
+const items = ref<any[]>([]);
 const search = ref("");
-const meta = ref([]);
+const meta = ref<any>({});
 const page = ref(1);
 const hasMorePages = computed(
   () => meta.value?.current_page != meta.value.last_page
@@ -76,6 +77,18 @@ const prop = defineProps({
     required: true,
   },
   loadingSpinner: {
+    type: String as PropType<
+      | "circular"
+      | "bubbles"
+      | "circles"
+      | "crescent"
+      | "dots"
+      | "lines"
+      | "lines-small"
+      | "lines-sharp"
+      | "lines-sharp-small"
+      | null
+    >,
     default: "circular",
   },
   loadingText: {

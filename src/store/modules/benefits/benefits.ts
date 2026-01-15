@@ -17,30 +17,22 @@ export default {
   },
   actions: {
     async fetchBenefits({ commit }) {
-      try {
-        const response = await axios.get("/benefits");
+      const response = await axios.get("/benefits");
 
-        // Fix: Access the data array inside the response
-        const benefitsData = response.data.data || response.data;
+      // Fix: Access the data array inside the response
+      const benefitsData = response.data.data || response.data;
 
-        commit("setBenefits", benefitsData);
-        return benefitsData;
-      } catch (error) {
-        throw error;
-      }
+      commit("setBenefits", benefitsData);
+      return benefitsData;
     },
     async fetchBenefit({ commit }, id) {
-      try {
-        const response = await axios.get(`/benefits/${id}`);
+      const response = await axios.get(`/benefits/${id}`);
 
-        // Fix: Access the data object inside the response
-        const benefitData = response.data.data || response.data;
+      // Fix: Access the data object inside the response
+      const benefitData = response.data.data || response.data;
 
-        commit("setCurrentBenefit", benefitData);
-        return benefitData;
-      } catch (error) {
-        throw error;
-      }
+      commit("setCurrentBenefit", benefitData);
+      return benefitData;
     },
   },
 };
