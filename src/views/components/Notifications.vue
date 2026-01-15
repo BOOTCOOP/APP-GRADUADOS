@@ -105,29 +105,18 @@
   
   onMounted(() => {
     if (User.isSet()) {
-      console.log('🔍 INVESTIGACIÓN: Cargando notificaciones desde el backend...');
       store.dispatch("notifications/fetchAll").then((response) => {
-        console.log('📡 RESPUESTA COMPLETA del backend:', response);
-        console.log('📊 DATOS de notificaciones:', response?.data);
-        
         // Verificación más segura de la respuesta
         if (response && response.data && Array.isArray(response.data.data)) {
           notifications.value = response.data.data;
-          console.log('✅ Notificaciones procesadas:', notifications.value);
         } else if (response && Array.isArray(response.data)) {
           notifications.value = response.data;
-          console.log('✅ Notificaciones procesadas (formato alternativo):', notifications.value);
         } else {
           notifications.value = [];
-          console.warn('⚠️ Respuesta de notificaciones no tiene el formato esperado:', response);
         }
-      }).catch((e) => {
-        console.error('❌ Error cargando notificaciones:', e.message);
-        console.error('🔴 Error completo:', e);
+      }).catch(() => {
         notifications.value = []; // Asegurar que sea un array vacío en caso de error
       });
-    } else {
-      console.log('👤 Usuario no autenticado, no se cargan notificaciones');
     }
   });
 
@@ -286,15 +275,13 @@
       
       if (targetRoute) {
         router.push(targetRoute);
-        console.log(`📍 Navegando a: ${targetRoute} (conversión automática desde backend)`);
       } else {
         // Fallback: ir al home si no hay ruta válida
         router.push('/');
-        console.log('🏠 Navegando al home (fallback)');
       }
       
     } catch (error) {
-      console.error('Error navegando:', error);
+      // Error en navegación
     }
   };
 
@@ -302,7 +289,6 @@
   const markAllAsRead = async () => {
     try {
       if (!notifications.value || !Array.isArray(notifications.value)) {
-        console.warn('No hay notificaciones para marcar como leídas');
         return;
       }
 
@@ -320,7 +306,7 @@
         await store.dispatch('notifications/markAsRead', {ids});
       }
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      // Error al marcar como leídas
     }
   };
 </script>
