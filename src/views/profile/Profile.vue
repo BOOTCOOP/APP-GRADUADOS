@@ -205,22 +205,9 @@ setTimeout(() => {
       profile.value = p;
       profile.value.phone = p.phone || ""; // 🆕 Asegurar que phone no sea null
       profile.value.type_id = p.type_id || 0; // 🆕 Agregar type_id
-
-      // Log detallado de cada campo
-      if (p) {
-        Object.entries(p).forEach(([key, value]) => {
-          console.log(`📋 ${key}:`, value, `(${typeof value})`);
-        });
-      } else {
-        console.log("❌ No se recibieron datos del usuario");
-      }
     })
-    .catch((error) => {
-      console.error("❌ Error cargando perfil:", error);
-      console.log(
-        "🔍 Detalles del error:",
-        error.response?.data || error.message
-      );
+    .catch(() => {
+      // Error al cargar perfil
     });
 }, 500);
 

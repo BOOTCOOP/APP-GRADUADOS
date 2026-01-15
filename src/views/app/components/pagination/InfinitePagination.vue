@@ -129,13 +129,6 @@ function filtersChanged() {
 function fetchData() {
   return new Promise((resolve) => {
     loadingItems.value = true;
-    console.log("🔍 BÚSQUEDA - Parámetros enviados:", {
-      store_action: prop.fetchDataStore,
-      page: page.value,
-      per_page: prop.perPage,
-      filters: prop.filters,
-      search: search.value,
-    });
 
     store
       .dispatch(prop.fetchDataStore, {
@@ -145,22 +138,12 @@ function fetchData() {
         search: search.value,
       })
       .then((response) => {
-        console.log("📨 RESPUESTA API - Datos recibidos:", response.data);
-        
         // 🔍 DIAGNÓSTICO DE MODALIDAD EN LISTA DE CURSOS
-        if (prop.fetchDataStore.includes('courses') && response.data.data?.length > 0) {
-          console.log('\n🎯 DIAGNÓSTICO MODALIDAD - LISTA DE CURSOS:')
+        if (
+          prop.fetchDataStore.includes("courses") &&
+          response.data.data?.length > 0
+        ) {
           analyzeCoursesListForModality(response.data.data);
-        }
-        
-        console.log(
-          "📊 ELEMENTOS ENCONTRADOS - Total:",
-          response.data.data.length
-        );
-        console.log("📄 META INFORMACIÓN:", response.data.meta);
-
-        if (response.data.data.length > 0) {
-          console.log("🎯 PRIMER TRABAJO DE MUESTRA:", response.data.data[0]);
         }
 
         items.value = items.value.concat(response.data.data);

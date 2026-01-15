@@ -1,23 +1,23 @@
-import axios from "@/libs/axios"
+import axios from "@/libs/axios";
 
 interface Aviso {
-  id: number
-  title: string
-  description: string
-  file: string | null
-  contact_phone: string
-  contact_email: string
-  status: string
-  user_id: number
-  created_at: string
-  updated_at: string
+  id: number;
+  title: string;
+  description: string;
+  file: string | null;
+  contact_phone: string;
+  contact_email: string;
+  status: string;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AvisosState {
-  avisos: Aviso[]
-  currentAviso: Aviso | null
-  loading: boolean
-  error: string | null
+  avisos: Aviso[];
+  currentAviso: Aviso | null;
+  loading: boolean;
+  error: string | null;
 }
 
 const state: AvisosState = {
@@ -25,108 +25,98 @@ const state: AvisosState = {
   currentAviso: null,
   loading: false,
   error: null,
-}
+};
 
 const getters = {
   getAvisos: (state: AvisosState) => state.avisos,
   getCurrentAviso: (state: AvisosState) => state.currentAviso,
   isLoading: (state: AvisosState) => state.loading,
-}
+};
 
 const actions = {
   async fetchAvisos({ commit }: any) {
-    commit("SET_LOADING", true)
+    commit("SET_LOADING", true);
     try {
-      const response = await axios.get("/avisos")
-      console.log("Avisos API response:", response.data)
+      const response = await axios.get("/avisos");
       // Extract the avisos array from the data property
-      commit("SET_AVISOS", response.data.data || [])
-      commit("SET_ERROR", null)
+      commit("SET_AVISOS", response.data.data || []);
+      commit("SET_ERROR", null);
     } catch (error) {
-      console.error("Error fetching avisos:", error)
-      commit("SET_ERROR", "Error al cargar los avisos")
-      commit("SET_AVISOS", [])
+      commit("SET_ERROR", "Error al cargar los avisos");
+      commit("SET_AVISOS", []);
     } finally {
-      commit("SET_LOADING", false)
+      commit("SET_LOADING", false);
     }
   },
 
   async fetchAviso({ commit }: any, id: number) {
-    commit("SET_LOADING", true)
+    commit("SET_LOADING", true);
     try {
-      const response = await axios.get(`/avisos/${id}`)
-      console.log("Aviso detail API response:", response.data)
+      const response = await axios.get(`/avisos/${id}`);
       // Extract the aviso from the data property if it exists
-      commit("SET_CURRENT_AVISO", response.data.data || response.data)
-      commit("SET_ERROR", null)
+      commit("SET_CURRENT_AVISO", response.data.data || response.data);
+      commit("SET_ERROR", null);
     } catch (error) {
-      console.error(`Error fetching aviso ${id}:`, error)
-      commit("SET_ERROR", "Error al cargar el aviso")
-      commit("SET_CURRENT_AVISO", null)
+      commit("SET_ERROR", "Error al cargar el aviso");
+      commit("SET_CURRENT_AVISO", null);
     } finally {
-      commit("SET_LOADING", false)
+      commit("SET_LOADING", false);
     }
   },
 
   async createAviso({ commit, dispatch }: any, formData: FormData) {
-    commit("SET_LOADING", true)
-    console.log("Creating aviso with data:", Object.fromEntries(formData.entries()))
+    commit("SET_LOADING", true);
 
     try {
-      const response = await axios.post("/avisos", formData, {
+      await axios.post("/avisos", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      })
+      });
 
-      console.log("Create aviso API response:", response.data)
-      commit("SET_ERROR", null)
+      commit("SET_ERROR", null);
       // Refresh the avisos list after creating a new one
-      dispatch("fetchAvisos")
-      return true
+      dispatch("fetchAvisos");
+      return true;
     } catch (error: any) {
-      console.error("Error creating aviso:", error)
-      console.error("Error response:", error.response?.data)
-      commit("SET_ERROR", "Error al crear el aviso")
-      return false
+      commit("SET_ERROR", "Error al crear el aviso");
+      return false;
     } finally {
-      commit("SET_LOADING", false)
+      commit("SET_LOADING", false);
     }
   },
 
   async cancelAviso({ commit, dispatch }: any, id: number) {
-    commit("SET_LOADING", true)
+    commit("SET_LOADING", true);
     try {
-      const response = await axios.delete(`/avisos/${id}`)
-      console.log("Cancel aviso API response:", response.data)
-      commit("SET_ERROR", null)
+      await axios.delete(`/avisos/${id}`);
+      commit("SET_ERROR", null);
       // Refresh the avisos list after canceling
-      dispatch("fetchAvisos")
-      return true
+      dispatch("fetchAvisos");
+      return true;
     } catch (error) {
-      console.error(`Error canceling aviso ${id}:`, error)
-      commit("SET_ERROR", "Error al cancelar el aviso")
-      return false
+      commit("SET_ERROR", "Error al cancelar el aviso");
+      return false;
     } finally {
-      commit("SET_LOADING", false)
+      commit("SET_LOADING", false);
     }
   },
-}
+};
 
 const mutations = {
   SET_AVISOS(state: AvisosState, avisos: Aviso[]) {
-    state.avisos = avisos
+    state.avisos = avisos;
   },
   SET_CURRENT_AVISO(state: AvisosState, aviso: Aviso) {
-    state.currentAviso = aviso
+    state.currentAviso = aviso;
   },
   SET_LOADING(state: AvisosState, loading: boolean) {
-    state.loading = loading
+    state.loading = loading;
   },
   SET_ERROR(state: AvisosState, error: string | null) {
-    state.error = error
+    state.error = error;
   },
-}
+};
 
 export default {
   namespaced: true,
@@ -134,5 +124,4 @@ export default {
   getters,
   actions,
   mutations,
-}
-
+};

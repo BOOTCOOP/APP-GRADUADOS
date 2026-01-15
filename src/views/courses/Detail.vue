@@ -51,7 +51,7 @@
             <strong>Docentes:</strong> {{ course.teachers }}
           </ion-text>
         </div>
-        
+
         <div class="info-item ion-margin-top">
           <ion-icon
             :md="calendarOutline"
@@ -97,7 +97,10 @@
           </ion-text>
         </div>
 
-        <div class="info-item ion-margin-top" v-if="course.price && course.price.value">
+        <div
+          class="info-item ion-margin-top"
+          v-if="course.price && course.price.value"
+        >
           <ion-icon
             :md="journalOutline"
             :ios="journalOutline"
@@ -113,7 +116,10 @@
       </div>
 
       <!-- Contenido/Descripción del curso -->
-      <div class="course-description ion-margin-top" v-if="course.content && course.content.trim()">
+      <div
+        class="course-description ion-margin-top"
+        v-if="course.content && course.content.trim()"
+      >
         <h5>Programa del Curso</h5>
         <div class="content" v-html="course.content"></div>
       </div>
@@ -122,8 +128,13 @@
       <div class="course-description ion-margin-top" v-else>
         <h5>Información del Programa</h5>
         <div class="content">
-          <p>El programa detallado de este curso estará disponible próximamente.</p>
-          <p>Para más información, puedes contactar directamente con el centro de graduados.</p>
+          <p>
+            El programa detallado de este curso estará disponible próximamente.
+          </p>
+          <p>
+            Para más información, puedes contactar directamente con el centro de
+            graduados.
+          </p>
         </div>
       </div>
     </div>
@@ -167,31 +178,39 @@
         >
           No disponible para inscripción
         </ion-button>
-        
+
         <!-- Mensaje informativo -->
         <div class="info-message ion-text-center ion-margin-top">
           <ion-text color="medium">
             <p v-if="course.can_enroll && !course.is_enrolled">
-              <small>Al hacer clic en "INSCRIPCIÓN" te registrarás en este curso.</small>
+              <small
+                >Al hacer clic en "INSCRIPCIÓN" te registrarás en este
+                curso.</small
+              >
             </p>
             <p v-else-if="course.is_enrolled">
               <small>¡Felicitaciones! Ya estás inscripto en este curso.</small>
             </p>
             <p v-else>
-              <small>Este curso no está disponible para inscripción en este momento.</small>
+              <small
+                >Este curso no está disponible para inscripción en este
+                momento.</small
+              >
             </p>
           </ion-text>
         </div>
       </div>
     </template>
-    
+
     <!-- Componente de compartir social -->
     <SocialShare
       v-if="course && loaded"
       :share-data="{
         title: course.title,
-        text: `${course.teachers ? 'Docentes: ' + course.teachers + ' - ' : ''}${course.duration ? 'Duración: ' + course.duration : ''}`,
-        type: 'curso'
+        text: `${
+          course.teachers ? 'Docentes: ' + course.teachers + ' - ' : ''
+        }${course.duration ? 'Duración: ' + course.duration : ''}`,
+        type: 'curso',
       }"
     />
   </graduados-app>
@@ -206,7 +225,7 @@ import {
   IonSpinner,
   useIonRouter,
   alertController,
-} from '@ionic/vue'
+} from "@ionic/vue";
 import {
   personCircleOutline,
   calendarOutline,
@@ -215,140 +234,94 @@ import {
   journalOutline,
   arrowBackOutline,
   checkmarkCircleOutline,
-} from 'ionicons/icons'
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { useStore } from 'vuex'
-import SocialShare from '@/components/SocialShare.vue'
-import { analyzeCourseForModality } from '@/utils/modalityDetector'
+} from "ionicons/icons";
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { useStore } from "vuex";
+import SocialShare from "@/components/SocialShare.vue";
+import { analyzeCourseForModality } from "@/utils/modalityDetector";
 
-const loaded = ref(false)
-const enrolling = ref(false)
-const store = useStore()
-const route = useRoute()
-const course = ref<any>({})
-const router = useIonRouter()
+const loaded = ref(false);
+const enrolling = ref(false);
+const store = useStore();
+const route = useRoute();
+const course = ref<any>({});
+const router = useIonRouter();
 
 function goBack() {
-  router.replace({ name: 'courses.index' })
+  router.replace({ name: "courses.index" });
 }
 
 // Función para inscribirse al curso
 async function enroll() {
-  enrolling.value = true
-  
+  enrolling.value = true;
+
   try {
-    await store.dispatch('courses/enroll', course.value.id)
-    
+    await store.dispatch("courses/enroll", course.value.id);
+
     // Actualizar el estado del curso
-    course.value.is_enrolled = true
-    course.value.can_enroll = false
-    
+    course.value.is_enrolled = true;
+    course.value.can_enroll = false;
+
     // Mostrar mensaje de éxito
     const alert = await alertController.create({
-      header: '¡Inscripción exitosa!',
+      header: "¡Inscripción exitosa!",
       subHeader: course.value.title,
-      message: 'Te has inscripto correctamente en este curso. Recibirás más información por email.',
-      buttons: ['Entendido']
-    })
-    
-    await alert.present()
-    
+      message:
+        "Te has inscripto correctamente en este curso. Recibirás más información por email.",
+      buttons: ["Entendido"],
+    });
+
+    await alert.present();
   } catch (error: any) {
-    console.error('Error al inscribirse:', error)
-    
     // Mostrar error al usuario
     const alert = await alertController.create({
-      header: 'Error en la inscripción',
-      message: error.response?.data?.message || 'Hubo un problema al procesar tu inscripción. Por favor, intenta nuevamente.',
-      buttons: ['Entendido']
-    })
-    
-    await alert.present()
+      header: "Error en la inscripción",
+      message:
+        error.response?.data?.message ||
+        "Hubo un problema al procesar tu inscripción. Por favor, intenta nuevamente.",
+      buttons: ["Entendido"],
+    });
+
+    await alert.present();
   } finally {
-    enrolling.value = false
+    enrolling.value = false;
   }
 }
 
 // Función para mostrar información sobre inscripción
 async function showInscriptionInfo() {
   const alert = await alertController.create({
-    header: 'Información de Inscripción',
+    header: "Información de Inscripción",
     subHeader: course.value.title,
-    message: 'Para obtener información sobre el proceso de inscripción, horarios y requisitos, contacta con el centro de graduados.',
+    message:
+      "Para obtener información sobre el proceso de inscripción, horarios y requisitos, contacta con el centro de graduados.",
     buttons: [
       {
-        text: 'Entendido',
-        role: 'confirm'
-      }
-    ]
-  })
+        text: "Entendido",
+        role: "confirm",
+      },
+    ],
+  });
 
-  await alert.present()
+  await alert.present();
 }
 
 onMounted(() => {
-  const { slug } = route.params
-  store.dispatch('courses/fetch', slug).then((response: any) => {
-    course.value = response.data.data
-    loaded.value = true
-    
-    // 🔍 DIAGNÓSTICO COMPLETO DE CAMPOS DISPONIBLES
-    console.log('='.repeat(60))
-    console.log('🎯 DIAGNÓSTICO COMPLETO - CURSO:', course.value.title)
-    console.log('='.repeat(60))
-    console.log('📊 TODOS LOS CAMPOS DISPONIBLES:')
-    Object.keys(course.value).forEach(key => {
-      console.log(`  ✓ ${key}:`, course.value[key])
+  const { slug } = route.params;
+  store
+    .dispatch("courses/fetch", slug)
+    .then((response: any) => {
+      course.value = response.data.data;
+      loaded.value = true;
+
+      // 🔍 ANÁLISIS PROFESIONAL DE MODALIDAD
+      analyzeCourseForModality(course.value);
     })
-    
-    // 🔍 BÚSQUEDA ESPECÍFICA DE MODALIDAD
-    console.log('\n🎯 BÚSQUEDA DE MODALIDAD:')
-    const modalityFields = Object.keys(course.value).filter(key => 
-      key.toLowerCase().includes('modalit') || 
-      key.toLowerCase().includes('mode') ||
-      key.toLowerCase().includes('delivery') ||
-      key.toLowerCase().includes('format') ||
-      key.toLowerCase().includes('virtual') ||
-      key.toLowerCase().includes('online') ||
-      key.toLowerCase().includes('presencial') ||
-      key.toLowerCase().includes('distance')
-    )
-    
-    if (modalityFields.length > 0) {
-      console.log('🎉 ¡CAMPOS DE MODALIDAD ENCONTRADOS!:')
-      modalityFields.forEach(field => {
-        console.log(`  ✅ ${field}:`, course.value[field])
-      })
-    } else {
-      console.log('❌ NO se encontraron campos de modalidad obvios')
-      console.log('💡 Campos que podrían contener modalidad:')
-      Object.keys(course.value).forEach(key => {
-        if (typeof course.value[key] === 'string' && course.value[key]) {
-          const value = course.value[key].toLowerCase()
-          if (value.includes('virtual') || value.includes('presencial') || 
-              value.includes('online') || value.includes('distancia') ||
-              value.includes('remoto') || value.includes('híbrido')) {
-            console.log(`  🔍 ${key}:`, course.value[key])
-          }
-        }
-      })
-    }
-    // 🔍 ANÁLISIS PROFESIONAL DE MODALIDAD
-    const modalityAnalysis = analyzeCourseForModality(course.value)
-    
-    // Console logs originales
-    console.log('Course data structure:', course.value)
-    console.log('Available properties:', Object.keys(course.value))
-    console.log('Price:', course.value.price)
-    console.log('Content:', course.value.content)
-    console.log('Classes count:', course.value.classes_count)
-    console.log('Days and hours:', course.value.days_and_hours)
-  }).catch((error) => {
-    console.error('Error fetching course:', error)
-    loaded.value = true
-  })
-})
+    .catch(() => {
+      loaded.value = true;
+    });
+});
 </script>
 
 <style scoped>
@@ -447,12 +420,12 @@ onMounted(() => {
   .course-title {
     font-size: 1.25rem;
   }
-  
+
   .info-item {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .info-item ion-icon {
     align-self: flex-start;
   }
