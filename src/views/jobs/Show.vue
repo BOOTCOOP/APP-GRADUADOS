@@ -89,7 +89,8 @@
               :share-data="{
                 title: job.title,
                 text: `Compañía: ${job.company} - ${job.description ? job.description.replace(/<[^>]*>/g, '').substring(0, 100) + '...' : ''}`,
-                type: 'empleo'
+                type: 'empleo',
+                id: job.id
               }"
             />
         </div>

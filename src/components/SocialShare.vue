@@ -51,6 +51,7 @@ interface ShareData {
   title: string
   text?: string
   url?: string
+  id?: string | number
   type?: 'noticia' | 'taller' | 'curso' | 'empleo' | 'actividad'
 }
 
@@ -59,17 +60,34 @@ const props = defineProps<{
 }>()
 
 const generateShareText = (): string => {
-  const { title, text, type } = props.shareData
+  const { title, text, type, id } = props.shareData
   const typeText = type ? getTypeText(type) : ''
-  const baseText = `${typeText}${title}`
+  let baseText = `${typeText}${title}`
   
   if (text) {
     // Limitar texto a 100 caracteres para WhatsApp
     const shortText = text.length > 100 ? text.substring(0, 97) + '...' : text
-    return `${baseText}\n\n${shortText}`
+    baseText = `${baseText}\n\n${shortText}`
+  }
+  
+  // Agregar referencia al ID en lugar de URL
+  if (id) {
+    const typeLabel = getTypeLabelForId(type)
+    baseText = `${baseText}\n\n${typeLabel} #${id}`
   }
   
   return baseText
+}
+
+const getTypeLabelForId = (type: string | undefined): string => {
+  const typeMap: Record<string, string> = {
+    'noticia': 'Noticia',
+    'taller': 'Taller',
+    'curso': 'Curso',
+    'empleo': 'Oferta laboral',
+    'actividad': 'Actividad'
+  }
+  return typeMap[type || ''] || 'Contenido'
 }
 
 const getTypeText = (type: string): string => {
@@ -89,8 +107,6 @@ const getCurrentUrl = (): string => {
 
 const shareWhatsApp = async () => {
   const text = generateShareText()
-  const url = getCurrentUrl()
-  const fullText = `${text}\n\n${url}`
   
   // Verificar si estamos en dispositivo móvil con Capacitor
   if (isPlatform('capacitor')) {
@@ -98,38 +114,36 @@ const shareWhatsApp = async () => {
       // Usar API nativa de Capacitor Share
       await Share.share({
         title: props.shareData.title,
-        text: fullText,
-        url: url,
+        text: text,
         dialogTitle: 'Compartir vía WhatsApp'
       })
     } catch (error) {
       console.error('Error sharing with Capacitor:', error)
       // Fallback: intento con intent de Android
-      fallbackWhatsAppShare(text, url)
+      fallbackWhatsAppShare(text)
     }
   } else {
     // Web: usar WhatsApp Web
-    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullText)}`
+    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`
     window.open(whatsappWebUrl, '_blank')
   }
 }
 
 // Función de fallback para casos donde Capacitor Share no funciona
-const fallbackWhatsAppShare = (text: string, url: string) => {
+const fallbackWhatsAppShare = (text: string) => {
   const encodedText = encodeURIComponent(text)
-  const encodedUrl = encodeURIComponent(url)
   
   if (isPlatform('android')) {
     // Android: usar intent específico de WhatsApp
-    const androidIntent = `intent://send/?text=${encodedText}%20${encodedUrl}#Intent;scheme=whatsapp;package=com.whatsapp;end`
+    const androidIntent = `intent://send/?text=${encodedText}#Intent;scheme=whatsapp;package=com.whatsapp;end`
     window.location.href = androidIntent
   } else if (isPlatform('ios')) {
     // iOS: URL scheme
-    const whatsappUrl = `whatsapp://send?text=${encodedText}%20${encodedUrl}`
+    const whatsappUrl = `whatsapp://send?text=${encodedText}`
     window.location.href = whatsappUrl
   } else {
     // Web fallback
-    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`
+    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodedText}`
     window.open(whatsappWebUrl, '_blank')
   }
 }
@@ -147,10 +161,11 @@ const shareEmail = () => {
 
 const copyLink = async () => {
   try {
-    await navigator.clipboard.writeText(getCurrentUrl())
+    const textToCopy = generateShareText()
+    await navigator.clipboard.writeText(textToCopy)
     
     const toast = await toastController.create({
-      message: '¡Link copiado al portapapeles!',
+      message: '¡Texto copiado al portapapeles!',
       duration: 2000,
       position: 'bottom',
       color: 'success',
@@ -158,10 +173,10 @@ const copyLink = async () => {
     })
     await toast.present()
   } catch (error) {
-    console.error('Error al copiar link:', error)
+    console.error('Error al copiar:', error)
     
     const toast = await toastController.create({
-      message: 'No se pudo copiar el link',
+      message: 'No se pudo copiar el texto',
       duration: 2000,
       position: 'bottom',
       color: 'danger'

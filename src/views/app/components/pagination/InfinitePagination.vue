@@ -167,6 +167,13 @@ function fetchData() {
 
         resolve(true);
       })
+      .catch(() => {
+        // Manejar error 500 o cualquier otro error como "sin resultados"
+        items.value = [];
+        meta.value = { current_page: 1, last_page: 1 };
+        firstLoad.value = false;
+        resolve(false);
+      })
       .finally(() => (loadingItems.value = false));
   });
 }
