@@ -4,25 +4,25 @@
       <small><strong>Compartir:</strong></small>
     </ion-text>
     <div class="social-buttons">
-      <ion-button 
-        fill="clear" 
-        size="small" 
+      <ion-button
+        fill="clear"
+        size="small"
         @click="shareWhatsApp"
         class="share-btn whatsapp"
       >
         <ion-icon :icon="logoWhatsapp" slot="icon-only"></ion-icon>
       </ion-button>
-      <ion-button 
-        fill="clear" 
-        size="small" 
+      <ion-button
+        fill="clear"
+        size="small"
         @click="shareEmail"
         class="share-btn email"
       >
         <ion-icon :icon="mailOutline" slot="icon-only"></ion-icon>
       </ion-button>
-      <ion-button 
-        fill="clear" 
-        size="small" 
+      <ion-button
+        fill="clear"
+        size="small"
         @click="copyLink"
         class="share-btn copy"
       >
@@ -38,152 +38,152 @@ import {
   IonIcon,
   IonText,
   toastController,
-  isPlatform
-} from '@ionic/vue'
-import { 
-  logoWhatsapp, 
-  mailOutline, 
-  copyOutline 
-} from 'ionicons/icons'
-import { Share } from '@capacitor/share'
+  isPlatform,
+} from "@ionic/vue";
+import { logoWhatsapp, mailOutline, copyOutline } from "ionicons/icons";
+import { Share } from "@capacitor/share";
 
 interface ShareData {
-  title: string
-  text?: string
-  url?: string
-  id?: string | number
-  type?: 'noticia' | 'taller' | 'curso' | 'empleo' | 'actividad'
+  title: string;
+  text?: string;
+  url?: string;
+  id?: string | number;
+  type?: "noticia" | "taller" | "curso" | "empleo" | "actividad";
 }
 
 const props = defineProps<{
-  shareData: ShareData
-}>()
+  shareData: ShareData;
+}>();
 
 const generateShareText = (): string => {
-  const { title, text, type, id } = props.shareData
-  const typeText = type ? getTypeText(type) : ''
-  let baseText = `${typeText}${title}`
-  
+  const { title, text, type, id } = props.shareData;
+  const typeText = type ? getTypeText(type) : "";
+  let baseText = `${typeText}${title}`;
+
   if (text) {
     // Limitar texto a 100 caracteres para WhatsApp
-    const shortText = text.length > 100 ? text.substring(0, 97) + '...' : text
-    baseText = `${baseText}\n\n${shortText}`
+    const shortText = text.length > 100 ? text.substring(0, 97) + "..." : text;
+    baseText = `${baseText}\n\n${shortText}`;
   }
-  
+
   // Agregar referencia al ID en lugar de URL
   if (id) {
-    const typeLabel = getTypeLabelForId(type)
-    baseText = `${baseText}\n\n${typeLabel} #${id}`
+    const typeLabel = getTypeLabelForId(type);
+    baseText = `${baseText}\n\n${typeLabel} #${id}`;
   }
-  
-  return baseText
-}
+
+  return baseText;
+};
 
 const getTypeLabelForId = (type: string | undefined): string => {
   const typeMap: Record<string, string> = {
-    'noticia': 'Noticia',
-    'taller': 'Taller',
-    'curso': 'Curso',
-    'empleo': 'Oferta laboral',
-    'actividad': 'Actividad'
-  }
-  return typeMap[type || ''] || 'Contenido'
-}
+    noticia: "Noticia",
+    taller: "Taller",
+    curso: "Curso",
+    empleo: "Oferta laboral",
+    actividad: "Actividad",
+  };
+  return typeMap[type || ""] || "Contenido";
+};
 
 const getTypeText = (type: string): string => {
   const typeMap: Record<string, string> = {
-    'noticia': '📰 Noticia: ',
-    'taller': '🎓 Taller: ',
-    'curso': '📚 Curso: ',
-    'empleo': '💼 Empleo: ',
-    'actividad': '🎯 Actividad: '
-  }
-  return typeMap[type] || '📱 '
-}
+    noticia: "📰 Noticia: ",
+    taller: "🎓 Taller: ",
+    curso: "📚 Curso: ",
+    empleo: "💼 Empleo: ",
+    actividad: "🎯 Actividad: ",
+  };
+  return typeMap[type] || "📱 ";
+};
 
 const getCurrentUrl = (): string => {
-  return props.shareData.url || window.location.href
-}
+  return props.shareData.url || window.location.href;
+};
 
 const shareWhatsApp = async () => {
-  const text = generateShareText()
-  
+  const text = generateShareText();
+
   // Verificar si estamos en dispositivo móvil con Capacitor
-  if (isPlatform('capacitor')) {
+  if (isPlatform("capacitor")) {
     try {
       // Usar API nativa de Capacitor Share
       await Share.share({
         title: props.shareData.title,
         text: text,
-        dialogTitle: 'Compartir vía WhatsApp'
-      })
+        dialogTitle: "Compartir vía WhatsApp",
+      });
     } catch (error) {
-      console.error('Error sharing with Capacitor:', error)
+      console.error("Error sharing with Capacitor:", error);
       // Fallback: intento con intent de Android
-      fallbackWhatsAppShare(text)
+      fallbackWhatsAppShare(text);
     }
   } else {
     // Web: usar WhatsApp Web
-    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`
-    window.open(whatsappWebUrl, '_blank')
+    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+      text
+    )}`;
+    window.open(whatsappWebUrl, "_blank");
   }
-}
+};
 
 // Función de fallback para casos donde Capacitor Share no funciona
 const fallbackWhatsAppShare = (text: string) => {
-  const encodedText = encodeURIComponent(text)
-  
-  if (isPlatform('android')) {
+  const encodedText = encodeURIComponent(text);
+
+  if (isPlatform("android")) {
     // Android: usar intent específico de WhatsApp
-    const androidIntent = `intent://send/?text=${encodedText}#Intent;scheme=whatsapp;package=com.whatsapp;end`
-    window.location.href = androidIntent
-  } else if (isPlatform('ios')) {
+    const androidIntent = `intent://send/?text=${encodedText}#Intent;scheme=whatsapp;package=com.whatsapp;end`;
+    window.location.href = androidIntent;
+  } else if (isPlatform("ios")) {
     // iOS: URL scheme
-    const whatsappUrl = `whatsapp://send?text=${encodedText}`
-    window.location.href = whatsappUrl
+    const whatsappUrl = `whatsapp://send?text=${encodedText}`;
+    window.location.href = whatsappUrl;
   } else {
     // Web fallback
-    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodedText}`
-    window.open(whatsappWebUrl, '_blank')
+    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+    window.open(whatsappWebUrl, "_blank");
   }
-}
+};
 
 const shareEmail = () => {
-  const { title, text } = props.shareData
-  const subject = encodeURIComponent(`Facultad de Derecho - ${title}`)
+  const { title, text } = props.shareData;
+  const subject = encodeURIComponent(`Facultad de Derecho - ${title}`);
   const body = encodeURIComponent(
-    `Hola,\n\nTe comparto esta información de la Facultad de Derecho:\n\n${title}\n\n${text || ''}\n\nVer más: ${getCurrentUrl()}\n\n--\nCentro de Graduados - Facultad de Derecho UBA`
-  )
-  
-  const mailtoUrl = `mailto:?subject=${subject}&body=${body}`
-  window.location.href = mailtoUrl
-}
+    `Hola,\n\nTe comparto esta información de la Facultad de Derecho:\n\n${title}\n\n${
+      text || ""
+    }\n\nVer más: ${getCurrentUrl()}\n\n--\nCentro de Graduados - Facultad de Derecho UBA`
+  );
+
+  const mailtoUrl = `mailto:?subject=${subject}&body=${body}`;
+  window.location.href = mailtoUrl;
+};
 
 const copyLink = async () => {
   try {
-    const textToCopy = generateShareText()
-    await navigator.clipboard.writeText(textToCopy)
-    
+    const textToCopy = generateShareText();
+    await navigator.clipboard.writeText(textToCopy);
+
     const toast = await toastController.create({
-      message: '¡Texto copiado al portapapeles!',
+      message: "¡Texto copiado al portapapeles!",
       duration: 2000,
-      position: 'bottom',
-      color: 'success',
-      icon: copyOutline
-    })
-    await toast.present()
+      position: "bottom",
+      color: "success",
+      icon: copyOutline,
+    });
+    await toast.present();
   } catch (error) {
-    console.error('Error al copiar:', error)
-    
+    console.error("Error al copiar:", error);
+
     const toast = await toastController.create({
-      message: 'No se pudo copiar el texto',
+      message: "No se pudo copiar el texto",
       duration: 2000,
-      position: 'bottom',
-      color: 'danger'
-    })
-    await toast.present()
+      position: "bottom",
+      color: "danger",
+    });
+    await toast.present();
   }
-}
+};
 </script>
 
 <style scoped>
@@ -214,11 +214,11 @@ const copyLink = async () => {
 }
 
 .share-btn.whatsapp {
-  --color: #25D366;
+  --color: #25d366;
 }
 
 .share-btn.whatsapp:hover {
-  --color: #128C7E;
+  --color: #128c7e;
 }
 
 .share-btn.email {
@@ -239,7 +239,7 @@ const copyLink = async () => {
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .social-buttons {
     align-self: stretch;
     justify-content: center;

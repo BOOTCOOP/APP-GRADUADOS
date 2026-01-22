@@ -10,6 +10,8 @@
     </template>
 
     <Banner />
+    <!-- Carrusel de Novedades/Anuncios - Listo para activar cuando se defina contenido -->
+    <!-- <StoriesCarousel /> -->
     <Shortcuts />
     <!-- <Links />
     <Social /> -->
@@ -22,9 +24,10 @@ import { notificationsOutline } from "ionicons/icons";
 import { IonMenuButton, IonIcon } from "@ionic/vue";
 
 import Banner from "./Banner.vue";
+// import StoriesCarousel from "./StoriesCarousel.vue"; // Listo para activar
 import Shortcuts from "./Shortcuts.vue";
-import Links from "./Links.vue";
-import Social from "./Social.vue";
+// import Links from "./Links.vue";
+// import Social from "./Social.vue";
 </script>
 
 <style scoped>
