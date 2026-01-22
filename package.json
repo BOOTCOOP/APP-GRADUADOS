@@ -15,7 +15,6 @@
   },
   "homepage": "https://BOOTCOOP.github.io/APP-GRADUADOS",
   "dependencies": {
-    "@capacitor-community/http": "^1.4.1",
     "@capacitor/android": "^5.7.0",
     "@capacitor/app": "^5.0.7",
     "@capacitor/camera": "^5.0.9",
@@ -24,7 +23,7 @@
     "@capacitor/haptics": "^5.0.7",
     "@capacitor/ios": "^5.7.8",
     "@capacitor/keyboard": "^5.0.8",
-    "@capacitor/share": "^1.0.7",
+    "@capacitor/share": "^5.0.8",
     "@capacitor/status-bar": "^5.0.7",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
