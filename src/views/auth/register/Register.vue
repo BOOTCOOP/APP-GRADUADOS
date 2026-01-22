@@ -16,6 +16,31 @@
 
     <Form ref="form">
       <div v-show="step.step == 1">
+        <!-- Texto explicativo del paso 1 -->
+        <ion-card class="info-card ion-margin-bottom">
+          <ion-card-content>
+            <div class="info-content">
+              <ion-icon
+                :icon="informationCircleOutline"
+                color="primary"
+              ></ion-icon>
+              <ion-text>
+                <p>
+                  <strong
+                    >Asegurate de usar un email al que tengas acceso
+                    regularmente.</strong
+                  >
+                </p>
+                <p class="info-detail">
+                  Es la cuenta a la que enviaremos todas las constancias y
+                  documentaciones que solicites, como tu constancia regular o de
+                  graduado.
+                </p>
+              </ion-text>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
         <Field
           v-model="data.firstname"
           label="nombre"
@@ -95,6 +120,30 @@
       </div>
 
       <div v-show="step.step == 2">
+        <!-- Texto explicativo del paso 2 -->
+        <ion-card class="info-card ion-margin-bottom">
+          <ion-card-content>
+            <div class="info-content">
+              <ion-icon
+                :icon="shieldCheckmarkOutline"
+                color="success"
+              ></ion-icon>
+              <ion-text>
+                <p><strong>¿Por qué necesitamos estos datos?</strong></p>
+                <p class="info-detail">
+                  Los utilizamos para validar que sos un estudiante o graduado
+                  de la UBA y así poder darte acceso a todos los beneficios
+                  exclusivos.
+                </p>
+                <p class="info-detail">
+                  <strong>Tu número de teléfono</strong> será usado únicamente
+                  para enviarte confirmaciones importantes de tus trámites.
+                </p>
+              </ion-text>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
         <Field
           v-model="data.phone"
           label="teléfono"
@@ -294,15 +343,15 @@
         color="primary"
         @click="nextStep"
         expand="full"
-        >{{ sending ? 'Enviando...' : step.buttonText }}</ion-button
+        >{{ sending ? "Enviando..." : step.buttonText }}</ion-button
       >
     </template>
   </graduados-blank>
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '@/uses/auth'
-import FormPasswordValidation from '@/views/app/components/form/FormPasswordValidation.vue'
+import { useAuth } from "@/uses/auth";
+import FormPasswordValidation from "@/views/app/components/form/FormPasswordValidation.vue";
 import {
   IonButton,
   IonCard,
@@ -313,137 +362,139 @@ import {
   IonLabel,
   IonText,
   useIonRouter,
-} from '@ionic/vue'
+} from "@ionic/vue";
 import {
   arrowBackOutline,
   cloudUploadOutline,
   documentOutline,
+  informationCircleOutline,
   manOutline,
   personOutline,
   schoolOutline,
-} from 'ionicons/icons'
-import { ErrorMessage, Field, Form, defineRule } from 'vee-validate'
-import { reactive, ref } from 'vue'
-import { useStore } from 'vuex'
-import ProfilePicture from '../../profile/ProfilePicture.vue'
+  shieldCheckmarkOutline,
+} from "ionicons/icons";
+import { ErrorMessage, Field, Form, defineRule } from "vee-validate";
+import { reactive, ref } from "vue";
+import { useStore } from "vuex";
+import ProfilePicture from "../../profile/ProfilePicture.vue";
 
-defineRule('passwordIsValid', () => {
-  if (passwordValidation.value) return true
+defineRule("passwordIsValid", () => {
+  if (passwordValidation.value) return true;
 
-  return 'Revisa las contraseñas'
-})
+  return "Revisa las contraseñas";
+});
 
-defineRule('notExists', (email) => {
+defineRule("notExists", (email) => {
   return useAuth()
     .emailAvailable(email)
     .then((response) => {
       return response.data.available
         ? true
-        : 'El correo ingresado ya se encuentra en uso'
-    })
-})
+        : "El correo ingresado ya se encuentra en uso";
+    });
+});
 
-const ionRouter = useIonRouter()
-const form = ref(null)
-const sending = ref(false)
-const store = useStore()
+const ionRouter = useIonRouter();
+const form = ref(null);
+const sending = ref(false);
+const store = useStore();
 
 const data = reactive({
-  firstname: '',
-  lastname: '',
-  email: '',
-  password: '',
-  password_confirmation: '',
-  phone: '',
-  dni: '',
+  firstname: "",
+  lastname: "",
+  email: "",
+  password: "",
+  password_confirmation: "",
+  phone: "",
+  dni: "",
   type_id: 1,
   images: [],
-  thumb: '',
-})
+  thumb: "",
+});
 
 const steps = [
   {
     step: 1,
-    buttonText: 'Siguiente',
+    buttonText: "Siguiente",
   },
   {
     step: 2,
-    buttonText: 'Siguiente',
+    buttonText: "Siguiente",
   },
   {
     step: 3,
-    buttonText: 'Finalizar',
+    buttonText: "Finalizar",
   },
-]
+];
 
-const step = ref(steps[0])
+const step = ref(steps[0]);
 
-const passwordValidation = ref(null)
+const passwordValidation = ref(null);
 
 async function stepValid() {
-  const valid = await form.value.validate()
+  const valid = await form.value.validate();
 
-  return valid.valid
+  return valid.valid;
 }
 
 async function nextStep() {
-  if (!(await stepValid())) return
+  if (!(await stepValid())) return;
 
-  if (steps.length == step.value.step) return register()
+  if (steps.length == step.value.step) return register();
 
-  step.value = steps.filter((s) => s.step == step.value.step + 1)[0]
+  step.value = steps.filter((s) => s.step == step.value.step + 1)[0];
 
-  setTimeout(() => form.value.setErrors({}), 0)
+  setTimeout(() => form.value.setErrors({}), 0);
 }
 
 function stepBack() {
-  if (step.value.step == 1) return
+  if (step.value.step == 1) return;
 
-  step.value = steps.filter((s) => s.step == step.value.step - 1)[0]
+  step.value = steps.filter((s) => s.step == step.value.step - 1)[0];
 }
 
 function register() {
-  const formData = new FormData()
-  formData.append('diploma', file.value)
-  let i
+  const formData = new FormData();
+  formData.append("diploma", file.value);
+  let i;
   for (i in data) {
-    if (i == 'images') continue
-    formData.append(i, data[i])
+    if (i == "images") continue;
+    formData.append(i, data[i]);
   }
-  formData.append('images[]', data.images[0])
+  formData.append("images[]", data.images[0]);
 
   form.value.validate().then((r) => {
-    sending.value = true
+    sending.value = true;
     if (r.valid) {
       useAuth()
         .register(formData)
         .then(() => {
-          store.dispatch('ui/toastr/success', 'Usuario credo correctamente')
-          goToLogin()
+          store.dispatch("ui/toastr/success", "Usuario credo correctamente");
+          goToLogin();
         })
         .catch((errors) => {
-          form.value.setErrors(errors)
-          sending.value = false
-        })
+          form.value.setErrors(errors);
+          sending.value = false;
+        });
     }
-  })
+  });
 }
 
 function goToLogin() {
-  ionRouter.navigate('/login', 'forward', 'replace')
+  ionRouter.navigate("/login", "forward", "replace");
 }
 
 function setImage(response) {
-  data.thumb = response.thumb
-  data.images = [response.id]
+  data.thumb = response.thumb;
+  data.images = [response.id];
 }
 
 // File
-const file = ref(false)
+const file = ref(false);
 
 const uploadFile = (event) => {
-  file.value = event.target.files[0]
-}
+  file.value = event.target.files[0];
+};
 </script>
 
 <style scoped>
@@ -533,5 +584,49 @@ ion-card ion-text {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Estilos para las tarjetas informativas */
+.info-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-left: 4px solid var(--ion-color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.info-card ion-card-content {
+  padding: 12px 16px;
+}
+
+.info-content {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.info-content ion-icon {
+  font-size: 28px;
+  min-width: 28px;
+  margin-top: 2px;
+}
+
+.info-content ion-text p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ion-color-dark);
+}
+
+.info-content ion-text p:last-child {
+  margin-bottom: 0;
+}
+
+.info-content ion-text p strong {
+  color: var(--ion-color-dark);
+  font-weight: 600;
+}
+
+.info-detail {
+  color: var(--ion-color-medium) !important;
+  font-size: 13px !important;
 }
 </style>
