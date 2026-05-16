@@ -88,8 +88,3 @@ function goToInstagram() {
   background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
 }
 </style>
-
-.share-button font-awesome-icon {
-  font-size: 42px;
-}
-</style>
