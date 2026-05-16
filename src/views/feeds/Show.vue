@@ -48,47 +48,55 @@
         <h4 class="ion-no-margin">{{ feed.title }}</h4>
         <div class="content ion-margin-top" v-html="feed.content"></div>
       </ion-text>
-
-      <div class="share ion-margin-top">
-        <ion-button shape="round" class="share-button twitter">
-          <font-awesome-icon icon="fa-brands fa-x-twitter" size="lg" />
-        </ion-button>
-        <ion-button shape="round" class="share-button whatsapp">
-          <ion-icon
-            slot="icon-only"
-            :md="logoWhatsapp"
-            :ios="logoWhatsapp"
-          ></ion-icon>
-        </ion-button>
-        <ion-button shape="round" class="share-button facebook">
-          <ion-icon
-            slot="icon-only"
-            :md="logoFacebook"
-            :ios="logoFacebook"
-          ></ion-icon>
-        </ion-button>
-      </div>
+      
+      <!-- Componente de compartir social -->
+      <SocialShare
+        :share-data="{
+          title: feed.title,
+          text: getPlainTextContent(feed.content),
+          type: 'noticia'
+        }"
+      />
     </div>
   </graduados-app>
 </template>
 
 <script setup lang="ts">
 import {
-  IonButton,
-  IonIcon,
   IonSkeletonText,
   IonText,
   IonThumbnail,
 } from '@ionic/vue'
-import { logoFacebook, logoWhatsapp } from 'ionicons/icons'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
+import SocialShare from '@/components/SocialShare.vue'
+
+interface FeedItem {
+  title: string;
+  content: string;
+  date: string;
+  thumb: {
+    absolute_path: string;
+  };
+}
 
 const loaded = ref(false)
 const store = useStore()
 const route = useRoute()
-const feed = ref({})
+const feed = ref<FeedItem>({} as FeedItem)
+
+// Función para extraer texto plano del HTML
+const getPlainTextContent = (htmlContent: string): string => {
+  if (!htmlContent) return ''
+  
+  // Crear un elemento temporal para extraer texto
+  const temp = document.createElement('div')
+  temp.innerHTML = htmlContent
+  
+  // Obtener solo el texto, sin etiquetas HTML
+  return temp.textContent || temp.innerText || ''
+}
 
 onMounted(() => {
   const { slug } = route.params
@@ -106,28 +114,5 @@ ion-thumbnail img {
 .content {
   color: var(--ion-color-step-500);
   font-size: 14px;
-}
-
-.share-button {
-  height: 35px;
-
-  width: 35px;
-  border-radius: 50%;
-  --padding-start: 0;
-  --padding-end: 0;
-  margin-inline: 5px;
-}
-
-.share-button ion-icon {
-  font-size: 22px;
-}
-.share-button.twitter {
-  --background: #55acef;
-}
-.share-button.facebook {
-  --background: #1977f3;
-}
-.share-button.whatsapp {
-  --background: #00bd3d;
 }
 </style>

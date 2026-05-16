@@ -1,59 +1,456 @@
 <template>
   <graduados-app header-title="Información de interés">  
+    <!-- Búsqueda y filtros -->
+    <div class="search-filter-container ion-margin-bottom">
+      <FormSearchBar 
+        v-model="searchQuery"
+        placeholder="Buscar información de interés..."
+        class="search-bar"
+      />
+      
+      <ion-button 
+        size="small" 
+        fill="outline" 
+        color="primary"
+        @click="openCategoryFilter"
+        class="filter-button"
+      >
+        <ion-icon slot="start" :icon="filterOutline"></ion-icon>
+        Categorías
+        <ion-badge color="primary" v-if="selectedCategory !== 'all'" class="filter-badge">
+          1
+        </ion-badge>
+      </ion-button>
+    </div>
+
     <InfinitePagination fetch-data-store="interests/fetchAll">
         <template #skeleton>
-          <ion-card class="ion-padding" v-for="i in [1,2,3,4,5,6,7]" :key="i">
-            <div style="flex-grow:1">
-              <ion-skeleton-text :animated="true" style="width:30%; height:20px"></ion-skeleton-text>
-              <div class="ion-margin-top">
-                <ion-label>
-                  <ion-skeleton-text :animated="true" style="width:60%"></ion-skeleton-text>
-                  <ion-skeleton-text :animated="true" style="width:50%"></ion-skeleton-text>
-                </ion-label>
+          <ion-card class="interest-card" v-for="i in [1,2,3,4,5,6,7]" :key="i">
+            <ion-card-content class="card-content">
+              <div class="content-wrapper">
+                <div class="header-section">
+                  <ion-skeleton-text :animated="true" style="width:80px; height:16px; border-radius: 12px;"></ion-skeleton-text>
+                  <ion-skeleton-text :animated="true" style="width:60%; height:24px; margin-top: 8px;"></ion-skeleton-text>
+                </div>
+                <div class="description-section">
+                  <ion-skeleton-text :animated="true" style="width:90%; height:16px; margin-top: 8px;"></ion-skeleton-text>
+                  <ion-skeleton-text :animated="true" style="width:70%; height:16px; margin-top: 4px;"></ion-skeleton-text>
+                </div>
               </div>
-            </div>
-            
-            <ion-skeleton-text :animated="true" style="width:20px; height:20px"></ion-skeleton-text>
+              <div class="icon-wrapper">
+                <ion-skeleton-text :animated="true" style="width:24px; height:24px; border-radius: 50%;"></ion-skeleton-text>
+              </div>
+            </ion-card-content>
           </ion-card>
         </template>
 
         <template #default="{ items }">
-            <ion-card v-for="info in items" :key="info.id">
-              <ion-card-content class="content">
-                <div style="flex-grow:1">
-                  <ion-text color="primary">
-                    <h6><strong>{{ info.title }}</strong></h6>
-                  </ion-text>
-                  <div class="info-content" v-html="info.content"></div>
-                </div>
-                
-                <a :href="info.url" target="_blank">
-                  <ion-icon :md="openOutline" :ios="openOutline" color="primary"></ion-icon>
-                </a>
+          <!-- Mostrar por categorías -->
+          <div v-for="(categoryItems, categoryName) in categorizedItems(filteredItems(items))" 
+               :key="categoryName" 
+               class="category-section">
             
-              </ion-card-content>
-            </ion-card>
+            <div class="category-header ion-margin-vertical">
+              <ion-icon 
+                :icon="getCategoryIcon(String(categoryName))" 
+                color="primary" 
+                class="category-icon"
+              ></ion-icon>
+              <ion-text color="primary" class="category-title">
+                <h3>{{ categoryName }}</h3>
+              </ion-text>
+            </div>
+
+            <!-- Items de la categoría -->
+            <div class="category-items">
+              <ion-card v-for="info in categoryItems" :key="info.id" class="interest-card">
+                <ion-card-content class="card-content">
+                  <div class="content-wrapper">
+                    <div class="header-section">
+                      <ion-badge 
+                        :color="getCategoryColor(String(categoryName))" 
+                        class="category-badge"
+                      >
+                        {{ categoryName }}
+                      </ion-badge>
+                      <ion-text color="dark" class="item-title">
+                        <h4>{{ info.title }}</h4>
+                      </ion-text>
+                    </div>
+                    <div class="description-section">
+                      <div class="info-content" v-html="getShortDescription(info.content)"></div>
+                    </div>
+                  </div>
+                  
+                  <div class="icon-wrapper">
+                    <a :href="info.url" target="_blank" @click.stop>
+                      <ion-button fill="clear" size="small" class="action-button">
+                        <ion-icon :icon="openOutline" color="primary"></ion-icon>
+                      </ion-button>
+                    </a>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+            </div>
+          </div>
+
+          <!-- Mensaje si no hay resultados -->
+          <div v-if="filteredItems(items).length === 0" class="no-results">
+            <ion-text color="medium">
+              <p>No se encontró información que coincida con tu búsqueda.</p>
+            </ion-text>
+          </div>
         </template>
     </InfinitePagination>
   </graduados-app>
 </template>
 
 <script setup lang="ts">
-  import { IonText, IonCard, IonCardContent, IonLabel, IonSkeletonText, IonIcon } from '@ionic/vue';
-  import InfinitePagination from '../app/components/pagination/InfinitePagination.vue';
-  import { openOutline } from 'ionicons/icons';
+import { ref } from 'vue';
+import { 
+  IonText, 
+  IonCard, 
+  IonCardContent, 
+  IonSkeletonText, 
+  IonIcon, 
+  IonButton, 
+  IonBadge, 
+  actionSheetController 
+} from '@ionic/vue';
+import { 
+  openOutline, 
+  filterOutline, 
+  libraryOutline,
+  businessOutline,
+  scaleOutline,
+  documentTextOutline,
+  schoolOutline,
+  informationCircleOutline
+} from 'ionicons/icons';
+import InfinitePagination from '../app/components/pagination/InfinitePagination.vue';
+import FormSearchBar from '../app/components/form/FormSearchBar.vue';
+
+// Estados reactivos
+const searchQuery = ref('');
+const selectedCategory = ref('all');
+
+// Función para categorizar elementos automáticamente
+function categorizeItem(item: any): string {
+  const title = item.title?.toLowerCase() || '';
+  const content = item.content?.toLowerCase() || '';
+  const url = item.url?.toLowerCase() || '';
+  const fullText = `${title} ${content} ${url}`;
+  
+  // Bibliotecas
+  const libraryKeywords = ['biblioteca', 'bibliotecas', 'catálogo', 'libros', 'publicaciones', 'hemeroteca', 'archivo bibliográfico'];
+  if (libraryKeywords.some(keyword => fullText.includes(keyword))) {
+    return 'Bibliotecas';
+  }
+  
+  // Organismos Públicos
+  const publicOrgKeywords = ['organismo', 'ministerio', 'secretaría', 'gobierno', 'estado', 'público', 'nacional', 'municipal', 'provincial', 'afip', 'anses', 'registro civil'];
+  if (publicOrgKeywords.some(keyword => fullText.includes(keyword))) {
+    return 'Organismos Públicos';
+  }
+  
+  // Tribunales
+  const courtKeywords = ['tribunal', 'juzgado', 'corte', 'justicia', 'judicial', 'sentencia', 'jurisprudencia', 'fuero', 'cámara'];
+  if (courtKeywords.some(keyword => fullText.includes(keyword))) {
+    return 'Tribunales';
+  }
+  
+  // Documentación
+  const docKeywords = ['documentación', 'documento', 'formulario', 'certificado', 'constancia', 'trámite', 'gestión', 'solicitud', 'reglamento', 'normativa'];
+  if (docKeywords.some(keyword => fullText.includes(keyword))) {
+    return 'Documentación';
+  }
+  
+  // UBA Derecho
+  const ubaKeywords = ['uba', 'universidad de buenos aires', 'facultad de derecho', 'derecho uba', 'campus virtual', 'siu', 'graduados'];
+  if (ubaKeywords.some(keyword => fullText.includes(keyword))) {
+    return 'UBA Derecho';
+  }
+  
+  return 'General';
+}
+
+// Función para obtener el ícono de cada categoría
+function getCategoryIcon(categoryName: string): string {
+  switch (categoryName) {
+    case 'Bibliotecas': return libraryOutline;
+    case 'Organismos Públicos': return businessOutline;
+    case 'Tribunales': return scaleOutline;
+    case 'Documentación': return documentTextOutline;
+    case 'UBA Derecho': return schoolOutline;
+    default: return informationCircleOutline;
+  }
+}
+
+// Función para obtener el color de cada categoría
+function getCategoryColor(categoryName: string): string {
+  switch (categoryName) {
+    case 'Bibliotecas': return 'secondary';
+    case 'Organismos Públicos': return 'primary';
+    case 'Tribunales': return 'danger';
+    case 'Documentación': return 'warning';
+    case 'UBA Derecho': return 'success';
+    default: return 'medium';
+  }
+}
+
+// Función para filtrar elementos
+function filteredItems(items: any[]) {
+  if (!items) return [];
+  
+  let filtered = items;
+  
+  // Filtro por búsqueda
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase().trim();
+    filtered = filtered.filter((item: any) => {
+      return (
+        item.title?.toLowerCase().includes(query) ||
+        item.content?.toLowerCase().includes(query) ||
+        item.url?.toLowerCase().includes(query)
+      );
+    });
+  }
+  
+  // Filtro por categoría
+  if (selectedCategory.value !== 'all') {
+    filtered = filtered.filter((item: any) => {
+      const category = categorizeItem(item);
+      return category === selectedCategory.value;
+    });
+  }
+  
+  return filtered;
+}
+
+// Función para agrupar elementos por categorías
+function categorizedItems(items: any[]) {
+  const categories: { [key: string]: any[] } = {};
+  
+  items.forEach((item: any) => {
+    const category = categorizeItem(item);
+    if (!categories[category]) {
+      categories[category] = [];
+    }
+    categories[category].push(item);
+  });
+  
+  // Ordenar las categorías según prioridad
+  const orderedCategories: { [key: string]: any[] } = {};
+  const categoryOrder = ['Bibliotecas', 'Organismos Públicos', 'Tribunales', 'Documentación', 'UBA Derecho', 'General'];
+  
+  categoryOrder.forEach(categoryName => {
+    if (categories[categoryName] && categories[categoryName].length > 0) {
+      orderedCategories[categoryName] = categories[categoryName];
+    }
+  });
+  
+  return orderedCategories;
+}
+
+// Función para mostrar filtros de categorías
+async function openCategoryFilter() {
+  const actionSheet = await actionSheetController.create({
+    header: 'Filtrar por categoría',
+    buttons: [
+      { text: 'Todas las categorías', handler: () => { selectedCategory.value = 'all'; } },
+      { text: 'Bibliotecas', handler: () => { selectedCategory.value = 'Bibliotecas'; } },
+      { text: 'Organismos Públicos', handler: () => { selectedCategory.value = 'Organismos Públicos'; } },
+      { text: 'Tribunales', handler: () => { selectedCategory.value = 'Tribunales'; } },
+      { text: 'Documentación', handler: () => { selectedCategory.value = 'Documentación'; } },
+      { text: 'UBA Derecho', handler: () => { selectedCategory.value = 'UBA Derecho'; } },
+      { text: 'General', handler: () => { selectedCategory.value = 'General'; } },
+      { text: 'Cancelar', role: 'cancel' }
+    ]
+  });
+  await actionSheet.present();
+}
+
+// Función para obtener descripción resumida
+function getShortDescription(content: string): string {
+  if (!content) return '';
+  const plainText = content.replace(/<[^>]*>/g, '').trim();
+  return plainText.length > 150 ? plainText.substring(0, 150) + '...' : plainText;
+}
 </script>
 
 <style scoped>
-  ion-card .content{
-    display:flex; align-items:center; justify-content: space-between
-  }
+/* Contenedor de búsqueda y filtros */
+.search-filter-container {
+  display: flex;
+  gap: 8px;
+  align-items: center; /* Cambiado de flex-end a center para mejor alineación */
+  padding: 16px;
+}
 
-  ion-card ion-icon{
-    font-size: 18px;
-  }
+.search-bar {
+  flex: 1;
+  margin-bottom: 0 !important;
+}
 
-  ion-card .info-content{
-    color: var(--ion-color-medium)
+.filter-button {
+  flex-shrink: 0;
+  min-height: 44px; /* Asegurar que tenga la misma altura que la barra de búsqueda */
+}
+
+.filter-badge {
+  margin-left: 4px;
+  font-size: 10px;
+}
+
+/* Sección de categorías */
+.category-section {
+  margin-bottom: 24px;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+
+.category-icon {
+  font-size: 24px;
+}
+
+.category-title h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.category-items {
+  padding: 0 16px;
+}
+
+/* Cards mejoradas */
+.interest-card {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.interest-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.category-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  align-self: flex-start;
+  border-radius: 12px;
+  padding: 4px 8px;
+}
+
+.item-title h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ion-color-dark);
+}
+
+.description-section {
+  margin-top: 4px;
+}
+
+.info-content {
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.icon-wrapper {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+
+.action-button {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  min-height: 32px;
+  border-radius: 50%;
+}
+
+.action-button:hover {
+  --background: var(--ion-color-primary-tint);
+}
+
+/* Mensaje sin resultados */
+.no-results {
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.no-results p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .search-filter-container {
+    padding: 12px;
+    gap: 6px;
   }
+  
+  .category-header {
+    padding: 0 12px;
+  }
+  
+  .category-items {
+    padding: 0 12px;
+  }
+  
+  .card-content {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .category-title h3 {
+    font-size: 1.1rem;
+  }
+  
+  .item-title h4 {
+    font-size: 0.95rem;
+  }
+  
+  .info-content {
+    font-size: 0.85rem;
+  }
+}
 </style>

@@ -58,77 +58,70 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue'
-import { useStore } from 'vuex'
+import { computed, defineComponent, onMounted, ref } from "vue";
+import { useStore } from "vuex";
 
 export default defineComponent({
-  name: 'Benefits',
+  name: "Benefits",
   setup() {
-    const store = useStore()
-    const loading = ref(true)
-    const error = ref(null)
+    const store = useStore();
+    const loading = ref(true);
+    const error = ref(null);
 
     function getImageUrl(logo: string): string {
       if (!logo) {
-        return '/assets/img/imagen-no-disponible.jpg'
+        return "/assets/img/imagen-no-disponible.jpg";
       }
 
       // 1) Base de tu API: quita la parte “/api” si existe
-      const raw = process.env.VUE_APP_API_URL || ''
+      const raw = process.env.VUE_APP_API_URL || "";
       const apiBase =
-        raw.replace(/\/api\/?$/, '') || 'https://graduados.derecho.uba.ar'
+        raw.replace(/\/api\/?$/, "") || "https://api.graduados.kame-code.com";
 
       // 2) Asegúrate de que la ruta venga sin slash repetido
       //    benefit.logo podría venir como "benefits/originals/…"
       //    o "/storage/benefits/…", o incluso "storage/benefits/…"
-      let path = logo
+      let path = logo;
       // Si ya incluye "storage", no lo dupliques
       if (!/^\/?storage\//.test(path)) {
         // quita cualquier "/" al inicio y añade "/storage/"
-        path = '/storage/' + path.replace(/^\/+/, '')
+        path = "/storage/" + path.replace(/^\/+/, "");
       } else {
         // si empieza con "/storage", mantenlo y solo quita "/" de más
-        path = '/' + path.replace(/^\/+/, '')
+        path = "/" + path.replace(/^\/+/, "");
       }
 
-      return `${apiBase}${path}`
+      return `${apiBase}${path}`;
     }
 
     function formatDate(dateString) {
-      if (!dateString) return ''
-      const date = new Date(dateString)
-      return date.toLocaleDateString('es-ES')
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return date.toLocaleDateString("es-ES");
     }
 
     async function loadBenefits() {
-      loading.value = true
-      error.value = null
+      loading.value = true;
+      error.value = null;
 
       try {
-        await store.dispatch('benefits/fetchBenefits')
-        console.log(
-          'Benefits loaded in component:',
-          store.state.benefits.benefits
-        )
-        loading.value = false
+        await store.dispatch("benefits/fetchBenefits");
+        loading.value = false;
       } catch (err) {
-        console.error('Error al cargar beneficios', err)
-        loading.value = false
+        loading.value = false;
       }
     }
 
     // Dispatch the action to fetch benefits when the component mounts
     onMounted(() => {
-      console.log('Benefits component mounted')
-      loadBenefits()
-    })
+      loadBenefits();
+    });
 
     // Define a computed property so it stays reactive
     const benefits = computed(() => {
-      const result = store.state.benefits.benefits
-      console.log('Computed benefits:', result)
-      return result
-    })
+      const result = store.state.benefits.benefits;
+      return result;
+    });
 
     return {
       benefits,
@@ -137,9 +130,9 @@ export default defineComponent({
       getImageUrl,
       formatDate,
       loadBenefits,
-    }
+    };
   },
-})
+});
 </script>
 
 <style scoped>

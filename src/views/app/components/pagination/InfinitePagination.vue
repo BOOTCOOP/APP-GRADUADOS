@@ -43,38 +43,59 @@
 </template>
 
 <script setup lang="ts">
-import FormSearchBar from '@/views/app/components/form/FormSearchBar.vue'
+import FormSearchBar from "@/views/app/components/form/FormSearchBar.vue";
 import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
   IonSpinner,
-} from '@ionic/vue'
-import { computed, defineExpose, defineProps, onMounted, ref, watch } from 'vue'
-import { useStore } from 'vuex'
+} from "@ionic/vue";
+import {
+  computed,
+  defineExpose,
+  defineProps,
+  onMounted,
+  PropType,
+  ref,
+  watch,
+} from "vue";
+import { useStore } from "vuex";
+import { analyzeCoursesListForModality } from "@/utils/modalityDetector";
 
-const firstLoad = ref(true)
-const loadingItems = ref(false)
-const store = useStore()
-const items = ref([])
-const search = ref('')
-const meta = ref([])
-const page = ref(1)
+const firstLoad = ref(true);
+const loadingItems = ref(false);
+const store = useStore();
+const items = ref<any[]>([]);
+const search = ref("");
+const meta = ref<any>({});
+const page = ref(1);
 const hasMorePages = computed(
   () => meta.value?.current_page != meta.value.last_page
-)
+);
 const prop = defineProps({
   fetchDataStore: {
     type: String,
     required: true,
   },
   loadingSpinner: {
-    default: 'circular',
+    type: String as PropType<
+      | "circular"
+      | "bubbles"
+      | "circles"
+      | "crescent"
+      | "dots"
+      | "lines"
+      | "lines-small"
+      | "lines-sharp"
+      | "lines-sharp-small"
+      | null
+    >,
+    default: "circular",
   },
   loadingText: {
-    default: '',
+    default: "",
   },
   emptyResultsText: {
-    default: 'No hay resultados para mostrar',
+    default: "No hay resultados para mostrar",
   },
   perPage: {
     type: Number,
@@ -88,39 +109,40 @@ const prop = defineProps({
     default: false,
   },
   searchValue: {
-    default: '',
+    default: "",
   },
   searchPlaceholder: {
-    default: 'Buscar...',
+    default: "Buscar...",
   },
-})
+});
 
-onMounted(() => fetchData())
+onMounted(() => fetchData());
 
-watch(meta, (meta) => (page.value = meta.current_page))
+watch(meta, (meta) => (page.value = meta.current_page));
 watch(
   () => prop.filters,
   () => filtersChanged()
-)
+);
 watch(
   () => prop.searchValue,
   (val) => (search.value = val)
-)
-watch(search, () => filtersChanged())
+);
+watch(search, () => filtersChanged());
 
 function filtersChanged() {
-  firstLoad.value = true
+  firstLoad.value = true;
 
-  page.value = 1
+  page.value = 1;
 
-  fetchData()
+  fetchData();
 
-  items.value = []
+  items.value = [];
 }
 
 function fetchData() {
   return new Promise((resolve) => {
-    loadingItems.value = true
+    loadingItems.value = true;
+
     store
       .dispatch(prop.fetchDataStore, {
         page: page.value,
@@ -129,31 +151,46 @@ function fetchData() {
         search: search.value,
       })
       .then((response) => {
-        items.value = items.value.concat(response.data.data)
+        // 🔍 DIAGNÓSTICO DE MODALIDAD EN LISTA DE CURSOS
+        if (
+          prop.fetchDataStore.includes("courses") &&
+          response.data.data?.length > 0
+        ) {
+          analyzeCoursesListForModality(response.data.data);
+        }
 
-        meta.value = response.data.meta
+        items.value = items.value.concat(response.data.data);
 
-        firstLoad.value = false
+        meta.value = response.data.meta;
 
-        resolve(true)
+        firstLoad.value = false;
+
+        resolve(true);
       })
-      .finally(() => (loadingItems.value = false))
-  })
+      .catch(() => {
+        // Manejar error 500 o cualquier otro error como "sin resultados"
+        items.value = [];
+        meta.value = { current_page: 1, last_page: 1 };
+        firstLoad.value = false;
+        resolve(false);
+      })
+      .finally(() => (loadingItems.value = false));
+  });
 }
 
 function loadMore(event) {
-  page.value++
+  page.value++;
 
-  fetchData().then(() => event.target.complete())
+  fetchData().then(() => event.target.complete());
 }
 
 function removeItem(item) {
-  const id = typeof item == 'object' ? item.id : item
+  const id = typeof item == "object" ? item.id : item;
 
-  items.value = items.value.filter((i) => i.id != id)
+  items.value = items.value.filter((i) => i.id != id);
 }
 
-defineExpose({ removeItem })
+defineExpose({ removeItem });
 </script>
 
 <style scoped>

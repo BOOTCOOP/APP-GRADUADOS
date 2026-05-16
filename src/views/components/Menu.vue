@@ -1,18 +1,23 @@
 <template>
-  <ion-menu side="start" menu-id="main-menu" content-id="main-content" type="overlay">
-    <ion-content>
-      <div class="menu-header">
-        <ion-img class="menu-logo" :src="logo" />
-        <div class="menu-user">
-          <div class="menu-avatar">
-            {{ User.get()?.firstname?.charAt(0)?.toUpperCase() }}
-          </div>
-          <div>
-            <p class="menu-user-name">Hola, {{ User.get()?.firstname }}</p>
-            <p class="menu-user-status" @click="openNotificationsMenu">No tenés notificaciones</p>
-          </div>
-        </div>
-      </div>
+  <ion-menu
+    side="start"
+    menu-id="main-menu"
+    content-id="main-content"
+    type="overlay"
+  >
+    <ion-content class="ion-padding">
+      <ion-img class="logo" src="/assets/logo/logo.png"></ion-img>
+
+      <ion-card class="user-welcome ion-no-margin ion-margin-top">
+        <ion-card-content>
+          <ion-text
+            ><h2>Hola, {{ User.get()?.firstname }}</h2></ion-text
+          >
+          <ion-text color="primary" @click="openNotificationsMenu"
+            >No tenes notificaciones nuevas</ion-text
+          >
+        </ion-card-content>
+      </ion-card>
 
       <ion-list id="menu-items">
         <ion-menu-toggle auto-hide="false" v-for="(p, i) in items" :key="i">
@@ -23,9 +28,13 @@
             class="hydrated"
             :class="{ selected: active === i }"
           >
-            <div slot="start" class="menu-icon-wrap" :class="{ 'menu-icon-active': active === i }">
-              <ion-icon color="primary" :ios="p.icon" :md="p.icon"></ion-icon>
-            </div>
+            <ion-icon
+              aria-hidden="true"
+              slot="start"
+              color="primary"
+              :ios="p.icon"
+              :md="p.icon"
+            ></ion-icon>
             <ion-label>{{ p.title }}</ion-label>
           </ion-item>
         </ion-menu-toggle>
@@ -33,11 +42,20 @@
 
       <ion-list id="logout-item">
         <ion-menu-toggle auto-hide="false">
-          <ion-item @click="logout" lines="none" detail="false" class="hydrated">
-            <div slot="start" class="menu-icon-wrap menu-icon-danger">
-              <ion-icon color="danger" :ios="logOutOutline" :md="logOutOutline"></ion-icon>
-            </div>
-            <ion-label color="danger">Cerrar sesión</ion-label>
+          <ion-item
+            @click="logout"
+            lines="none"
+            detail="false"
+            class="hydrated"
+          >
+            <ion-icon
+              aria-hidden="true"
+              slot="start"
+              color="primary"
+              :ios="logOutOutline"
+              :md="logOutOutline"
+            ></ion-icon>
+            <ion-label>Cerrar sesión</ion-label>
           </ion-item>
         </ion-menu-toggle>
       </ion-list>
@@ -46,10 +64,12 @@
 </template>
 
 <script setup>
-import logo from '@/assets/logo/logo.png'
 import {
   IonImg,
+  IonText,
+  IonCard,
   IonContent,
+  IonCardContent,
   IonIcon,
   IonItem,
   IonLabel,
@@ -58,198 +78,135 @@ import {
   IonMenuToggle,
   menuController,
   useIonRouter,
-} from '@ionic/vue'
-import { ref, watch } from 'vue'
+} from "@ionic/vue";
+import { ref, watch } from "vue";
 
 import {
   newspaperOutline,
-  bookmarkOutline,
+  libraryOutline,
   giftOutline,
   megaphoneOutline,
   schoolOutline,
-  bagAddOutline,
-  shareSocialOutline,
+  briefcaseOutline,
+  informationCircleOutline,
   personOutline,
   logOutOutline,
   homeOutline,
-  gridOutline,
-} from 'ionicons/icons'
-import { useRoute } from 'vue-router'
-import { useAuth } from '@/uses/auth'
-import User from '@/utils/user'
+  ribbonOutline,
+  callOutline,
+} from "ionicons/icons";
+import { useRoute } from "vue-router";
+import { useAuth } from "@/uses/auth";
+import User from "@/utils/user";
 
-const route = useRoute()
-const router = useIonRouter()
-const active = ref(null)
+const route = useRoute();
+const router = useIonRouter();
+const active = ref(null);
 const items = [
+  // 1. Inicio
   {
-    title: 'Inicio',
-    url: '/',
+    title: "Inicio",
+    url: "/",
     icon: homeOutline,
   },
+  // 2. Cursos
   {
-    title: 'Noticias',
-    url: '/noticias',
-    icon: newspaperOutline,
+    title: "Cursos",
+    url: "/cursos",
+    icon: ribbonOutline,
   },
+  // 3. Talleres y Jornadas
   {
-    title: 'Talleres',
-    url: '/talleres',
+    title: "Talleres y Jornadas",
+    url: "/talleres",
     icon: schoolOutline,
   },
+  // 4. Actividades Online
   {
-    title: 'Programas',
-    url: '/cursos',
-    icon: gridOutline,
-  },
-  {
-    title: 'Material bibliográfico',
-    url: '/material-bibliografico',
-    icon: bookmarkOutline,
-  },
-  {
-    title: 'Búsqueda laboral',
-    url: '/busqueda-laboral',
-    icon: bagAddOutline,
-  },
-  {
-    title: 'Información de interés',
-    url: '/informacion-de-interes',
-    icon: shareSocialOutline,
-  },
-  {
-    title: 'Beneficios',
-    url: '/beneficios',
-    icon: giftOutline, // Importá giftOutline desde ionicons/icons
-  },
-  {
-    title: 'Avisos',
-    url: '/classifieds',
+    title: "Actividades Online",
+    url: "/classifieds",
     icon: megaphoneOutline,
   },
+  // 5. Búsquedas Laborales
   {
-    title: 'Mi cuenta',
-    url: '/perfil',
+    title: "Búsquedas Laborales",
+    url: "/busqueda-laboral",
+    icon: briefcaseOutline,
+  },
+  // 6. Bibliografía
+  {
+    title: "Bibliografía",
+    url: "/material-bibliografico",
+    icon: libraryOutline,
+  },
+  // 7. Noticias
+  {
+    title: "Noticias",
+    url: "/noticias",
+    icon: newspaperOutline,
+  },
+  // 8. Información de interés
+  {
+    title: "Información de interés",
+    url: "/informacion-de-interes",
+    icon: informationCircleOutline,
+  },
+  // 9. Beneficios
+  {
+    title: "Beneficios",
+    url: "/beneficios",
+    icon: giftOutline,
+  },
+  // 10. Mi cuenta
+  {
+    title: "Mi cuenta",
+    url: "/perfil",
     icon: personOutline,
   },
-]
+  // 11. Contacto
+  {
+    title: "Contacto",
+    url: "/contacto",
+    icon: callOutline,
+  },
+];
 
-const path = route.path
-setActiveItem(path)
-watch(route, (r) => setActiveItem(r.path))
+const path = route.path;
+setActiveItem(path);
+watch(route, (r) => setActiveItem(r.path));
 
 function setActiveItem(curr) {
-  active.value = items.findIndex((page) => page.url === curr.toLowerCase())
+  active.value = items.findIndex((page) => page.url === curr.toLowerCase());
 }
 
 function openNotificationsMenu() {
   menuController
-    .close('main-menu')
-    .then(() => menuController.open('notification-content'))
+    .close("main-menu")
+    .then(() => menuController.open("notification-content"));
 }
 
 function logout() {
   useAuth()
     .logout()
-    .then(() => router.push({ name: 'login' }))
+    .then(() => router.push({ name: "login" }));
 }
 </script>
 
 <style scoped>
 ion-content {
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
+  --ion-item-background: #fff;
 }
 
-.menu-header {
-  background: linear-gradient(145deg, #AB49CC 0%, #7A35AB 100%);
-  padding: 48px 20px 28px;
-  border-radius: 0 0 28px 28px;
-  margin-bottom: 8px;
-  box-shadow: 0 4px 20px rgba(171, 73, 204, 0.28);
+.logo {
+  width: 200px;
 }
 
-.menu-logo {
-  width: 130px;
-  filter: brightness(0) invert(1);
-  margin-bottom: 18px;
+.user-welcome {
+  background-color: var(--ion-color-step-950);
 }
 
-.menu-user {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.menu-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
-  border: 2px solid rgba(255, 255, 255, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: white;
-  flex-shrink: 0;
-}
-
-.menu-user-name {
-  color: white;
-  font-weight: 700;
-  font-size: 15px;
-  margin: 0 0 3px;
-}
-
-.menu-user-status {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 12px;
-  margin: 0;
-  cursor: pointer;
-}
-
-.menu-icon-wrap {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(171, 73, 204, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px;
-  flex-shrink: 0;
-}
-
-.menu-icon-active {
-  background: rgba(171, 73, 204, 0.18);
-}
-
-.menu-icon-danger {
-  background: rgba(254, 61, 61, 0.08);
-}
-
-ion-list {
-  padding: 8px 12px;
-  background: transparent;
-}
-
-ion-item {
-  --border-radius: 12px;
-  --padding-start: 8px;
-  --inner-padding-end: 8px;
-  margin-bottom: 2px;
-  border-radius: 12px;
-}
-
-ion-item.selected {
-  --background: rgba(171, 73, 204, 0.09);
-  --color: var(--ion-color-primary);
-  font-weight: 600;
-  border-radius: 12px;
+.user-welcome * {
+  margin-top: 0;
 }
 
 #logout-item {
@@ -257,6 +214,89 @@ ion-item.selected {
   width: 100%;
   bottom: 0;
   left: 0;
-  padding-bottom: 8px;
+  padding-bottom: 0;
+}
+
+ion-menu ion-content {
+  --background: var(--ion-item-background, var(--ion-background-color, #fff));
+}
+
+ion-menu ion-content {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+}
+
+ion-menu ion-list {
+  padding: 20px 0;
+}
+
+ion-menu ion-note {
+  margin-bottom: 30px;
+}
+
+ion-menu ion-list-header,
+ion-menu ion-note {
+  padding-left: 10px;
+}
+
+ion-menu ion-list#menu-items ion-list-header {
+  font-size: 22px;
+  font-weight: 600;
+
+  min-height: 20px;
+}
+
+ion-menu ion-list#labels-list ion-list-header {
+  font-size: 16px;
+
+  margin-bottom: 18px;
+
+  color: #757575;
+
+  min-height: 26px;
+}
+
+ion-menu ion-item:not(.selected) {
+  /* --padding-start: 10px; */
+  /* --padding-end: 10px; */
+  /* border-radius: 4px; */
+  border-top: 1px solid var(--ion-color-step-900);
+}
+
+ion-menu ion-menu-toggle:last-child ion-item:not(.selected) {
+  border-bottom: 1px solid var(--ion-color-step-900);
+}
+
+ion-menu ion-item.selected {
+  --background: rgba(var(--ion-color-primary-rgb), 0.14);
+}
+
+ion-menu ion-item.selected ion-icon {
+  color: var(--ion-color-light);
+}
+
+ion-menu ion-item ion-label {
+  font-weight: 500;
+}
+
+ion-menu.ios ion-item {
+  font-size: 16px;
+}
+
+ion-menu.ios ion-icon {
+  font-size: 1.4em;
+}
+
+ion-note {
+  display: inline-block;
+  font-size: 16px;
+
+  color: var(--ion-color-medium-shade);
+}
+
+ion-item.selected {
+  --color: var(--ion-color-primary);
 }
 </style>

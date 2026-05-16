@@ -6,7 +6,7 @@
               <ion-buttons slot="start">
                 <slot name="header-start">
                     <ion-menu-button menu="main-menu" v-show="headerShowMenu && !showBackButton" color="primary"></ion-menu-button>
-                    <ion-back-button menu="main-menu" v-if="showBackButton" color="primary"></ion-back-button>
+                                <ion-back-button v-if="showBackButton" color="secondary" @click="goBack" default-href="/"></ion-back-button>
                 </slot>
               </ion-buttons>
               <slot name="header-title">
@@ -39,27 +39,38 @@
 </template>
 
 <script setup>
-  import { IonButtons, IonFooter, IonMenuButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonBackButton, useIonRouter, IonFab, IonFabButton, IonIcon } from '@ionic/vue';
-  import { homeOutline } from 'ionicons/icons';
+import { IonButtons, IonFooter, IonMenuButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonBackButton, useIonRouter, IonFab, IonFabButton, IonIcon } from '@ionic/vue';
+import { homeOutline } from 'ionicons/icons';
+import { computed } from 'vue';
 
-  const router = useIonRouter()
+const router = useIonRouter()
 
-  const prop = defineProps({
-    headerTitle: {default: ''},
-    headerTranslucent: {default: true},
-    headerShowMenu: {default: true},
-    headerShowBackButton: {default: false},
-    contentFullscreen: {default: true},
-    body: {default: ''},
-    toolbarNoShadow: {default: false},
-    hideFabButton: {default: false}
-  })  
+const prop = defineProps({
+  headerTitle: {default: ''},
+  headerTranslucent: {default: true},
+  headerShowMenu: {default: true},
+  headerShowBackButton: {default: false},
+  contentFullscreen: {default: true},
+  body: {default: ''},
+  toolbarNoShadow: {default: false},
+  hideFabButton: {default: false}
+})  
 
-  const showBackButton = prop.headerShowBackButton && router.canGoBack();
+const showBackButton = computed(() => prop.headerShowBackButton); // Usar computed para reactividad
 
-  const gotoHome = () => {
-    router.replace({name:'home'})
+const gotoHome = () => {
+  router.replace({name:'home'})
+}
+
+// Función para ir atrás
+const goBack = () => {
+  if (router.canGoBack()) {
+    router.back();
+  } else {
+    // Si no puede ir atrás, ir al home
+    router.replace({name:'home'});
   }
+}
 </script>
 
 <style>

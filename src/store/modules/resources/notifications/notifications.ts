@@ -1,4 +1,4 @@
-import axios from '@/libs/axios'
+import axios from "@/libs/axios";
 
 export default {
   namespaced: true,
@@ -10,10 +10,14 @@ export default {
     fetchAll(ctx, filters = {}) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`notifications`, {params: filters})
-          .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
+          .get(`notifications`, { params: filters })
+          .then((response) => {
+            resolve(response);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
     },
 
     // Mark as read
@@ -22,8 +26,8 @@ export default {
         axios
           .post(`notifications/mark-as-read`, data)
           .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
-    }
+          .catch((error) => reject(error));
+      });
+    },
   },
-}
+};

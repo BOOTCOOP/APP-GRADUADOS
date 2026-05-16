@@ -69,8 +69,8 @@ import { ref } from 'vue'
 
 const sending = ref(false)
 const form = ref(false)
-const email = ref('user@mail.com')
-const password = ref('123456')
+const email = ref('')
+const password = ref('')
 
 const ionRouter = useIonRouter()
 
