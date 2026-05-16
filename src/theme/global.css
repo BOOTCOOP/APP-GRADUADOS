@@ -3,6 +3,41 @@
     src: url('../../public/assets/fonts/NunitoSans-Regular.ttf');
 }
 
+/* ── Page entrance animation ──────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+ion-router-outlet > .ion-page {
+  animation: fade-up 0.22s ease both;
+}
+
+/* Staggered shortcut cards */
+ion-grid ion-row:first-child ion-col:nth-child(1) ion-card,
+ion-grid ion-row:first-child ion-col:nth-child(2) ion-card,
+ion-grid ion-row:first-child ion-col:nth-child(3) ion-card,
+ion-grid ion-row:first-child ion-col:nth-child(4) ion-card,
+ion-grid ion-row:nth-child(2) ion-col:nth-child(1) ion-card,
+ion-grid ion-row:nth-child(2) ion-col:nth-child(2) ion-card,
+ion-grid ion-row:nth-child(2) ion-col:nth-child(3) ion-card,
+ion-grid ion-row:nth-child(2) ion-col:nth-child(4) ion-card {
+  animation: card-in 0.3s ease both;
+}
+ion-grid ion-row:first-child ion-col:nth-child(1) ion-card { animation-delay: 0.04s; }
+ion-grid ion-row:first-child ion-col:nth-child(2) ion-card { animation-delay: 0.08s; }
+ion-grid ion-row:first-child ion-col:nth-child(3) ion-card { animation-delay: 0.12s; }
+ion-grid ion-row:first-child ion-col:nth-child(4) ion-card { animation-delay: 0.16s; }
+ion-grid ion-row:nth-child(2) ion-col:nth-child(1) ion-card { animation-delay: 0.20s; }
+ion-grid ion-row:nth-child(2) ion-col:nth-child(2) ion-card { animation-delay: 0.24s; }
+ion-grid ion-row:nth-child(2) ion-col:nth-child(3) ion-card { animation-delay: 0.28s; }
+ion-grid ion-row:nth-child(2) ion-col:nth-child(4) ion-card { animation-delay: 0.32s; }
+
 /* Common */
 .cursor-pointer{cursor: pointer;}
 
