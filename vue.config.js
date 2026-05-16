@@ -4,7 +4,7 @@
 //   publicPath: process.env.NODE_ENV === 'production' ? '/APP-GRADUADOS/' : '/',
 // }
 module.exports = {
-  publicPath: "./",
+  publicPath: process.env.NODE_ENV === 'production' ? '/APP-GRADUADOS/' : '/',
   configureWebpack: {
     plugins: [
       new (require('webpack')).DefinePlugin({
