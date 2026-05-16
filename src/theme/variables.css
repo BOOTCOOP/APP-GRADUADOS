@@ -60,7 +60,28 @@ http://ionicframework.com/docs/theming/ */
 	--ion-color-light-tint: #f3f4f8;
 
   --ion-margin:10px;
-  --ion-toolbar-border-color: #EDEDED
+  --ion-toolbar-border-color: #EDEDED;
+
+  /* ── App Design System Tokens ─────────────────── */
+  --app-radius-sm: 10px;
+  --app-radius-md: 16px;
+  --app-radius-lg: 24px;
+  --app-radius-pill: 100px;
+
+  --app-shadow-sm: 0 2px 10px rgba(0,0,0,0.06);
+  --app-shadow-md: 0 4px 18px rgba(0,0,0,0.10);
+  --app-shadow-primary: 0 4px 16px rgba(171,73,204,0.22);
+
+  --app-text-title: #1A1A2E;
+  --app-text-body: #4E5457;
+  --app-text-secondary: #8F9BB3;
+
+  --app-surface: #FFFFFF;
+  --app-bg: #F4F5F8;
+  --app-border: rgba(0,0,0,0.07);
+
+  --app-gradient-primary: linear-gradient(135deg, #AB49CC 0%, #7A35AB 100%);
+  --app-gradient-subtle: linear-gradient(135deg, rgba(171,73,204,0.10) 0%, rgba(122,53,171,0.05) 100%);
 }
 
 

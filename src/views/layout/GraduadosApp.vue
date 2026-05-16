@@ -6,7 +6,7 @@
               <ion-buttons slot="start">
                 <slot name="header-start">
                     <ion-menu-button menu="main-menu" v-show="headerShowMenu && !showBackButton" color="primary"></ion-menu-button>
-                                <ion-back-button v-if="showBackButton" color="secondary" @click="goBack" default-href="/"></ion-back-button>
+                                <ion-back-button v-if="showBackButton" color="primary" @click="goBack" default-href="/"></ion-back-button>
                 </slot>
               </ion-buttons>
               <slot name="header-title">

@@ -1,236 +1,150 @@
 <template>
-  <div class="main-logo">
+  <!-- Logo Hero -->
+  <div class="logo-hero">
     <img :src="logoUrl" alt="UBA Derecho" class="logo-img" />
   </div>
-  <ion-grid>
-    <!-- Fila 1: Cursos - Talleres -->
-    <ion-row>
-      <ion-col size="6">
-        <ion-card
-          router-link="/cursos"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="ribbonOutline"
-              :md="ribbonOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary"
-              >Cursos</ion-text
-            >
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6">
-        <ion-card
-          router-link="/talleres"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="schoolOutline"
-              :md="schoolOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary">Talleres y Jornadas</ion-text>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
 
-    <!-- Fila 2: Actividades Online - Búsqueda laboral -->
-    <ion-row>
-      <ion-col size="6">
-        <ion-card
-          @click="openYouTubeChannel"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="logoYoutube"
-              :md="logoYoutube"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary">Actividades Online</ion-text>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6">
-        <ion-card
-          router-link="/busqueda-laboral"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="briefcaseOutline"
-              :md="briefcaseOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary"
-              >Búsqueda laboral</ion-text
-            >
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-
-    <!-- Fila 3: Biblioteca - Noticias -->
-    <ion-row>
-      <ion-col size="6">
-        <ion-card
-          router-link="/material-bibliografico"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="libraryOutline"
-              :md="libraryOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary"
-              >Biblioteca</ion-text
-            >
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6">
-        <ion-card
-          router-link="/noticias"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="newspaperOutline"
-              :md="newspaperOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary">Noticias</ion-text>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-
-    <!-- Fila 4: Información de interés - Beneficios -->
-    <ion-row>
-      <ion-col size="6">
-        <ion-card
-          router-link="/informacion-de-interes"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="informationCircleOutline"
-              :md="informationCircleOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary"
-              >Información de interés</ion-text
-            >
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6">
-        <ion-card
-          router-link="/beneficios"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-square"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="giftOutline"
-              :md="giftOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary"
-              >Beneficios</ion-text
-            >
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-
-    <!-- Fila 5: Contacto (ocupa toda la fila) -->
-    <ion-row>
-      <ion-col size="12">
-        <ion-card
-          router-link="/contacto"
-          class="ion-no-margin cursor-pointer ion-text-center ion-card-full-width"
-        >
-          <ion-card-content>
-            <ion-icon
-              color="primary"
-              :ios="callOutline"
-              :md="callOutline"
-            ></ion-icon>
-            <ion-text class="ion-margin-top" color="primary">Contacto</ion-text>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <!-- Shortcuts Grid -->
+  <div class="shortcuts-grid">
+    <div
+      v-for="item in shortcuts"
+      :key="item.label"
+      class="shortcut-card"
+      :class="{ 'span-2': item.full }"
+      @click="item.action ? item.action() : router.push(item.route!)"
+      :style="{ '--card-color': item.color }"
+    >
+      <div class="shortcut-icon-wrap">
+        <ion-icon :icon="item.icon" />
+      </div>
+      <span class="shortcut-label">{{ item.label }}</span>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-const logoUrl = "/assets/logo/logo.png";
-
-// Función para abrir el canal de YouTube
-function openYouTubeChannel() {
-  window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy', '_system');
-}
-
+import { useIonRouter, IonIcon } from '@ionic/vue';
 import {
+  ribbonOutline,
+  schoolOutline,
+  logoYoutube,
   briefcaseOutline,
   libraryOutline,
-  giftOutline,
-  ribbonOutline,
   newspaperOutline,
-  schoolOutline,
   informationCircleOutline,
-  logoYoutube,
+  giftOutline,
   callOutline,
-} from "ionicons/icons";
+} from 'ionicons/icons';
 
-import {
-  IonCard,
-  IonCardContent,
-  IonCol,
-  IonGrid,
-  IonIcon,
-  IonRow,
-  IonText,
-} from "@ionic/vue";
+const router = useIonRouter();
+
+const logoUrl = (process.env.BASE_URL ?? '/') + 'assets/logo/logo.png';
+
+function openYouTubeChannel() {
+  window.open(
+    'https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy',
+    '_system'
+  );
+}
+
+const shortcuts = [
+  { label: 'Cursos',                   icon: ribbonOutline,             route: '/cursos',                   color: '#7A35AB' },
+  { label: 'Talleres y Jornadas',      icon: schoolOutline,             route: '/talleres',                 color: '#2563EB' },
+  { label: 'Actividades Online',       icon: logoYoutube,               action: openYouTubeChannel,         color: '#DC2626' },
+  { label: 'Búsqueda Laboral',         icon: briefcaseOutline,          route: '/busqueda-laboral',         color: '#D97706' },
+  { label: 'Biblioteca',               icon: libraryOutline,            route: '/material-bibliografico',   color: '#059669' },
+  { label: 'Noticias',                 icon: newspaperOutline,          route: '/noticias',                 color: '#0891B2' },
+  { label: 'Información de Interés',   icon: informationCircleOutline,  route: '/informacion-de-interes',   color: '#4338CA' },
+  { label: 'Beneficios',               icon: giftOutline,               route: '/beneficios',               color: '#B45309' },
+  { label: 'Contacto',                 icon: callOutline,               route: '/contacto',                 color: '#64748B', full: true },
+];
 </script>
 
 <style scoped>
-.main-logo {
-  text-align: center;
-  margin-bottom: 24px;
-  margin-top: 10px;
-}
-.logo-img {
-  width: auto;
-  height: auto;
-  /* margin-bottom: 8px; */
-}
-
-/* Forzar el tamaño de los íconos */
-ion-icon {
-  width: 60px !important;
-  height: 60px !important;
-}
-
-/* Estilo para el botón de contacto que ocupa toda la fila */
-.ion-card-full-width {
-  min-height: 120px;
+/* ── Logo Hero ──────────────────────────────────── */
+.logo-hero {
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 18px 24px 6px;
+}
+.logo-img {
+  width: 200px;
+  max-width: 60vw;
+  height: auto;
+  object-fit: contain;
 }
 
-.ion-card-full-width ion-card-content {
+/* ── Shortcuts Grid ─────────────────────────────── */
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 10px 16px 24px;
+}
+
+/* ── Individual Card ────────────────────────────── */
+.shortcut-card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  padding: 18px 10px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.shortcut-card:active {
+  transform: scale(0.94);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+.shortcut-card.span-2 {
+  grid-column: span 2;
+  flex-direction: row;
+  padding: 18px 24px;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+/* ── Icon Wrap ──────────────────────────────────── */
+.shortcut-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background-color: color-mix(in srgb, var(--card-color) 14%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.shortcut-icon-wrap ion-icon {
+  font-size: 26px;
+  color: var(--card-color);
+}
+
+/* Fallback for browsers without color-mix */
+@supports not (background: color-mix(in srgb, red 10%, transparent)) {
+  .shortcut-icon-wrap {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* ── Label ──────────────────────────────────────── */
+.shortcut-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1A1A2E;
+  text-align: center;
+  line-height: 1.35;
+  letter-spacing: -0.1px;
+}
+.span-2 .shortcut-label {
+  font-size: 14px;
+  text-align: left;
 }
 </style>

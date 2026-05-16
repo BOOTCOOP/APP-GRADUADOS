@@ -3,41 +3,6 @@
     src: url('../../public/assets/fonts/NunitoSans-Regular.ttf');
 }
 
-/* ── Page entrance animation ──────────────────────── */
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes card-in {
-  from { opacity: 0; transform: translateY(14px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)   scale(1); }
-}
-
-ion-router-outlet > .ion-page {
-  animation: fade-up 0.22s ease both;
-}
-
-/* Staggered shortcut cards */
-ion-grid ion-row:first-child ion-col:nth-child(1) ion-card,
-ion-grid ion-row:first-child ion-col:nth-child(2) ion-card,
-ion-grid ion-row:first-child ion-col:nth-child(3) ion-card,
-ion-grid ion-row:first-child ion-col:nth-child(4) ion-card,
-ion-grid ion-row:nth-child(2) ion-col:nth-child(1) ion-card,
-ion-grid ion-row:nth-child(2) ion-col:nth-child(2) ion-card,
-ion-grid ion-row:nth-child(2) ion-col:nth-child(3) ion-card,
-ion-grid ion-row:nth-child(2) ion-col:nth-child(4) ion-card {
-  animation: card-in 0.3s ease both;
-}
-ion-grid ion-row:first-child ion-col:nth-child(1) ion-card { animation-delay: 0.04s; }
-ion-grid ion-row:first-child ion-col:nth-child(2) ion-card { animation-delay: 0.08s; }
-ion-grid ion-row:first-child ion-col:nth-child(3) ion-card { animation-delay: 0.12s; }
-ion-grid ion-row:first-child ion-col:nth-child(4) ion-card { animation-delay: 0.16s; }
-ion-grid ion-row:nth-child(2) ion-col:nth-child(1) ion-card { animation-delay: 0.20s; }
-ion-grid ion-row:nth-child(2) ion-col:nth-child(2) ion-card { animation-delay: 0.24s; }
-ion-grid ion-row:nth-child(2) ion-col:nth-child(3) ion-card { animation-delay: 0.28s; }
-ion-grid ion-row:nth-child(2) ion-col:nth-child(4) ion-card { animation-delay: 0.32s; }
-
 /* Common */
 .cursor-pointer{cursor: pointer;}
 
@@ -64,7 +29,7 @@ ion-searchbar.searchbar-has-focus ion-icon.searchbar-search-icon{
 
 ion-searchbar.searchbar-has-focus .searchbar-input.sc-ion-searchbar-md,
 ion-searchbar.searchbar-has-focus .searchbar-input.sc-ion-searchbar-ios{
-    border-color: var(--ion-color-success) !important
+    border-color: var(--ion-color-primary) !important
 }
 
 ion-searchbar .searchbar-input.sc-ion-searchbar-md{
@@ -73,7 +38,7 @@ ion-searchbar .searchbar-input.sc-ion-searchbar-md{
 }
 
 ion-searchbar.searchbar-has-focus  .searchbar-clear-button ion-icon{
-    color: var(--ion-color-success) !important;
+    color: var(--ion-color-primary) !important;
 }
 
 /*IOS*/
@@ -87,10 +52,10 @@ ion-searchbar .searchbar-input.sc-ion-searchbar-ios{
 
 /* Cards */
 :root{
-    --ion-card-color:#4E5457;
-    --ion-font-family:"Nunito";
-    --ion-background-color:#F2F3F7;
-    --ion-card-background:#fff;
+    --ion-card-color: var(--app-text-body, #4E5457);
+    --ion-font-family: "Nunito";
+    --ion-background-color: var(--app-bg, #F4F5F8);
+    --ion-card-background: var(--app-surface, #fff);
     --ion-toolbar-background: #ffffff;
 }
 
@@ -236,82 +201,75 @@ ion-item ion-select{
 
 /* Cards: rounded corners + soft shadow + press feedback */
 ion-card {
-    border-radius: 16px !important;
-    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.07) !important;
+    border-radius: var(--app-radius-md, 16px) !important;
+    box-shadow: var(--app-shadow-sm, 0 2px 10px rgba(0,0,0,0.06)) !important;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 ion-card:active {
     transform: scale(0.97);
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
 }
 
-/* Buttons: better height, letter-spacing, primary glow */
+/* Buttons */
 ion-button {
     height: 48px;
     letter-spacing: 0.3px;
+    --border-radius: var(--app-radius-md, 16px);
 }
 ion-button[expand="full"],
 ion-button[expand="block"] {
     height: 52px;
     font-size: 16px;
-    --box-shadow: 0 6px 20px rgba(171, 73, 204, 0.28);
+    --box-shadow: var(--app-shadow-primary, 0 4px 16px rgba(171,73,204,0.22));
 }
 
 /* FAB: branded shadow */
 ion-fab-button {
     --box-shadow: 0 4px 18px rgba(171, 73, 204, 0.38);
+    --border-radius: 50%;
 }
 
 /* Toolbar: subtle separator */
 ion-toolbar {
-    --box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+    --box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
 }
 
-/* Input items: soft focus highlight */
+/* Input items: primary focus */
 ion-item.item-input.item-has-focus {
     --ion-item-border-color: var(--ion-color-primary) !important;
 }
 
-/* Shortcut cards (home grid) */
-.shortcut-icon-bg {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, rgba(171, 73, 204, 0.13), rgba(171, 73, 204, 0.05));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 6px;
+/* Chips: active state */
+ion-chip.active {
+    --background: var(--ion-color-primary);
+    --color: white;
 }
-.shortcut-icon-bg ion-icon {
-    font-size: 26px;
-}
-.shortcut-text {
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.3;
-    color: var(--ion-color-step-350);
-}
+
+/* Typography utilities */
+.text-title   { font-size: 18px; font-weight: 700; color: var(--app-text-title, #1A1A2E); }
+.text-body    { font-size: 14px; color: var(--app-text-body, #4E5457); }
+.text-meta    { font-size: 12px; color: var(--app-text-secondary, #8F9BB3); }
 
 /* Section header labels */
 .section-header {
+    display: block;
     font-size: 15px;
     font-weight: 700;
-    color: var(--ion-color-step-300);
+    color: var(--app-text-title, #1A1A2E);
     letter-spacing: -0.2px;
-    margin: 12px 0 6px;
+    margin: 16px 0 8px;
 }
 
 /* Login hero */
 .login-hero {
-    background: linear-gradient(145deg, #AB49CC 0%, #7A35AB 100%);
+    background: var(--app-gradient-primary, linear-gradient(145deg, #AB49CC 0%, #7A35AB 100%));
     margin: -16px -16px 28px;
     padding: 52px 32px 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 0 0 36px 36px;
-    box-shadow: 0 6px 24px rgba(171, 73, 204, 0.3);
+    box-shadow: var(--app-shadow-primary, 0 6px 24px rgba(171,73,204,0.28));
 }
 .login-hero ion-img {
     width: 160px;
@@ -335,13 +293,22 @@ ion-item.item-input.item-has-focus {
     font-weight: 600;
 }
 
-/* Links cards (WhatsApp / YouTube) */
+/* Links cards */
 .links ion-card {
     border-radius: 14px !important;
 }
 .links ion-card-content {
     font-weight: 600;
     font-size: 15px;
+}
+
+/* Page entrance animation */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+ion-router-outlet > .ion-page {
+  animation: fade-up 0.22s ease both;
 }
 
 ion-item.item-input .input-success-messsage{

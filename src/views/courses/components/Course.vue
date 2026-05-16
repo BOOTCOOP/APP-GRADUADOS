@@ -50,8 +50,8 @@
             <!-- Botones de acción -->
             <div class="action-buttons ion-margin-top">
                 <ion-button 
-                    fill="clear" 
-                    size="small" 
+                    fill="outline" 
+                    expand="block"
                     @click="showDetail"
                     class="details-button"
                 >
@@ -142,15 +142,15 @@ function showDetail() {
 <style scoped>
 .course-card {
     margin: 0;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border-radius: var(--app-radius-md, 16px);
+    box-shadow: var(--app-shadow-sm, 0 2px 10px rgba(0, 0, 0, 0.07));
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
     overflow: hidden;
 }
 
-.course-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
+.course-card:active {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    transform: scale(0.98);
 }
 
 .enrollment-status {
@@ -207,16 +207,18 @@ function showDetail() {
 
 .action-buttons {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
-    padding-top: 16px;
-    border-top: 1px solid var(--ion-color-light);
+    padding-top: 14px;
+    border-top: 1px solid var(--app-border, rgba(0,0,0,0.07));
 }
 
 .details-button {
-    --color: var(--ion-color-medium);
-    --color-hover: var(--ion-color-primary);
+    --color: var(--ion-color-primary);
+    --border-color: var(--ion-color-primary);
+    --border-radius: var(--app-radius-md, 16px);
+    height: 44px;
+    font-weight: 600;
     font-size: 0.875rem;
     flex-grow: 1;
     justify-content: space-between;

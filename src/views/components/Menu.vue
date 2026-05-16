@@ -5,71 +5,57 @@
     content-id="main-content"
     type="overlay"
   >
-    <ion-content class="ion-padding">
-      <ion-img class="logo" src="/assets/logo/logo.png"></ion-img>
+    <ion-content>
+      <!-- Gradient header with avatar + user info -->
+      <div class="menu-header">
+        <div class="menu-avatar">{{ userInitial }}</div>
+        <div class="menu-user-info">
+          <span class="menu-user-name">{{ User.get()?.firstname }} {{ User.get()?.lastname }}</span>
+          <span class="menu-user-sub">Graduado UBA Derecho</span>
+        </div>
+      </div>
 
-      <ion-card class="user-welcome ion-no-margin ion-margin-top">
-        <ion-card-content>
-          <ion-text
-            ><h2>Hola, {{ User.get()?.firstname }}</h2></ion-text
-          >
-          <ion-text color="primary" @click="openNotificationsMenu"
-            >No tenes notificaciones nuevas</ion-text
-          >
-        </ion-card-content>
-      </ion-card>
-
-      <ion-list id="menu-items">
+      <!-- Navigation items -->
+      <ion-list lines="none" class="menu-list">
         <ion-menu-toggle auto-hide="false" v-for="(p, i) in items" :key="i">
           <ion-item
             :router-link="p.url"
-            lines="none"
             detail="false"
-            class="hydrated"
+            class="menu-item"
             :class="{ selected: active === i }"
           >
-            <ion-icon
-              aria-hidden="true"
-              slot="start"
-              color="primary"
-              :ios="p.icon"
-              :md="p.icon"
-            ></ion-icon>
+            <div class="menu-icon-wrap" slot="start" :class="{ 'selected-icon': active === i }">
+              <ion-icon :icon="p.icon" />
+            </div>
             <ion-label>{{ p.title }}</ion-label>
           </ion-item>
         </ion-menu-toggle>
       </ion-list>
 
-      <ion-list id="logout-item">
-        <ion-menu-toggle auto-hide="false">
-          <ion-item
-            @click="logout"
-            lines="none"
-            detail="false"
-            class="hydrated"
-          >
-            <ion-icon
-              aria-hidden="true"
-              slot="start"
-              color="primary"
-              :ios="logOutOutline"
-              :md="logOutOutline"
-            ></ion-icon>
-            <ion-label>Cerrar sesión</ion-label>
-          </ion-item>
-        </ion-menu-toggle>
-      </ion-list>
+      <!-- Logout -->
+      <div class="menu-footer">
+        <ion-list lines="none">
+          <ion-menu-toggle auto-hide="false">
+            <ion-item
+              @click="logout"
+              detail="false"
+              class="menu-item logout-item"
+            >
+              <div class="menu-icon-wrap danger-icon" slot="start">
+                <ion-icon :icon="logOutOutline" />
+              </div>
+              <ion-label color="danger">Cerrar sesión</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        </ion-list>
+      </div>
     </ion-content>
   </ion-menu>
 </template>
 
 <script setup>
 import {
-  IonImg,
-  IonText,
-  IonCard,
   IonContent,
-  IonCardContent,
   IonIcon,
   IonItem,
   IonLabel,
@@ -79,7 +65,7 @@ import {
   menuController,
   useIonRouter,
 } from "@ionic/vue";
-import { ref, watch } from "vue";
+import { ref, computed, watch } from "vue";
 
 import {
   newspaperOutline,
@@ -102,87 +88,31 @@ import User from "@/utils/user";
 const route = useRoute();
 const router = useIonRouter();
 const active = ref(null);
+
+const userInitial = computed(() => {
+  const name = User.get()?.firstname ?? '';
+  return name.charAt(0).toUpperCase() || '?';
+});
+
 const items = [
-  // 1. Inicio
-  {
-    title: "Inicio",
-    url: "/",
-    icon: homeOutline,
-  },
-  // 2. Cursos
-  {
-    title: "Cursos",
-    url: "/cursos",
-    icon: ribbonOutline,
-  },
-  // 3. Talleres y Jornadas
-  {
-    title: "Talleres y Jornadas",
-    url: "/talleres",
-    icon: schoolOutline,
-  },
-  // 4. Actividades Online
-  {
-    title: "Actividades Online",
-    url: "/classifieds",
-    icon: megaphoneOutline,
-  },
-  // 5. Búsquedas Laborales
-  {
-    title: "Búsquedas Laborales",
-    url: "/busqueda-laboral",
-    icon: briefcaseOutline,
-  },
-  // 6. Bibliografía
-  {
-    title: "Bibliografía",
-    url: "/material-bibliografico",
-    icon: libraryOutline,
-  },
-  // 7. Noticias
-  {
-    title: "Noticias",
-    url: "/noticias",
-    icon: newspaperOutline,
-  },
-  // 8. Información de interés
-  {
-    title: "Información de interés",
-    url: "/informacion-de-interes",
-    icon: informationCircleOutline,
-  },
-  // 9. Beneficios
-  {
-    title: "Beneficios",
-    url: "/beneficios",
-    icon: giftOutline,
-  },
-  // 10. Mi cuenta
-  {
-    title: "Mi cuenta",
-    url: "/perfil",
-    icon: personOutline,
-  },
-  // 11. Contacto
-  {
-    title: "Contacto",
-    url: "/contacto",
-    icon: callOutline,
-  },
+  { title: "Inicio",                   url: "/",                        icon: homeOutline },
+  { title: "Cursos",                   url: "/cursos",                  icon: ribbonOutline },
+  { title: "Talleres y Jornadas",      url: "/talleres",                icon: schoolOutline },
+  { title: "Actividades Online",       url: "/classifieds",             icon: megaphoneOutline },
+  { title: "Búsquedas Laborales",      url: "/busqueda-laboral",        icon: briefcaseOutline },
+  { title: "Bibliografía",             url: "/material-bibliografico",  icon: libraryOutline },
+  { title: "Noticias",                 url: "/noticias",                icon: newspaperOutline },
+  { title: "Información de interés",   url: "/informacion-de-interes",  icon: informationCircleOutline },
+  { title: "Beneficios",               url: "/beneficios",              icon: giftOutline },
+  { title: "Mi cuenta",                url: "/perfil",                  icon: personOutline },
+  { title: "Contacto",                 url: "/contacto",                icon: callOutline },
 ];
 
-const path = route.path;
-setActiveItem(path);
+setActiveItem(route.path);
 watch(route, (r) => setActiveItem(r.path));
 
 function setActiveItem(curr) {
   active.value = items.findIndex((page) => page.url === curr.toLowerCase());
-}
-
-function openNotificationsMenu() {
-  menuController
-    .close("main-menu")
-    .then(() => menuController.open("notification-content"));
 }
 
 function logout() {
@@ -193,110 +123,134 @@ function logout() {
 </script>
 
 <style scoped>
+/* ── Content background ─────────────────────────── */
 ion-content {
-  --ion-item-background: #fff;
+  --background: #F4F5F8;
 }
 
-.logo {
-  width: 200px;
+/* ── Gradient header ────────────────────────────── */
+.menu-header {
+  background: linear-gradient(145deg, #AB49CC 0%, #7A35AB 100%);
+  padding: 48px 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-.user-welcome {
-  background-color: var(--ion-color-step-950);
-}
-
-.user-welcome * {
-  margin-top: 0;
-}
-
-#logout-item {
-  position: absolute;
-  width: 100%;
-  bottom: 0;
-  left: 0;
-  padding-bottom: 0;
-}
-
-ion-menu ion-content {
-  --background: var(--ion-item-background, var(--ion-background-color, #fff));
-}
-
-ion-menu ion-content {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  --padding-top: 20px;
-  --padding-bottom: 20px;
-}
-
-ion-menu ion-list {
-  padding: 20px 0;
-}
-
-ion-menu ion-note {
-  margin-bottom: 30px;
-}
-
-ion-menu ion-list-header,
-ion-menu ion-note {
-  padding-left: 10px;
-}
-
-ion-menu ion-list#menu-items ion-list-header {
+.menu-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 22px;
-  font-weight: 600;
-
-  min-height: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
 }
 
-ion-menu ion-list#labels-list ion-list-header {
+.menu-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.menu-user-name {
   font-size: 16px;
-
-  margin-bottom: 18px;
-
-  color: #757575;
-
-  min-height: 26px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-ion-menu ion-item:not(.selected) {
-  /* --padding-start: 10px; */
-  /* --padding-end: 10px; */
-  /* border-radius: 4px; */
-  border-top: 1px solid var(--ion-color-step-900);
-}
-
-ion-menu ion-menu-toggle:last-child ion-item:not(.selected) {
-  border-bottom: 1px solid var(--ion-color-step-900);
-}
-
-ion-menu ion-item.selected {
-  --background: rgba(var(--ion-color-primary-rgb), 0.14);
-}
-
-ion-menu ion-item.selected ion-icon {
-  color: var(--ion-color-light);
-}
-
-ion-menu ion-item ion-label {
+.menu-user-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
   font-weight: 500;
 }
 
-ion-menu.ios ion-item {
-  font-size: 16px;
+/* ── Nav list ───────────────────────────────────── */
+.menu-list {
+  padding: 12px 12px 0 !important;
+  background: transparent !important;
 }
 
-ion-menu.ios ion-icon {
-  font-size: 1.4em;
+.menu-item {
+  --background: transparent;
+  --background-activated: transparent;
+  --background-focused: transparent;
+  --border-radius: 12px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --inner-padding-end: 0;
+  --min-height: 52px;
+  margin-bottom: 2px;
+  border-radius: 12px;
+  transition: background 0.15s ease;
 }
 
-ion-note {
-  display: inline-block;
-  font-size: 16px;
-
-  color: var(--ion-color-medium-shade);
+.menu-item.selected {
+  --background: rgba(171, 73, 204, 0.10);
 }
 
-ion-item.selected {
-  --color: var(--ion-color-primary);
+.menu-item.selected ion-label {
+  color: var(--ion-color-primary) !important;
+  font-weight: 700;
+}
+
+ion-item.menu-item ion-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1A1A2E;
+}
+
+/* ── Icon wrap ──────────────────────────────────── */
+.menu-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(171, 73, 204, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.menu-icon-wrap ion-icon {
+  font-size: 18px;
+  color: var(--ion-color-primary);
+}
+
+.menu-icon-wrap.selected-icon {
+  background: var(--ion-color-primary);
+}
+
+.menu-icon-wrap.selected-icon ion-icon {
+  color: #ffffff;
+}
+
+/* ── Logout ─────────────────────────────────────── */
+.menu-footer {
+  padding: 8px 12px 24px;
+  margin-top: 4px;
+}
+
+.logout-item.menu-item {
+  --background: rgba(254, 61, 61, 0.06);
+}
+
+.menu-icon-wrap.danger-icon {
+  background: rgba(254, 61, 61, 0.10);
+}
+
+.menu-icon-wrap.danger-icon ion-icon {
+  color: var(--ion-color-danger);
 }
 </style>
