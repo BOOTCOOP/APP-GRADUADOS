@@ -16,7 +16,7 @@
                 
                 <Field v-model="email" class="ion-margin-top" name="email" v-slot="{ field }" rules="required|email">
                     <IonItem>
-                        <IonLabel position="floating">Nombre</IonLabel>
+                        <IonLabel position="floating">Correo Electrónico</IonLabel>
                         <IonInput v-bind="field"/>
                     </IonItem>
                     <ErrorMessage name="email" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
