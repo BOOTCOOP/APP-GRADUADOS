@@ -1,57 +1,51 @@
 <template>
   <graduados-blank body="white" :hideFabButton="true">
-    <Form ref="form" class="content">
+    <div class="login-hero">
       <ion-img :src="logo" alt="Logo Graduados" />
-      <div>
-        <Field v-model="email" name="email" v-slot="{ field }" rules="required">
-          <IonItem>
-            <IonLabel position="floating">Email</IonLabel>
-            <IonInput v-bind="field" />
-          </IonItem>
-          <ErrorMessage name="email" #default="{ message }">
-            <ion-text color="danger"
-              ><small>{{ message }}</small></ion-text
-            ></ErrorMessage
-          >
-        </Field>
+    </div>
 
-        <Field
-          name="password"
-          v-model="password"
-          label="contraseña"
-          v-slot="{ field }"
-          rules="required"
-        >
-          <FormPassword v-model="password" v-bind="field" label="Contraseña" />
-          <ErrorMessage name="password" #default="{ message }">
-            <ion-text color="danger"
-              ><small>{{ message }}</small></ion-text
-            ></ErrorMessage
-          >
-        </Field>
-        <div>
-          <ion-text
-            color="medium"
-            router-link="/recuperar-contrasena"
-            class="ion-margin-vertical"
-            ><small>¿Olvidaste tu contraseña?</small></ion-text
-          >
-        </div>
-      </div>
-      <div>
-        <ion-button
-          @click="login()"
-          :disabled="sending"
-          expand="full"
-          shape="round"
-          >{{ sending ? 'Ingresando...' : 'Ingresar' }}</ion-button
-        >
-        <div class="ion-text-center">
-          <ion-text color="medium"
-            >¿Aún no tenés una cuenta?
-            <span @click="register()">Registrate</span>
-          </ion-text>
-        </div>
+    <Form ref="form">
+      <Field v-model="email" name="email" v-slot="{ field }" rules="required">
+        <IonItem>
+          <IonLabel position="floating">Email</IonLabel>
+          <IonInput v-bind="field" />
+        </IonItem>
+        <ErrorMessage name="email" #default="{ message }">
+          <ion-text color="danger"><small>{{ message }}</small></ion-text>
+        </ErrorMessage>
+      </Field>
+
+      <Field
+        name="password"
+        v-model="password"
+        label="contraseña"
+        v-slot="{ field }"
+        rules="required"
+      >
+        <FormPassword v-model="password" v-bind="field" label="Contraseña" />
+        <ErrorMessage name="password" #default="{ message }">
+          <ion-text color="danger"><small>{{ message }}</small></ion-text>
+        </ErrorMessage>
+      </Field>
+
+      <ion-text
+        router-link="/recuperar-contrasena"
+        class="forgot-link"
+      ><small>¿Olvidaste tu contraseña?</small></ion-text>
+
+      <ion-button
+        @click="login()"
+        :disabled="sending"
+        expand="full"
+        shape="round"
+        >{{ sending ? 'Ingresando...' : 'Ingresar' }}</ion-button
+      >
+
+      <div class="login-form-footer">
+        <ion-text color="medium"
+          >¿Aún no tenés una cuenta?
+          <span @click="register()">Registrate</span>
+        </ion-text>
       </div>
     </Form>
   </graduados-blank>

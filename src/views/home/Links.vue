@@ -1,15 +1,15 @@
 <template>
     <div class="ion-margin-top links">
-        <ion-text>Enlaces de interés</ion-text>
+        <ion-text class="section-header">Enlaces de interés</ion-text>
 
-        <ion-card @click="goToWhatsapp" color="dark" class="ion-no-margin ion-margin-top link-whatsapp">
+        <ion-card @click="goToWhatsapp" color="dark" class="ion-no-margin ion-margin-top link-whatsapp cursor-pointer">
             <ion-card-content>
                     Atención y consultas
                     <ion-icon :md="logoWhatsapp" size="large" :ios="logoWhatsapp"></ion-icon>
             </ion-card-content>
         </ion-card>
 
-        <ion-card @click="goToYoutube" color="dark" class="ion-no-margin ion-margin-top link-youtube">
+        <ion-card @click="goToYoutube" color="dark" class="ion-no-margin ion-margin-top link-youtube cursor-pointer">
             <ion-card-content>
                 Canal de Youtube
                 <ion-icon :md="logoYoutube" size="large" :ios="logoYoutube"></ion-icon>
