@@ -107,7 +107,7 @@ const shortcuts = [
   grid-column: span 2;
   flex-direction: row;
   padding: 18px 24px;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 16px;
 }
 
