@@ -111,7 +111,7 @@
       <Field v-model="profile.type_id" name="type_id" v-slot="{ field }">
         <IonItem>
           <!-- Quitar IonLabel -->
-          <IonSelect v-bind="field" placeholder="Categoría">
+          <IonSelect v-bind="field" placeholder="Categoría" interface="alert">
             <!-- Usar placeholder -->
             <ion-select-option
               v-for="type in userTypes"
@@ -178,23 +178,13 @@ const profile = ref({
   images: [],
 });
 
-const getUserTypeName = (typeId) => {
-  const types = {
-    1: "Estudiante",
-    2: "Graduado UBA",
-    3: "Graduado otra universidad",
-    4: "Docente",
-    5: "Investigador",
-  };
-  return types[typeId] || "Desconocido";
-};
-
 const userTypes = [
-  { id: 1, name: "Estudiante" },
-  { id: 2, name: "Graduado UBA" },
-  { id: 3, name: "Graduado otra universidad" },
-  { id: 4, name: "Docente" },
-  { id: 5, name: "Investigador" },
+  { id: 1, name: "Alumno (UBA)" },
+  { id: 2, name: "Graduado (UBA)" },
+  { id: 3, name: "Alumno - (Otra universidad)" },
+  { id: 4, name: "Graduado - (Otra universidad)" },
+  { id: 5, name: "Público General" },
+  { id: 6, name: "Título en trámite" },
 ];
 
 setTimeout(() => {
@@ -297,19 +287,41 @@ function setImage(data) {
   --border-radius: 12px;
   --padding-start: 16px;
   --inner-padding-end: 16px;
-  --border-color: var(--ion-color-light-shade);
+  --border-color: var(--app-border, rgba(0, 0, 0, 0.07));
+  --border-style: solid;
+  --border-width: 1px;
+  --inner-border-width: 0;
+  --highlight-height: 0;
   --background: white;
   margin-bottom: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--app-shadow-sm, 0 2px 10px rgba(0, 0, 0, 0.06));
+  overflow: hidden;
+}
+
+.profile ion-item::part(native) {
+  border-radius: 12px;
+  box-shadow: none;
 }
 
 .profile ion-item.item-has-focus {
   --border-color: var(--ion-color-primary);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.14);
 }
 
 .profile ion-select {
-  --placeholder-color: var(--ion-color-medium);
+  --color: var(--app-text-title, #1A1A2E);
+  --placeholder-color: var(--app-text-body, #4E5457);
+  --placeholder-opacity: 1;
   width: 100%;
+}
+
+.profile ion-select::part(text),
+.profile ion-select::part(placeholder) {
+  color: var(--app-text-title, #1A1A2E);
+  opacity: 1;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: unset;
+  line-height: 1.35;
 }
 </style>

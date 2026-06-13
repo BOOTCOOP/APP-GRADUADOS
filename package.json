@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "postbuild": "copyfiles -f dist/index.html dist/404.html",
+    "postbuild": "node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
     "predeploy": "npm run build",
     "ionic:build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",

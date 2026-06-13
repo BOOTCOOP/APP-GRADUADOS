@@ -214,10 +214,7 @@
           @click="() => (data.type_id = 2)"
         >
           <ion-card-content>
-            <ion-text
-              >Soy graduada/o de la Facultad de Derecho de la UBA -
-              <strong>Tengo el título</strong></ion-text
-            >
+            <ion-text>Graduado (UBA)</ion-text>
             <ion-icon
               :md="schoolOutline"
               :ios="schoolOutline"
@@ -231,10 +228,7 @@
           @click="() => (data.type_id = 6)"
         >
           <ion-card-content>
-            <ion-text
-              >Soy graduada/o de la Facultad de Derecho de la UBA -
-              <strong>Mi título está en trámite</strong></ion-text
-            >
+            <ion-text>Título en trámite</ion-text>
             <ion-icon
               :md="schoolOutline"
               :ios="schoolOutline"
@@ -248,7 +242,7 @@
           @click="() => (data.type_id = 4)"
         >
           <ion-card-content>
-            <ion-text>Soy graduada/o de otra Universidad</ion-text>
+            <ion-text>Graduado - (Otra universidad)</ion-text>
             <ion-icon
               :md="schoolOutline"
               :ios="schoolOutline"
@@ -262,9 +256,7 @@
           @click="() => (data.type_id = 1)"
         >
           <ion-card-content>
-            <ion-text
-              >Soy estudiante de la Facultad de Derecho de la UBA</ion-text
-            >
+            <ion-text>Alumno (UBA)</ion-text>
             <ion-icon
               :md="personOutline"
               :ios="personOutline"
@@ -278,7 +270,7 @@
           @click="() => (data.type_id = 3)"
         >
           <ion-card-content>
-            <ion-text>Soy estudiante de otra Universidad</ion-text>
+            <ion-text>Alumno - (Otra universidad)</ion-text>
             <ion-icon
               :md="personOutline"
               :ios="personOutline"
@@ -292,9 +284,7 @@
           @click="() => (data.type_id = 5)"
         >
           <ion-card-content>
-            <ion-text
-              >No pertenezco a ninguna de las categorías anteriores</ion-text
-            >
+            <ion-text>Público General</ion-text>
             <ion-icon
               :md="manOutline"
               :ios="manOutline"
