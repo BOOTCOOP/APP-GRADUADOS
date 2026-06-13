@@ -1,57 +1,58 @@
-@font-face {   
+@font-face {
     font-family: 'Nunito';
     src: url('../../public/assets/fonts/NunitoSans-Regular.ttf');
 }
 
 /* Common */
-.cursor-pointer{cursor: pointer;}
+.cursor-pointer { cursor: pointer; }
 
 /* Header */
-ion-header ion-toolbar ion-title{
+ion-header ion-toolbar ion-title {
     font-size: 16px;
 }
-/* footer */
-ion-footer{
+
+/* Footer */
+ion-footer {
     background-color: var(--ion-background-color);
 }
-/* searchbar */
-ion-searchbar{
-    --border-radius:5px !important;
-    --box-shadow:none !important;
+
+/* Searchbar */
+ion-searchbar {
+    --border-radius: 5px !important;
+    --box-shadow: none !important;
     --placeholder-color: var(--ion-color-step-750) !important;
     --icon-color: var(--ion-color-step-750) !important;
     --color: var(--ion-color-step-300) !important;
 }
 
-ion-searchbar.searchbar-has-focus ion-icon.searchbar-search-icon{
-    color: var(--ion-color-step-300) !important
+ion-searchbar.searchbar-has-focus ion-icon.searchbar-search-icon {
+    color: var(--ion-color-step-300) !important;
 }
 
 ion-searchbar.searchbar-has-focus .searchbar-input.sc-ion-searchbar-md,
-ion-searchbar.searchbar-has-focus .searchbar-input.sc-ion-searchbar-ios{
-    border-color: var(--ion-color-primary) !important
+ion-searchbar.searchbar-has-focus .searchbar-input.sc-ion-searchbar-ios {
+    border-color: var(--ion-color-primary) !important;
 }
 
-ion-searchbar .searchbar-input.sc-ion-searchbar-md{
-    border: 1px solid;
-    border-color: var(--ion-color-step-750);
+ion-searchbar .searchbar-input.sc-ion-searchbar-md {
+    border: 1px solid var(--ion-color-step-750);
 }
 
-ion-searchbar.searchbar-has-focus  .searchbar-clear-button ion-icon{
+ion-searchbar.searchbar-has-focus .searchbar-clear-button ion-icon {
     color: var(--ion-color-primary) !important;
 }
 
-/*IOS*/
-ion-searchbar .searchbar-input-container.sc-ion-searchbar-ios{
-    min-height:44px
+/* IOS */
+ion-searchbar .searchbar-input-container.sc-ion-searchbar-ios {
+    min-height: 44px;
 }
-ion-searchbar .searchbar-input.sc-ion-searchbar-ios{
+ion-searchbar .searchbar-input.sc-ion-searchbar-ios {
     --background: transparent;
     border: 1px solid var(--ion-color-step-750);
 }
 
-/* Cards */
-:root{
+/* Cards Base */
+:root {
     --ion-card-color: var(--app-text-body, #4E5457);
     --ion-font-family: "Nunito";
     --ion-background-color: var(--app-bg, #F4F5F8);
@@ -59,23 +60,23 @@ ion-searchbar .searchbar-input.sc-ion-searchbar-ios{
     --ion-toolbar-background: #ffffff;
 }
 
-ion-card{
-    box-shadow:none;       
+ion-card {
+    box-shadow: none;
 }
 
-ion-card.ion-card-square{
+ion-card.ion-card-square {
     position: relative;
 }
 
-ion-card.ion-card-square:before{
+ion-card.ion-card-square:before {
     content: "";
     display: block;
     padding-top: 100%;
 }
 
-ion-card.ion-card-square ion-card-content{
-    position:  absolute;
-    padding:0;
+ion-card.ion-card-square ion-card-content {
+    position: absolute;
+    padding: 0;
     bottom: 0;
     right: 0;
     top: 0;
@@ -90,58 +91,63 @@ ion-card.ion-card-square ion-card-content{
 }
 
 /* Swiper */
-.swiper.swiper-overflowed.items-1 .swiper-slide{
-    width: calc(100% - 70px) !important
+.swiper.swiper-overflowed.items-1 .swiper-slide {
+    width: calc(100% - 70px) !important;
 }
-.swiper.swiper-overflowed.items-2 .swiper-slide{
-    width: calc((100% / 2) - 30px) !important
+.swiper.swiper-overflowed.items-2 .swiper-slide {
+    width: calc((100% / 2) - 30px) !important;
 }
-.swiper.swiper-overflowed.items-3 .swiper-slide{
-    width: calc((100% / 3) - 20px) !important
+.swiper.swiper-overflowed.items-3 .swiper-slide {
+    width: calc((100% / 3) - 20px) !important;
 }
-.swiper.swiper-overflowed.items-4 .swiper-slide{
-    width: calc((100% / 4) - 10px) !important
+.swiper.swiper-overflowed.items-4 .swiper-slide {
+    width: calc((100% / 4) - 10px) !important;
 }
 
-/* ion-action-sheet */
-ion-action-sheet .action-sheet-group{
+/* Action Sheet */
+ion-action-sheet .action-sheet-group {
     background-color: #fff !important;
 }
-ion-action-sheet .action-sheet-button span{
-    color:var(--ion-color-step-300);
+ion-action-sheet .action-sheet-button span {
+    color: var(--ion-color-step-300);
 }
-ion-action-sheet ion-icon{
-    color:var(--ion-color-step-700) !important;
+ion-action-sheet ion-icon {
+    color: var(--ion-color-step-700) !important;
 }
-ion-action-sheet .action-sheet-group .action-sheet-button.action-sheet-destructive *{
-    color: var(--ion-color-danger) !important
+ion-action-sheet .action-sheet-group .action-sheet-button.action-sheet-destructive * {
+    color: var(--ion-color-danger) !important;
 }
-/* IOS */
-ion-action-sheet .action-sheet-container.sc-ion-action-sheet-ios button{
+
+/* IOS Action Sheet */
+ion-action-sheet .action-sheet-container.sc-ion-action-sheet-ios button {
     font-size: 15px;
 }
-ion-action-sheet .action-sheet-container.sc-ion-action-sheet-ios button ion-icon{
+ion-action-sheet .action-sheet-container.sc-ion-action-sheet-ios button ion-icon {
     font-size: 24px !important;
 }
 .action-sheet-group.sc-ion-action-sheet-ios {
     --button-background-selected: white;
-    /* --button-background:white; */
 }
 
-/*Buttons*/
-ion-button{
+/* Buttons */
+ion-button {
     text-transform: unset;
     font-weight: 700;
     height: 45px;
+    transition: all 0.2s ease;
 }
 
-ion-button.ion-color-medium{
+ion-button:hover {
+    opacity: 0.9;
+}
+
+ion-button.ion-color-medium {
     --ion-color-medium: var(--ion-color-step-900);
     --ion-color-medium-rgb: 227, 228, 228;
-    --box-shadow:none;
+    --box-shadow: none;
 }
 
-ion-button.ion-color-light-primary{
+ion-button.ion-color-light-primary {
     --ion-color-base: #FCDDE7;
     --ion-color-base-rgb: 252,221,231;
     --ion-color-contrast: var(--ion-color-primary);
@@ -150,18 +156,7 @@ ion-button.ion-color-light-primary{
     --ion-color-tint: #ffc8da;
 }
 
-/* Inputs */
-/* ion-item.item-input ion-label{ */
-/* ion-item.item-input ion-label, .item.sc-ion-label-md-h, .item .sc-ion-label-md-h{
-    --color: var(--ion-color-step-700)
-}
-
-
-*/
-/* 
-ion-item.item-input ion-label{
-    color: var(--ion-color-step-700)
-} */
+/* Input Items */
 /* Clean focus effect - just change border color */
 ion-item.item-input.item-has-focus,
 ion-item.item-select.item-has-focus,
@@ -177,14 +172,17 @@ ion-item.item-select.item-has-focus::part(native) {
     border: 1px solid #AB49CC !important;
 }
 
-ion-item.item-input ion-label, ion-item.item-input .sc-ion-label-md-h, ion-item.item-input .sc-ion-label-ios-h{
-    --color: var(--ion-color-step-700)
+ion-item.item-input ion-label,
+ion-item.item-input .sc-ion-label-md-h,
+ion-item.item-input .sc-ion-label-ios-h {
+    --color: var(--ion-color-step-700);
 }
 
-ion-item.item-input,ion-item.item-select{
-    --padding-start:16px;
-    --padding-end:16px;
-    --inner-padding-end:16px;
+ion-item.item-input,
+ion-item.item-select {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --inner-padding-end: 16px;
     --background: var(--app-surface, #FFFFFF);
     --border-color: var(--app-border, rgba(0,0,0,0.07));
     --border-radius: 8px;
@@ -199,13 +197,13 @@ ion-item.item-input,ion-item.item-select{
 }
 
 ion-item.item-input::part(native),
-ion-item.item-select::part(native){
+ion-item.item-select::part(native) {
     border-radius: 8px;
     box-shadow: none;
     border: 1px solid var(--app-border, rgba(0,0,0,0.07)) !important;
 }
 
-ion-item.item-checkbox{
+ion-item.item-checkbox {
     --ion-item-border-color: transparent;
     --background: transparent;
     --padding-start: 0;
@@ -213,80 +211,82 @@ ion-item.item-checkbox{
 }
 
 ion-item.item-input.item-has-value .label-floating.sc-ion-label-md-h,
-ion-item.item-input.item-has-focus .label-floating.sc-ion-label-md-h{
-    color: var(--ion-color-step-700)
-} 
+ion-item.item-input.item-has-focus .label-floating.sc-ion-label-md-h {
+    color: var(--ion-color-step-700);
+}
 
-ion-item ion-select{
-    width:100%;
+ion-item ion-select {
+    width: 100%;
     --color: var(--app-text-title, #1A1A2E);
     --placeholder-color: var(--app-text-body, #4E5457);
     --placeholder-opacity: 1;
-    --padding-start:0
+    --padding-start: 0;
 }
 
 ion-select::part(text),
 ion-select::part(placeholder),
-ion-select::part(icon){
+ion-select::part(icon) {
     color: var(--app-text-title, #1A1A2E);
     opacity: 1;
 }
 
-/* ── UX/UI Enhancements ──────────────────────────────── */
+/* UX/UI Enhancements */
 
-/* Cards: rounded corners + soft shadow + press feedback */
+/* Cards */
 ion-card {
-    border-radius: var(--app-radius-md, 16px) !important;
-    box-shadow: var(--app-shadow-sm, 0 2px 10px rgba(0,0,0,0.06)) !important;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+    transition: all 0.2s ease;
+}
+ion-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
 }
 ion-card:active {
-    transform: scale(0.97);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+    transform: scale(0.98);
 }
 
-/* Buttons */
-ion-button {
-    height: 48px;
-    letter-spacing: 0.3px;
-    --border-radius: var(--app-radius-md, 16px);
-}
-ion-button[expand="full"],
-ion-button[expand="block"] {
-    height: 52px;
-    font-size: 16px;
-    --box-shadow: var(--app-shadow-primary, 0 4px 16px rgba(171,73,204,0.22));
-}
-
-/* FAB: branded shadow */
+/* FAB Button */
 ion-fab-button {
-    --box-shadow: 0 4px 18px rgba(171, 73, 204, 0.38);
+    --box-shadow: 0 4px 12px rgba(171, 73, 204, 0.25);
     --border-radius: 50%;
+    transition: all 0.2s ease;
+}
+ion-fab-button:hover {
+    --box-shadow: 0 6px 16px rgba(171, 73, 204, 0.35);
 }
 
-/* Toolbar: subtle separator */
+/* Toolbar */
 ion-toolbar {
-    --box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+    --box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
+<<<<<<< HEAD
 /* Input items: primary focus - disabled */
 /* ion-item.item-input.item-has-focus,
 ion-item.item-select.item-has-focus {
     --border-color: var(--ion-color-primary) !important;
 } */
+=======
+/* Input Focus */
+ion-item.item-input.item-has-focus,
+ion-item.item-select.item-has-focus {
+    --border-color: var(--ion-color-primary) !important;
+    box-shadow: 0 2px 8px rgba(171, 73, 204, 0.15) !important;
+}
+>>>>>>> b41dd145cd24b4a13290bb8ef58b1787ac0580b5
 
-/* Chips: active state */
+/* Chips */
 ion-chip.active {
     --background: var(--ion-color-primary);
     --color: white;
 }
 
-/* Typography utilities */
-.text-title   { font-size: 18px; font-weight: 700; color: var(--app-text-title, #1A1A2E); }
-.text-body    { font-size: 14px; color: var(--app-text-body, #4E5457); }
-.text-meta    { font-size: 12px; color: var(--app-text-secondary, #8F9BB3); }
+/* Typography */
+.text-title { font-size: 18px; font-weight: 700; color: var(--app-text-title, #1A1A2E); }
+.text-body { font-size: 14px; color: var(--app-text-body, #4E5457); }
+.text-meta { font-size: 12px; color: var(--app-text-secondary, #8F9BB3); }
 
-/* Section header labels */
+/* Section headers */
 .section-header {
     display: block;
     font-size: 15px;
@@ -298,14 +298,14 @@ ion-chip.active {
 
 /* Login hero */
 .login-hero {
-    background: var(--app-gradient-primary, linear-gradient(145deg, #AB49CC 0%, #7A35AB 100%));
-    margin: -16px -16px 28px;
-    padding: 52px 32px 44px;
+    background: linear-gradient(135deg, #AB49CC 0%, #7A35AB 100%);
+    margin: 0 0 24px 0;
+    padding: 32px 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0 0 36px 36px;
-    box-shadow: var(--app-shadow-primary, 0 6px 24px rgba(171,73,204,0.28));
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 4px 12px rgba(171,73,204,0.2);
 }
 .login-hero ion-img {
     width: 160px;
@@ -338,16 +338,16 @@ ion-chip.active {
     font-size: 15px;
 }
 
-/* Page entrance animation */
+/* Page animations */
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 ion-router-outlet > .ion-page {
-  animation: fade-up 0.22s ease both;
+    animation: fade-up 0.22s ease both;
 }
 
-ion-item.item-input .input-success-messsage{
+ion-item.item-input .input-success-messsage {
     color: var(--ion-color-success);
     position: absolute;
     font-size: 12px;
@@ -355,93 +355,104 @@ ion-item.item-input .input-success-messsage{
     top: 13px;
 }
 
-/* Select options popup */
-ion-select-popover ion-list.list-md,ion-select-popover ion-list.list-ios{
+/* Select Popover */
+ion-select-popover ion-list.list-md,
+ion-select-popover ion-list.list-ios {
     background: white;
 }
-ion-select-popover ion-list ion-item{
+ion-select-popover ion-list ion-item {
     --background: white;
     --color: var(--app-text-title, #1A1A2E);
 }
 
 ion-select-popover ion-item::part(native),
-ion-select-popover ion-label{
+ion-select-popover ion-label {
     color: var(--app-text-title, #1A1A2E);
 }
 
-ion-select-popover ion-list ion-item.ios{
+ion-select-popover ion-list ion-item.ios {
     --inner-border-width: 0;
 }
-ion-select-popover ion-list ion-item.ios:not(:last-child){
+ion-select-popover ion-list ion-item.ios:not(:last-child) {
     border-bottom: 1px solid var(--ion-color-step-750);
 }
 
-/* SELECT LABEL TRANSITION */
-ion-item.item-select{
+/* Select label transition */
+ion-item.item-select {
     padding-top: 12px;
     overflow: visible;
 }
 
-ion-item.item-select ion-select{
-    --padding-top:8px;
-    --padding-bottom:8px;
+ion-item.item-select ion-select {
+    --padding-top: 8px;
+    --padding-bottom: 8px;
 }
 
 ion-item.item-select.item-has-value ion-select,
-ion-item.item-select.item-has-focus ion-select{
+ion-item.item-select.item-has-focus ion-select {
     position: absolute;
     max-width: unset;
 }
 
+<<<<<<< HEAD
 ion-item ion-label{
     /* transition: 150ms cubic-bezier(0.4, 0, 0.2, 1); */
+=======
+ion-item ion-label {
+    transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+>>>>>>> b41dd145cd24b4a13290bb8ef58b1787ac0580b5
 }
 
 ion-item.item-select ion-label.sc-ion-label-md-h,
-ion-item.item-select ion-label.sc-ion-label-ios-h{
+ion-item.item-select ion-label.sc-ion-label-ios-h {
     color: var(--ion-color-step-700);
-    margin:0;
-} 
+    margin: 0;
+}
 
+<<<<<<< HEAD
 /* ion-item.item-select.item-has-focus ion-label,
 ion-item.item-select.item-has-value ion-label{
+=======
+ion-item.item-select.item-has-focus ion-label,
+ion-item.item-select.item-has-value ion-label {
+>>>>>>> b41dd145cd24b4a13290bb8ef58b1787ac0580b5
     transform: scale(.75) translateY(calc(-100% - 12px)) translateX(-16%);
 } */
 
 ion-item.item-select.item-has-value .label-floating.sc-ion-label-md-h,
-ion-item.item-select.item-has-focus .label-floating.sc-ion-label-md-h{
-    color: var(--ion-color-step-700)
-} 
+ion-item.item-select.item-has-focus .label-floating.sc-ion-label-md-h {
+    color: var(--ion-color-step-700);
+}
 
-/* ALERT */
-.alert-wrapper.sc-ion-alert-ios{
-    --background:white;
+/* Alert */
+.alert-wrapper.sc-ion-alert-ios {
+    --background: white;
 }
 
 ion-alert .alert-wrapper.sc-ion-alert-md,
-ion-alert .alert-wrapper.sc-ion-alert-ios{
+ion-alert .alert-wrapper.sc-ion-alert-ios {
     background: var(--app-surface, #FFFFFF);
     color: var(--app-text-title, #1A1A2E);
 }
 
-ion-alert .alert-title.sc-ion-alert-md{
+ion-alert .alert-title.sc-ion-alert-md {
     color: var(--ion-color-step-300);
-    font-size:16px;
+    font-size: 16px;
     font-weight: 600;
     margin-bottom: 7px;
 }
-ion-alert .alert-sub-title.sc-ion-alert-md{
+ion-alert .alert-sub-title.sc-ion-alert-md {
     color: var(--ion-color-step-500);
-    font-size:14px
+    font-size: 14px;
 }
-ion-alert .alert-button.sc-ion-alert-md{
+ion-alert .alert-button.sc-ion-alert-md {
     font-weight: 700;
 }
 
 ion-alert .alert-radio-label.sc-ion-alert-md,
 ion-alert .alert-radio-label.sc-ion-alert-ios,
 ion-alert .alert-checkbox-label.sc-ion-alert-md,
-ion-alert .alert-checkbox-label.sc-ion-alert-ios{
+ion-alert .alert-checkbox-label.sc-ion-alert-ios {
     color: var(--app-text-title, #1A1A2E) !important;
     white-space: normal;
     line-height: 1.35;
@@ -451,7 +462,7 @@ ion-alert .alert-checkbox-label.sc-ion-alert-ios{
 ion-alert .alert-radio-button.sc-ion-alert-md,
 ion-alert .alert-radio-button.sc-ion-alert-ios,
 ion-alert .alert-checkbox-button.sc-ion-alert-md,
-ion-alert .alert-checkbox-button.sc-ion-alert-ios{
+ion-alert .alert-checkbox-button.sc-ion-alert-ios {
     color: var(--app-text-title, #1A1A2E) !important;
     opacity: 1 !important;
 }
@@ -459,7 +470,7 @@ ion-alert .alert-checkbox-button.sc-ion-alert-ios{
 ion-alert [aria-checked="true"] .alert-radio-label.sc-ion-alert-md,
 ion-alert [aria-checked="true"] .alert-radio-label.sc-ion-alert-ios,
 ion-alert [aria-checked="true"] .alert-checkbox-label.sc-ion-alert-md,
-ion-alert [aria-checked="true"] .alert-checkbox-label.sc-ion-alert-ios{
+ion-alert [aria-checked="true"] .alert-checkbox-label.sc-ion-alert-ios {
     color: var(--ion-color-primary) !important;
     font-weight: 700;
 }
@@ -467,7 +478,7 @@ ion-alert [aria-checked="true"] .alert-checkbox-label.sc-ion-alert-ios{
 ion-alert .alert-radio-icon.sc-ion-alert-md,
 ion-alert .alert-radio-icon.sc-ion-alert-ios,
 ion-alert .alert-checkbox-icon.sc-ion-alert-md,
-ion-alert .alert-checkbox-icon.sc-ion-alert-ios{
+ion-alert .alert-checkbox-icon.sc-ion-alert-ios {
     border-color: var(--app-text-body, #4E5457) !important;
     opacity: 1 !important;
 }
@@ -475,14 +486,14 @@ ion-alert .alert-checkbox-icon.sc-ion-alert-ios{
 ion-alert [aria-checked="true"] .alert-radio-icon.sc-ion-alert-md,
 ion-alert [aria-checked="true"] .alert-radio-icon.sc-ion-alert-ios,
 ion-alert [aria-checked="true"] .alert-checkbox-icon.sc-ion-alert-md,
-ion-alert [aria-checked="true"] .alert-checkbox-icon.sc-ion-alert-ios{
+ion-alert [aria-checked="true"] .alert-checkbox-icon.sc-ion-alert-ios {
     border-color: var(--ion-color-primary) !important;
 }
 
-ion-alert .alert-button.alert-button-role-cancel{
-    color:var(--app-text-body, #4E5457)
+ion-alert .alert-button.alert-button-role-cancel {
+    color: var(--app-text-body, #4E5457);
 }
 
-ion-alert .alert-button.sc-ion-alert-md.alert-button-role-confirm{
+ion-alert .alert-button.sc-ion-alert-md.alert-button-role-confirm {
     background: rgba(232, 28, 98, 0.1);
 }
