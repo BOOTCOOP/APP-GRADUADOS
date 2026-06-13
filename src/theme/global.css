@@ -162,8 +162,19 @@ ion-button.ion-color-light-primary{
 ion-item.item-input ion-label{
     color: var(--ion-color-step-700)
 } */
-ion-item.ios.item-input.item-has-focus{
-    --border-color: var(--ion-color-primary);
+/* Clean focus effect - just change border color */
+ion-item.item-input.item-has-focus,
+ion-item.item-select.item-has-focus,
+ion-item.ios.item-input.item-has-focus {
+    --border-color: #AB49CC !important;
+    --box-shadow: none !important;
+    --highlight-background: transparent !important;
+    --highlight-height: 0 !important;
+}
+
+ion-item.item-input.item-has-focus::part(native),
+ion-item.item-select.item-has-focus::part(native) {
+    border: 1px solid #AB49CC !important;
 }
 
 ion-item.item-input ion-label, ion-item.item-input .sc-ion-label-md-h, ion-item.item-input .sc-ion-label-ios-h{
@@ -176,21 +187,22 @@ ion-item.item-input,ion-item.item-select{
     --inner-padding-end:16px;
     --background: var(--app-surface, #FFFFFF);
     --border-color: var(--app-border, rgba(0,0,0,0.07));
-    --border-radius: 12px;
+    --border-radius: 8px;
     --border-style: solid;
     --border-width: 1px;
     --inner-border-width: 0;
     --highlight-height: 0;
-    border-radius: 12px;
+    --highlight-background: transparent;
+    border-radius: 8px;
     box-shadow: var(--app-shadow-sm, 0 2px 10px rgba(0,0,0,0.06));
     margin-bottom: 12px;
-    overflow: hidden;
 }
 
 ion-item.item-input::part(native),
 ion-item.item-select::part(native){
-    border-radius: 12px;
+    border-radius: 8px;
     box-shadow: none;
+    border: 1px solid var(--app-border, rgba(0,0,0,0.07)) !important;
 }
 
 ion-item.item-checkbox{
@@ -257,12 +269,11 @@ ion-toolbar {
     --box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
 }
 
-/* Input items: primary focus */
-ion-item.item-input.item-has-focus,
+/* Input items: primary focus - disabled */
+/* ion-item.item-input.item-has-focus,
 ion-item.item-select.item-has-focus {
     --border-color: var(--ion-color-primary) !important;
-    box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.14);
-}
+} */
 
 /* Chips: active state */
 ion-chip.active {
@@ -383,7 +394,7 @@ ion-item.item-select.item-has-focus ion-select{
 }
 
 ion-item ion-label{
-    transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    /* transition: 150ms cubic-bezier(0.4, 0, 0.2, 1); */
 }
 
 ion-item.item-select ion-label.sc-ion-label-md-h,
@@ -392,10 +403,10 @@ ion-item.item-select ion-label.sc-ion-label-ios-h{
     margin:0;
 } 
 
-ion-item.item-select.item-has-focus ion-label,
+/* ion-item.item-select.item-has-focus ion-label,
 ion-item.item-select.item-has-value ion-label{
     transform: scale(.75) translateY(calc(-100% - 12px)) translateX(-16%);
-}
+} */
 
 ion-item.item-select.item-has-value .label-floating.sc-ion-label-md-h,
 ion-item.item-select.item-has-focus .label-floating.sc-ion-label-md-h{
