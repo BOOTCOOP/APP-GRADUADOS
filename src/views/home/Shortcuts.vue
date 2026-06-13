@@ -79,8 +79,8 @@ const shortcuts = [
 .shortcuts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 10px 16px 24px;
+  gap: 16px;
+  padding: 16px 16px 24px;
 }
 
 /* ── Individual Card ────────────────────────────── */
@@ -88,25 +88,29 @@ const shortcuts = [
   background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
-  padding: 18px 10px 14px;
+  padding: 20px 12px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
-  transition: transform 0.14s ease, box-shadow 0.14s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
+.shortcut-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
 .shortcut-card:active {
-  transform: scale(0.94);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  transform: scale(0.96);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 .shortcut-card.span-2 {
   grid-column: span 2;
   flex-direction: row;
-  padding: 18px 24px;
+  padding: 16px 24px;
   justify-content: center;
   gap: 16px;
 }

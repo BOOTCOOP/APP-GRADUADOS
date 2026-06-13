@@ -187,7 +187,16 @@
         >
           <IonItem>
             <IonLabel position="floating">Fecha de nacimiento</IonLabel>
-            <IonInput v-bind="field" />
+            <IonDatetime
+              slot="end"
+              presentation="date"
+              :value="dateForDisplay"
+              @ionChange="(e) => handleDateChange(e, field)"
+              :max="new Date().toISOString()"
+              cancel-text="Cancelar"
+              confirm-text="Confirmar"
+              :style="{ minWidth: '100%' }"
+            ></IonDatetime>
           </IonItem>
           <ErrorMessage name="birthdate" #default="{ message }">
             <ion-text color="danger"
@@ -346,6 +355,7 @@ import {
   IonButton,
   IonCard,
   IonCardContent,
+  IonDatetime,
   IonIcon,
   IonInput,
   IonItem,
@@ -397,6 +407,7 @@ const data = reactive({
   password_confirmation: "",
   phone: "",
   dni: "",
+  birthdate: "",
   type_id: 1,
   images: [],
   thumb: "",
@@ -420,6 +431,24 @@ const steps = [
 const step = ref(steps[0]);
 
 const passwordValidation = ref(null);
+
+// Convertir DDMMYYYY a YYYY-MM-DD para mostrar en el date picker
+const dateForDisplay = () => {
+  if (!data.birthdate || data.birthdate.length !== 8) return undefined;
+  const ddmmyyyy = data.birthdate;
+  const dd = ddmmyyyy.substring(0, 2);
+  const mm = ddmmyyyy.substring(2, 4);
+  const yyyy = ddmmyyyy.substring(4, 8);
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+// Convertir YYYY-MM-DD a DDMMYYYY para el backend
+const handleDateChange = (event, field) => {
+  const isoDate = event.detail.value;
+  if (!isoDate) return;
+  const [yyyy, mm, dd] = isoDate.split('T')[0].split('-');
+  data.birthdate = `${dd}${mm}${yyyy}`;
+};
 
 async function stepValid() {
   const valid = await form.value.validate();
