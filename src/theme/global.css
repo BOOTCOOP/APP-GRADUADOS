@@ -260,20 +260,11 @@ ion-toolbar {
     --box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
-<<<<<<< HEAD
 /* Input items: primary focus - disabled */
 /* ion-item.item-input.item-has-focus,
 ion-item.item-select.item-has-focus {
     --border-color: var(--ion-color-primary) !important;
 } */
-=======
-/* Input Focus */
-ion-item.item-input.item-has-focus,
-ion-item.item-select.item-has-focus {
-    --border-color: var(--ion-color-primary) !important;
-    box-shadow: 0 2px 8px rgba(171, 73, 204, 0.15) !important;
-}
->>>>>>> b41dd145cd24b4a13290bb8ef58b1787ac0580b5
 
 /* Chips */
 ion-chip.active {
@@ -394,13 +385,8 @@ ion-item.item-select.item-has-focus ion-select {
     max-width: unset;
 }
 
-<<<<<<< HEAD
 ion-item ion-label{
     /* transition: 150ms cubic-bezier(0.4, 0, 0.2, 1); */
-=======
-ion-item ion-label {
-    transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
->>>>>>> b41dd145cd24b4a13290bb8ef58b1787ac0580b5
 }
 
 ion-item.item-select ion-label.sc-ion-label-md-h,
@@ -409,13 +395,8 @@ ion-item.item-select ion-label.sc-ion-label-ios-h {
     margin: 0;
 }
 
-<<<<<<< HEAD
 /* ion-item.item-select.item-has-focus ion-label,
 ion-item.item-select.item-has-value ion-label{
-=======
-ion-item.item-select.item-has-focus ion-label,
-ion-item.item-select.item-has-value ion-label {
->>>>>>> b41dd145cd24b4a13290bb8ef58b1787ac0580b5
     transform: scale(.75) translateY(calc(-100% - 12px)) translateX(-16%);
 } */
 
