@@ -1,6 +1,0 @@
-"use strict";(self["webpackChunkgraduados_app"]=self["webpackChunkgraduados_app"]||[]).push([[4735],{4735(e,t,i){i.d(t,{startKeyboardAssist:()=>r});
-/*!
- * (C) Ionic http://ionicframework.com - MIT License
- */
-const s="ionKeyboardDidShow",a="ionKeyboardDidHide",o=150;let d={},h={},n=!1;const r=e=>{p(e),e.visualViewport&&(h=k(e.visualViewport),e.visualViewport.onresize=()=>{v(e),c()||f(e)?g(e):w(e)&&u(e)})},p=e=>{e.addEventListener("keyboardDidShow",t=>g(e,t)),e.addEventListener("keyboardDidHide",()=>u(e))},g=(e,t)=>{l(e,t),n=!0},u=e=>{b(e),n=!1},c=()=>{const e=(d.height-h.height)*h.scale;return!n&&d.width===h.width&&e>o},f=e=>n&&!w(e),w=e=>n&&h.height===e.innerHeight,l=(e,t)=>{const i=t?t.keyboardHeight:e.innerHeight-h.height,a=new CustomEvent(s,{detail:{keyboardHeight:i}});e.dispatchEvent(a)},b=e=>{const t=new CustomEvent(a);e.dispatchEvent(t)},v=e=>{d=Object.assign({},h),h=k(e.visualViewport)},k=e=>({width:Math.round(e.width),height:Math.round(e.height),offsetTop:e.offsetTop,offsetLeft:e.offsetLeft,pageTop:e.pageTop,pageLeft:e.pageLeft,scale:e.scale})}}]);
-//# sourceMappingURL=4735-legacy.72de788d.js.map
