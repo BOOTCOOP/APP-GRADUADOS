@@ -49,6 +49,13 @@
             valid: null,
         },
         {
+            text: 'Una minúscula',
+            validation: () => {
+                return !!passwordText.value.match(new RegExp("[a-z]+"));
+            },
+            valid: null,
+        },
+        {
             text: 'Un número',
             validation: () => {
                 return !!passwordText.value.match(new RegExp("[0-9]+"));

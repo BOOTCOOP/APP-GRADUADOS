@@ -191,6 +191,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import BibliographyItem from '../bibliography/components/BibliographyItem.vue'
 import SocialShare from '@/components/SocialShare.vue'
+import { useCurrentUser } from '@/uses/currentUser'
 
 const ionRouter = useIonRouter()
 const loaded = ref(false)
@@ -199,32 +200,41 @@ const route = useRoute()
 const workshop = ref<any>({})
 const router = useIonRouter()
 
+// Gate a nivel usuario (can_operate / operability_issue).
+const { canOperate, operabilityIssue } = useCurrentUser()
+
 // Mensaje para estados de inscripción
 const enrollmentMessage = computed(() => {
   if (!workshop.value) return '';
-  
+
+  // Gate de usuario primero: si no puede operar y hay motivo, lo mostramos.
+  if (!canOperate.value && operabilityIssue.value) return operabilityIssue.value;
+
   if (workshop.value.is_full) return 'Taller completo - Sin cupos disponibles';
   if (workshop.value.is_ended) return 'Taller finalizado';
   if (workshop.value.registration_closed) return 'Inscripciones cerradas';
-  
+
   return '';
 })
 
 // Verificar si se puede inscribir ahora
 function canEnrollNow() {
   if (!workshop.value) return false;
-  
+
+  // Gate a nivel usuario: si no puede operar, no se puede inscribir.
+  if (!canOperate.value) return false;
+
   // Si el backend permite explícitamente la inscripción
   if (workshop.value.can_enroll) return true;
-  
+
   // Si no está inscrito y no está lleno/cerrado
-  if (!workshop.value.is_enrolled && 
-      !workshop.value.is_full && 
-      !workshop.value.is_ended && 
+  if (!workshop.value.is_enrolled &&
+      !workshop.value.is_full &&
+      !workshop.value.is_ended &&
       !workshop.value.registration_closed) {
     return true;
   }
-  
+
   return false;
 }
 

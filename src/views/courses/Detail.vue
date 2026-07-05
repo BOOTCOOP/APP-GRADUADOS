@@ -142,7 +142,7 @@
       <div class="footer-actions">
         <!-- Botón de inscripción real -->
         <ion-button
-          v-if="!course.is_enrolled && course.can_enroll"
+          v-if="canEnroll"
           @click="enroll"
           shape="round"
           expand="full"
@@ -182,7 +182,10 @@
         <!-- Mensaje informativo -->
         <div class="info-message ion-text-center ion-margin-top">
           <ion-text color="medium">
-            <p v-if="course.can_enroll && !course.is_enrolled">
+            <p v-if="!canOperate && operabilityIssue">
+              <small>{{ operabilityIssue }}</small>
+            </p>
+            <p v-else-if="canEnroll">
               <small
                 >Al hacer clic en "INSCRIPCIÓN" te registrarás en este
                 curso.</small
@@ -235,11 +238,12 @@ import {
   arrowBackOutline,
   checkmarkCircleOutline,
 } from "ionicons/icons";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import SocialShare from "@/components/SocialShare.vue";
 import { analyzeCourseForModality } from "@/utils/modalityDetector";
+import { useCurrentUser } from "@/uses/currentUser";
 
 const loaded = ref(false);
 const enrolling = ref(false);
@@ -247,6 +251,14 @@ const store = useStore();
 const route = useRoute();
 const course = ref<any>({});
 const router = useIonRouter();
+
+// Gate a nivel usuario (can_operate / operability_issue).
+const { canOperate, operabilityIssue } = useCurrentUser();
+
+// Puede inscribirse si el recurso lo permite Y el usuario puede operar.
+const canEnroll = computed(
+  () => !course.value.is_enrolled && course.value.can_enroll && canOperate.value
+);
 
 function goBack() {
   router.replace({ name: "courses.index" });

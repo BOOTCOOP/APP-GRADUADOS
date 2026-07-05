@@ -8,20 +8,20 @@
             </ion-text>
             <ion-text color="medium">
                 <small>
-                    Te enviaremos un enlace que te permite establecer una nueva contraseña.
+                    Ingresá tu DNI y te enviaremos al correo registrado un enlace para establecer una nueva contraseña.
                 </small>
             </ion-text>
-            
+
             <Form ref="form" class="content">
-                
-                <Field v-model="email" class="ion-margin-top" name="email" v-slot="{ field }" rules="required|email">
+
+                <Field v-model="dni" class="ion-margin-top" name="dni" v-slot="{ field }" rules="required|numeric">
                     <IonItem>
-                        <IonLabel position="floating">Correo Electrónico</IonLabel>
-                        <IonInput v-bind="field"/>
+                        <IonLabel position="floating">DNI</IonLabel>
+                        <IonInput v-bind="field" inputmode="numeric"/>
                     </IonItem>
-                    <ErrorMessage name="email" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                    <ErrorMessage name="dni" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                 </Field>
-            </Form> 
+            </Form>
         </div>
         
         <div v-if="sent" class="recovery-sent ion-text-center ion-padding">
@@ -49,7 +49,7 @@
         ionRouter.navigate('/login', 'forward', 'replace');
     }
 
-    const email = ref('')
+    const dni = ref('')
     const sent = ref(false)
     const form = ref(false);
     const sending = ref(false)
@@ -58,11 +58,11 @@
         form.value.validate().then( v => {
             if(v.valid){
                 sending.value = true;
-                useAuth().forgotPassword(email.value).then(() => {
+                // forgot-password devuelve 200 siempre (no revela si el DNI existe).
+                useAuth().forgotPassword(dni.value).then(() => {
                     sent.value = true;
-                }).catch(err => {
-                    form.value.setErrors(err.response.data || {email: "Hubo un error"});
-                    sending.value = false;
+                }).catch(() => {
+                    form.value.setErrors({dni: "Hubo un error"});
                 }).finally(() => {
                     sending.value = false;
                 })

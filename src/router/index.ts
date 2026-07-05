@@ -1,4 +1,5 @@
 import ApiToken from '@/utils/apitoken'
+import { useCurrentUser } from '@/uses/currentUser'
 import { createRouter, createWebHistory } from '@ionic/vue-router'
 import { RouteRecordRaw } from 'vue-router'
 
@@ -36,9 +37,16 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/auth/ForgotPassword.vue'),
   },
   {
-    path: '/cambiar-contrasena/:token',
-    name: 'change-password',
-    component: () => import('../views/auth/ChangePassword.vue'),
+    path: '/completar-perfil',
+    name: 'complete-profile',
+    component: () => import('../views/profile/CompleteProfile.vue'),
+    meta: { auth },
+  },
+  {
+    path: '/validar-tipo',
+    name: 'type-validation',
+    component: () => import('../views/profile/TypeValidation.vue'),
+    meta: { auth },
   },
   {
     path: '/perfil',
@@ -241,10 +249,19 @@ const router = createRouter({
 
 router.beforeEach((route, from, next) => {
   if (route.meta?.auth && !ApiToken.isSet()) {
-    next({ name: 'login' })
-  } else {
-    next()
+    return next({ name: 'login' })
   }
+
+  // Gate de perfil incompleto: si el usuario está logueado y profile_complete es
+  // explícitamente false, forzamos completar los datos antes de operar en la app.
+  if (ApiToken.isSet()) {
+    const { profileComplete } = useCurrentUser()
+    if (profileComplete.value === false && route.name !== 'complete-profile') {
+      return next({ name: 'complete-profile' })
+    }
+  }
+
+  next()
 })
 
 export default router

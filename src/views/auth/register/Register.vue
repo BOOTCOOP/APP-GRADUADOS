@@ -5,7 +5,7 @@
         <ion-icon
           @click="stepBack"
           class="ion-margin-end"
-          v-show="step.step != 1"
+          v-show="canGoBack"
           color="primary"
           :ios="arrowBackOutline"
           :md="arrowBackOutline"
@@ -14,506 +14,471 @@
       </h5>
     </ion-text>
 
-    <Form ref="form">
-      <div v-show="step.step == 1">
-        <!-- Texto explicativo del paso 1 -->
-        <ion-card class="info-card ion-margin-bottom">
-          <ion-card-content>
-            <div class="info-content">
-              <ion-icon
-                :icon="informationCircleOutline"
-                color="primary"
-              ></ion-icon>
-              <ion-text>
-                <p>
-                  <strong
-                    >Asegurate de usar un email al que tengas acceso
-                    regularmente.</strong
-                  >
-                </p>
-                <p class="info-detail">
-                  Es la cuenta a la que enviaremos todas las constancias y
-                  documentaciones que solicites, como tu constancia regular o de
-                  graduado.
-                </p>
-              </ion-text>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
-        <Field
-          v-model="data.firstname"
-          label="nombre"
-          name="firstname"
-          v-slot="{ field }"
-          :rules="step.step == 1 ? 'required' : ''"
-        >
-          <IonItem>
-            <IonLabel position="floating">Nombre</IonLabel>
-            <IonInput v-bind="field" />
-          </IonItem>
-          <ErrorMessage name="firstname" #default="{ message }">
-            <ion-text color="danger"
-              ><small>{{ message }}</small></ion-text
-            ></ErrorMessage
-          >
-        </Field>
-
-        <Field
-          v-model="data.lastname"
-          label="apellido"
-          name="lastname"
-          v-slot="{ field }"
-          :rules="step.step == 1 ? 'required' : ''"
-        >
-          <IonItem>
-            <IonLabel position="floating">Apellido</IonLabel>
-            <IonInput v-bind="field" />
-          </IonItem>
-          <ErrorMessage name="lastname" #default="{ message }">
-            <ion-text color="danger"
-              ><small>{{ message }}</small></ion-text
-            ></ErrorMessage
-          >
-        </Field>
-        <Field
-          v-model="data.email"
-          label="email"
-          name="email"
-          v-slot="{ field, meta }"
-          :rules="step.step == 1 ? 'required|email|notExists' : ''"
-        >
-          <IonItem>
-            <IonLabel position="floating">Email</IonLabel>
-            <IonInput v-bind="field" />
-            <span
-              class="input-success-messsage"
-              v-if="!meta.pending && meta.valid && meta.validated"
-              >Email disponible</span
-            >
-          </IonItem>
-          <ErrorMessage name="email" #default="{ message }">
-            <ion-text color="danger"
-              ><small>{{ message }}</small></ion-text
-            ></ErrorMessage
-          >
-        </Field>
-
-        <Field
-          label="contraseña"
-          name="password"
-          v-slot="{ field }"
-          :rules="step.step == 1 ? 'passwordIsValid' : ''"
-        >
-          <FormPasswordValidation
-            v-bind="field"
-            v-model:password="data.password"
-            v-model:password_confirmation="data.password_confirmation"
-            @password-is-valid="(v) => (passwordValidation = v)"
-          ></FormPasswordValidation>
-          <ErrorMessage name="password" #default="{ message }">
-            <ion-text color="danger"
-              ><small>{{ message }}</small></ion-text
-            ></ErrorMessage
-          >
-        </Field>
-      </div>
-
-      <div v-show="step.step == 2">
-        <!-- Texto explicativo del paso 2 -->
-        <ion-card class="info-card ion-margin-bottom">
-          <ion-card-content>
-            <div class="info-content">
-              <ion-icon
-                :icon="shieldCheckmarkOutline"
-                color="success"
-              ></ion-icon>
-              <ion-text>
-                <p><strong>¿Por qué necesitamos estos datos?</strong></p>
-                <p class="info-detail">
-                  Los utilizamos para validar que sos un estudiante o graduado
-                  de la UBA y así poder darte acceso a todos los beneficios
-                  exclusivos.
-                </p>
-                <p class="info-detail">
-                  <strong>Tu número de teléfono</strong> será usado únicamente
-                  para enviarte confirmaciones importantes de tus trámites.
-                </p>
-              </ion-text>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
-        <Field
-          v-model="data.phone"
-          label="teléfono"
-          name="phone"
-          v-slot="{ field }"
-          :rules="step.step == 2 ? 'required' : ''"
-        >
-          <IonItem>
-            <IonLabel position="floating">Teléfono</IonLabel>
-            <IonInput v-bind="field" />
-          </IonItem>
-          <ErrorMessage name="phone" #default="{ message }">
-            <ion-text color="danger"
-              ><small>{{ message }}</small></ion-text
-            ></ErrorMessage
-          >
-        </Field>
-        <Field
-          v-model="data.dni"
-          label="DNI"
-          name="dni"
-          v-slot="{ field }"
-          :rules="step.step == 2 ? 'required|numeric|length:8' : ''"
-        >
-          <IonItem>
-            <IonLabel position="floating">DNI</IonLabel>
-            <IonInput v-bind="field" />
-          </IonItem>
-          <ErrorMessage name="dni" #default="{ message }">
-            <ion-text color="danger"
-              ><small>{{ message }}</small></ion-text
-            ></ErrorMessage
-          >
-        </Field>
-        <Field
-          v-model="data.birthdate"
-          label="Fecha de nacimiento"
-          name="birthdate"
-          v-slot="{ field }"
-          :rules="step.step == 2 ? 'required|numeric|length:8' : ''"
-        >
-          <IonItem>
-            <IonLabel position="floating">Fecha de nacimiento</IonLabel>
-            <IonDatetime
-              slot="end"
-              presentation="date"
-              :value="dateForDisplay"
-              @ionChange="(e) => handleDateChange(e, field)"
-              :max="new Date().toISOString()"
-              cancel-text="Cancelar"
-              confirm-text="Confirmar"
-              :style="{ minWidth: '100%' }"
-            ></IonDatetime>
-          </IonItem>
-          <ErrorMessage name="birthdate" #default="{ message }">
-            <ion-text color="danger"
-              ><small>{{ message }}</small></ion-text
-            ></ErrorMessage
-          >
-        </Field>
-        <div class="image-upload ion-margin-top ion-padding-top">
-          <ion-label class="text-muted">Foto de cara</ion-label>
-          <!-- <ion-input ></ion-input> -->
-          <profile-picture
-            main-color="primary"
-            :icon="cloudUploadOutline"
-            :thumb="data.thumb"
-            :emptyImg="null"
-            @image-changed="setImage"
-          />
-        </div>
-      </div>
-
-      <div v-show="step.step == 3" class="graduate-type ion-margin-top">
-        <ion-card
-          :class="{ selected: data.type_id == 2 }"
-          @click="() => (data.type_id = 2)"
-        >
-          <ion-card-content>
-            <ion-text>Graduado (UBA)</ion-text>
-            <ion-icon
-              :md="schoolOutline"
-              :ios="schoolOutline"
-              size="large"
-              color="primary"
-            ></ion-icon>
-          </ion-card-content>
-        </ion-card>
-        <ion-card
-          :class="{ selected: data.type_id == 6 }"
-          @click="() => (data.type_id = 6)"
-        >
-          <ion-card-content>
-            <ion-text>Título en trámite</ion-text>
-            <ion-icon
-              :md="schoolOutline"
-              :ios="schoolOutline"
-              size="large"
-              color="primary"
-            ></ion-icon>
-          </ion-card-content>
-        </ion-card>
-        <ion-card
-          :class="{ selected: data.type_id == 4 }"
-          @click="() => (data.type_id = 4)"
-        >
-          <ion-card-content>
-            <ion-text>Graduado - (Otra universidad)</ion-text>
-            <ion-icon
-              :md="schoolOutline"
-              :ios="schoolOutline"
-              size="large"
-              color="primary"
-            ></ion-icon>
-          </ion-card-content>
-        </ion-card>
-        <ion-card
-          :class="{ selected: data.type_id == 1 }"
-          @click="() => (data.type_id = 1)"
-        >
-          <ion-card-content>
-            <ion-text>Alumno (UBA)</ion-text>
-            <ion-icon
-              :md="personOutline"
-              :ios="personOutline"
-              size="large"
-              color="primary"
-            ></ion-icon>
-          </ion-card-content>
-        </ion-card>
-        <ion-card
-          :class="{ selected: data.type_id == 3 }"
-          @click="() => (data.type_id = 3)"
-        >
-          <ion-card-content>
-            <ion-text>Alumno - (Otra universidad)</ion-text>
-            <ion-icon
-              :md="personOutline"
-              :ios="personOutline"
-              size="large"
-              color="primary"
-            ></ion-icon>
-          </ion-card-content>
-        </ion-card>
-        <ion-card
-          :class="{ selected: data.type_id == 5 }"
-          @click="() => (data.type_id = 5)"
-        >
-          <ion-card-content>
-            <ion-text>Público General</ion-text>
-            <ion-icon
-              :md="manOutline"
-              :ios="manOutline"
-              size="large"
-              color="primary"
-            ></ion-icon>
-          </ion-card-content>
-        </ion-card>
-      </div>
-
-      <label v-show="!file && data.type_id == 4" class="box" for="diploma">
-        <form
-          action="http://localhost:3000/upload"
-          method="post"
-          enctype="multipart/form-data"
-        >
-          <input type="file" id="diploma" name="diploma" @change="uploadFile" />
-          <div class="container">
-            <ion-icon
-              color="primary"
-              size="large"
-              :md="cloudUploadOutline"
-              :ios="cloudUploadOutline"
-            ></ion-icon>
-            <ion-text>Cargar título</ion-text>
+    <!-- PASO 1: DNI -->
+    <Form v-if="stage === 'dni'" ref="dniForm">
+      <ion-card class="info-card ion-margin-bottom">
+        <ion-card-content>
+          <div class="info-content">
+            <ion-icon :icon="informationCircleOutline" color="primary"></ion-icon>
+            <ion-text>
+              <p><strong>Ingresá tu DNI para comenzar.</strong></p>
+              <p class="info-detail">
+                Verificamos tu identidad contra el padrón de la facultad para darte
+                acceso a los beneficios de graduados.
+              </p>
+            </ion-text>
           </div>
-        </form>
-      </label>
-      <div v-show="file" class="box">
-        <div class="container">
-          <ion-icon
-            color="primary"
-            size="large"
-            :md="documentOutline"
-            :ios="documentOutline"
-          ></ion-icon>
-          <ion-text>{{ file.name }}</ion-text>
+        </ion-card-content>
+      </ion-card>
+
+      <Field v-model="dni" name="dni" v-slot="{ field }" rules="required|numeric">
+        <IonItem>
+          <IonLabel position="floating">DNI</IonLabel>
+          <IonInput v-bind="field" inputmode="numeric" />
+        </IonItem>
+        <ErrorMessage name="dni" #default="{ message }">
+          <ion-text color="danger"><small>{{ message }}</small></ion-text>
+        </ErrorMessage>
+      </Field>
+    </Form>
+
+    <!-- PASO 2 (Caso B): email + password + tipo (+ documento si otra universidad) -->
+    <Form v-else-if="stage === 'form'" ref="registerForm">
+      <ion-card class="info-card ion-margin-bottom">
+        <ion-card-content>
+          <div class="info-content">
+            <ion-icon :icon="informationCircleOutline" color="primary"></ion-icon>
+            <ion-text>
+              <p><strong>Usá un email al que tengas acceso.</strong></p>
+              <p class="info-detail">
+                Te enviaremos un enlace para confirmar tu cuenta y ahí recibirás tus
+                constancias.
+              </p>
+            </ion-text>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <Field
+        v-model="data.email"
+        name="email"
+        v-slot="{ field }"
+        rules="required|email"
+      >
+        <IonItem>
+          <IonLabel position="floating">Email</IonLabel>
+          <IonInput v-bind="field" type="email" inputmode="email" />
+        </IonItem>
+        <ErrorMessage name="email" #default="{ message }">
+          <ion-text color="danger"><small>{{ message }}</small></ion-text>
+        </ErrorMessage>
+      </Field>
+
+      <Field name="password" v-slot="{ field }" rules="passwordIsValid">
+        <FormPasswordValidation
+          v-bind="field"
+          v-model:password="data.password"
+          v-model:password_confirmation="data.password_confirmation"
+          @password-is-valid="(v) => (passwordValidation = v)"
+        ></FormPasswordValidation>
+        <ErrorMessage name="password" #default="{ message }">
+          <ion-text color="danger"><small>{{ message }}</small></ion-text>
+        </ErrorMessage>
+      </Field>
+
+      <!-- Selector de tipo (4 opciones) -->
+      <div class="graduate-type ion-margin-top">
+        <ion-card
+          v-for="type in userTypes"
+          :key="type.id"
+          :class="{ selected: data.type_id === type.id }"
+          @click="selectType(type.id)"
+        >
+          <ion-card-content>
+            <ion-text>{{ type.label }}</ion-text>
+            <ion-icon
+              :md="schoolOutline"
+              :ios="schoolOutline"
+              size="large"
+              color="primary"
+            ></ion-icon>
+          </ion-card-content>
+        </ion-card>
+        <ion-text v-if="typeError" color="danger">
+          <small>Elegí una categoría para continuar.</small>
+        </ion-text>
+      </div>
+
+      <!-- Documento (solo Graduado otra universidad = 4) -->
+      <div v-if="isOtherUniversity(data.type_id)" class="ion-margin-top">
+        <ion-text color="medium">
+          <p><small>Para validar tu título de otra universidad podés adjuntar el
+          documento ahora o hacerlo más tarde desde tu perfil.</small></p>
+        </ion-text>
+
+        <label v-if="!verifyLater && !documento" class="box" for="documento">
+          <input
+            type="file"
+            id="documento"
+            name="documento"
+            accept=".pdf,.jpg,.jpeg,.png,.webp"
+            @change="onDocumentPicked"
+          />
+          <div class="container">
+            <ion-icon color="primary" size="large" :md="cloudUploadOutline" :ios="cloudUploadOutline"></ion-icon>
+            <ion-text>Adjuntar documento</ion-text>
+            <ion-text color="medium"><small>PDF/JPG/PNG/WEBP · máx 5 MB</small></ion-text>
+          </div>
+        </label>
+        <div v-if="documento && !verifyLater" class="box">
+          <div class="container">
+            <ion-icon color="primary" size="large" :md="documentOutline" :ios="documentOutline"></ion-icon>
+            <ion-text>{{ documento.name }}</ion-text>
+            <ion-text color="primary" @click="clearDocument"><small>Quitar</small></ion-text>
+          </div>
         </div>
+
+        <IonItem lines="none" class="ion-margin-top">
+          <IonCheckbox v-model="verifyLater" @ionChange="onVerifyLaterChange" slot="start"></IonCheckbox>
+          <IonLabel class="ion-text-wrap"><small>Verificar luego (subir el documento más tarde)</small></IonLabel>
+        </IonItem>
       </div>
     </Form>
 
+    <!-- REVISÁ TU MAIL (Caso A y B) -->
+    <div v-else-if="stage === 'checkMail'" class="ion-text-center ion-padding">
+      <ion-icon :icon="mailOutline" color="primary" style="font-size: 64px"></ion-icon>
+      <ion-text><h6><strong>Revisá tu correo</strong></h6></ion-text>
+      <ion-text color="medium" v-if="mailMode === 'A'">
+        <p><small>
+          Ya existe una cuenta asociada a ese DNI. Te enviamos un enlace a
+          <strong>{{ maskedEmail }}</strong> para que crees tu contraseña.
+        </small></p>
+      </ion-text>
+      <ion-text color="medium" v-else>
+        <p><small>
+          Te enviamos un enlace de confirmación<span v-if="maskedEmail"> a
+          <strong>{{ maskedEmail }}</strong></span>. Confirmá tu cuenta y volvé a
+          iniciar sesión.
+        </small></p>
+      </ion-text>
+      <ion-text
+        v-if="mailMode === 'A'"
+        color="primary"
+        class="link"
+        @click="goToDispute"
+      ><small>No tengo acceso a ese mail</small></ion-text>
+    </div>
+
+    <!-- DISPUTA / CONTACTAR ADMINISTRACIÓN -->
+    <div v-else-if="stage === 'dispute'">
+      <ion-card class="info-card ion-margin-bottom">
+        <ion-card-content>
+          <div class="info-content">
+            <ion-icon :icon="alertCircleOutline" color="warning"></ion-icon>
+            <ion-text>
+              <p><strong>Necesitamos validar tu identidad manualmente.</strong></p>
+              <p class="info-detail">{{ disputeReasonText }}</p>
+            </ion-text>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <Form ref="disputeForm">
+        <Field v-model="contacto" name="contacto" v-slot="{ field }" rules="required">
+          <IonItem>
+            <IonLabel position="floating">Datos de contacto (mail o teléfono)</IonLabel>
+            <IonTextarea v-bind="field" :auto-grow="true" :rows="2" />
+          </IonItem>
+          <ErrorMessage name="contacto" #default="{ message }">
+            <ion-text color="danger"><small>{{ message }}</small></ion-text>
+          </ErrorMessage>
+        </Field>
+      </Form>
+    </div>
+
+    <!-- DISPUTA ENVIADA -->
+    <div v-else-if="stage === 'disputeDone'" class="ion-text-center ion-padding">
+      <ion-icon :icon="checkmarkCircleOutline" color="success" style="font-size: 64px"></ion-icon>
+      <ion-text><h6><strong>Solicitud recibida</strong></h6></ion-text>
+      <ion-text color="medium">
+        <p><small>Administración revisará tu caso y se pondrá en contacto. Gracias.</small></p>
+      </ion-text>
+    </div>
+
+    <!-- CUENTA YA EXISTENTE -->
+    <div v-else-if="stage === 'accountExists'" class="ion-text-center ion-padding">
+      <ion-icon :icon="alertCircleOutline" color="medium" style="font-size: 64px"></ion-icon>
+      <ion-text><h6><strong>Ya tenés una cuenta</strong></h6></ion-text>
+      <ion-text color="medium">
+        <p><small>Existe una cuenta activa para ese DNI. Iniciá sesión con tu contraseña.</small></p>
+      </ion-text>
+    </div>
+
     <template #blank-footer>
       <ion-button
+        v-if="footerButton"
         :disabled="sending"
         shape="round"
         color="primary"
-        @click="nextStep"
+        @click="footerButton.action"
         expand="full"
-        >{{ sending ? "Enviando..." : step.buttonText }}</ion-button
-      >
+      >{{ sending ? 'Enviando...' : footerButton.text }}</ion-button>
     </template>
   </graduados-blank>
 </template>
 
 <script setup lang="ts">
-import { useAuth } from "@/uses/auth";
-import FormPasswordValidation from "@/views/app/components/form/FormPasswordValidation.vue";
+import { useAuth } from '@/uses/auth'
+import { USER_TYPES, isOtherUniversity } from '@/utils/userTypes'
+import FormPasswordValidation from '@/views/app/components/form/FormPasswordValidation.vue'
 import {
   IonButton,
   IonCard,
   IonCardContent,
-  IonDatetime,
+  IonCheckbox,
   IonIcon,
   IonInput,
   IonItem,
   IonLabel,
   IonText,
+  IonTextarea,
   useIonRouter,
-} from "@ionic/vue";
+} from '@ionic/vue'
 import {
+  alertCircleOutline,
   arrowBackOutline,
+  checkmarkCircleOutline,
   cloudUploadOutline,
   documentOutline,
   informationCircleOutline,
-  manOutline,
-  personOutline,
+  mailOutline,
   schoolOutline,
-  shieldCheckmarkOutline,
-} from "ionicons/icons";
-import { ErrorMessage, Field, Form, defineRule } from "vee-validate";
-import { reactive, ref } from "vue";
-import { useStore } from "vuex";
-import ProfilePicture from "../../profile/ProfilePicture.vue";
+} from 'ionicons/icons'
+import { ErrorMessage, Field, Form, defineRule } from 'vee-validate'
+import { computed, reactive, ref } from 'vue'
+import { useStore } from 'vuex'
 
-defineRule("passwordIsValid", () => {
-  if (passwordValidation.value) return true;
+const MAX_DOC_BYTES = 5 * 1024 * 1024
+const userTypes = USER_TYPES
 
-  return "Revisa las contraseñas";
-});
+defineRule('passwordIsValid', () => {
+  if (passwordValidation.value) return true
+  return 'Revisá las contraseñas'
+})
 
-defineRule("notExists", (email) => {
-  return useAuth()
-    .emailAvailable(email)
-    .then((response) => {
-      return response.data.available
-        ? true
-        : "El correo ingresado ya se encuentra en uso";
-    });
-});
+const ionRouter = useIonRouter()
+const store = useStore()
 
-const ionRouter = useIonRouter();
-const form = ref(null);
-const sending = ref(false);
-const store = useStore();
+const dniForm = ref<any>(null)
+const registerForm = ref<any>(null)
+const disputeForm = ref<any>(null)
+
+const sending = ref(false)
+const passwordValidation = ref<boolean | null>(null)
+
+// Máquina de estados del wizard: dni → form | checkMail | dispute
+const stage = ref<'dni' | 'form' | 'checkMail' | 'dispute' | 'disputeDone' | 'accountExists'>('dni')
+
+const dni = ref('')
+const contacto = ref('')
+const maskedEmail = ref('')
+const mailMode = ref<'A' | 'B'>('B')
+const disputeReason = ref<string>('')
+
+const typeError = ref(false)
+const verifyLater = ref(false)
+const documento = ref<File | null>(null)
 
 const data = reactive({
-  firstname: "",
-  lastname: "",
-  email: "",
-  password: "",
-  password_confirmation: "",
-  phone: "",
-  dni: "",
-  birthdate: "",
-  type_id: 1,
-  images: [],
-  thumb: "",
-});
+  email: '',
+  password: '',
+  password_confirmation: '',
+  type_id: null as number | null,
+})
 
-const steps = [
-  {
-    step: 1,
-    buttonText: "Siguiente",
-  },
-  {
-    step: 2,
-    buttonText: "Siguiente",
-  },
-  {
-    step: 3,
-    buttonText: "Finalizar",
-  },
-];
+const canGoBack = computed(() => stage.value === 'form')
 
-const step = ref(steps[0]);
+const disputeReasonText = computed(() => {
+  if (disputeReason.value === 'multiple')
+    return 'Tu DNI figura más de una vez en el padrón. Dejanos un contacto y lo resolvemos.'
+  if (disputeReason.value === 'no_email')
+    return 'No encontramos un email asociado a tu DNI en el padrón. Dejanos un contacto.'
+  return 'No pudiste resolverlo automáticamente. Dejanos un contacto y te ayudamos.'
+})
 
-const passwordValidation = ref(null);
+const footerButton = computed(() => {
+  switch (stage.value) {
+    case 'dni':
+      return { text: 'Continuar', action: submitDni }
+    case 'form':
+      return { text: 'Finalizar', action: submitRegister }
+    case 'checkMail':
+      return { text: 'Ir al login', action: goToLogin }
+    case 'dispute':
+      return { text: 'Enviar solicitud', action: submitDispute }
+    case 'disputeDone':
+    case 'accountExists':
+      return { text: 'Ir al login', action: goToLogin }
+    default:
+      return null
+  }
+})
 
-// Convertir DDMMYYYY a YYYY-MM-DD para mostrar en el date picker
-const dateForDisplay = () => {
-  if (!data.birthdate || data.birthdate.length !== 8) return undefined;
-  const ddmmyyyy = data.birthdate;
-  const dd = ddmmyyyy.substring(0, 2);
-  const mm = ddmmyyyy.substring(2, 4);
-  const yyyy = ddmmyyyy.substring(4, 8);
-  return `${yyyy}-${mm}-${dd}`;
-};
-
-// Convertir YYYY-MM-DD a DDMMYYYY para el backend
-const handleDateChange = (event, field) => {
-  const isoDate = event.detail.value;
-  if (!isoDate) return;
-  const [yyyy, mm, dd] = isoDate.split('T')[0].split('-');
-  data.birthdate = `${dd}${mm}${yyyy}`;
-};
-
-async function stepValid() {
-  const valid = await form.value.validate();
-
-  return valid.valid;
+function selectType(id: number) {
+  data.type_id = id
+  typeError.value = false
+  // Al cambiar de tipo, limpiamos el documento si ya no aplica.
+  if (!isOtherUniversity(id)) {
+    documento.value = null
+    verifyLater.value = false
+  }
 }
 
-async function nextStep() {
-  if (!(await stepValid())) return;
+function onVerifyLaterChange() {
+  if (verifyLater.value) documento.value = null
+}
 
-  if (steps.length == step.value.step) return register();
+function onDocumentPicked(event: any) {
+  const file = event.target.files?.[0]
+  if (!file) return
+  if (file.size > MAX_DOC_BYTES) {
+    store.dispatch('ui/toastr/danger', 'El documento supera los 5 MB.')
+    event.target.value = ''
+    return
+  }
+  documento.value = file
+  verifyLater.value = false
+}
 
-  step.value = steps.filter((s) => s.step == step.value.step + 1)[0];
+function clearDocument() {
+  documento.value = null
+}
 
-  setTimeout(() => form.value.setErrors({}), 0);
+// PASO 1 -----------------------------------------------------------------
+async function submitDni() {
+  const valid = await dniForm.value.validate()
+  if (!valid.valid) return
+
+  sending.value = true
+  try {
+    const res: any = await useAuth().checkDni(dni.value)
+    if (res.case === 'B') {
+      stage.value = 'form'
+    } else if (res.case === 'A') {
+      await startCaseA()
+    } else {
+      disputeReason.value = res.reason || ''
+      stage.value = 'dispute'
+    }
+  } catch (e: any) {
+    store.dispatch('ui/toastr/danger', 'No pudimos verificar el DNI. Intentá de nuevo.')
+  } finally {
+    sending.value = false
+  }
+}
+
+// Caso A: reclamo por mail del legacy -------------------------------------
+async function startCaseA() {
+  try {
+    const res: any = await useAuth().register({ dni: dni.value })
+    if (res.status === 'claim_sent') {
+      maskedEmail.value = res.masked_email || ''
+      mailMode.value = 'A'
+      stage.value = 'checkMail'
+    } else if (res.status === 'dispute_required') {
+      disputeReason.value = res.reason || ''
+      stage.value = 'dispute'
+    }
+  } catch (e: any) {
+    if (e.response?.status === 409) {
+      stage.value = 'accountExists'
+    } else {
+      store.dispatch('ui/toastr/danger', 'No pudimos iniciar el registro. Intentá de nuevo.')
+    }
+  }
+}
+
+// PASO 2 (Caso B) ---------------------------------------------------------
+async function submitRegister() {
+  const valid = await registerForm.value.validate()
+  if (!data.type_id) {
+    typeError.value = true
+    return
+  }
+  if (!valid.valid) return
+
+  sending.value = true
+  try {
+    const payload = buildRegisterPayload()
+    const res: any = await useAuth().register(payload)
+    if (res.status === 'verify_sent') {
+      maskedEmail.value = res.masked_email || ''
+      mailMode.value = 'B'
+      stage.value = 'checkMail'
+    } else if (res.status === 'dispute_required') {
+      disputeReason.value = res.reason || ''
+      stage.value = 'dispute'
+    }
+  } catch (e: any) {
+    const status = e.response?.status
+    if (status === 409) {
+      stage.value = 'accountExists'
+    } else if (status === 422 && e.response.data?.errors) {
+      registerForm.value.setErrors(e.response.data.errors)
+    } else {
+      store.dispatch('ui/toastr/danger', 'No pudimos completar el registro. Intentá de nuevo.')
+    }
+  } finally {
+    sending.value = false
+  }
+}
+
+function buildRegisterPayload(): any {
+  const base = {
+    dni: dni.value,
+    email: data.email,
+    password: data.password,
+    password_confirmation: data.password_confirmation,
+    type_id: data.type_id,
+  }
+  // Solo mandamos multipart si hay documento (Caso B, tipo 4, sin "verificar luego").
+  if (isOtherUniversity(data.type_id as number) && documento.value && !verifyLater.value) {
+    const fd = new FormData()
+    Object.entries(base).forEach(([k, v]) => fd.append(k, String(v)))
+    fd.append('documento', documento.value)
+    return fd
+  }
+  return base
+}
+
+// DISPUTA ----------------------------------------------------------------
+function goToDispute() {
+  stage.value = 'dispute'
+}
+
+async function submitDispute() {
+  const valid = await disputeForm.value.validate()
+  if (!valid.valid) return
+
+  sending.value = true
+  try {
+    await useAuth().dispute({ dni: dni.value, contacto: contacto.value })
+    stage.value = 'disputeDone'
+  } catch (e: any) {
+    store.dispatch('ui/toastr/danger', 'No pudimos enviar la solicitud. Intentá de nuevo.')
+  } finally {
+    sending.value = false
+  }
 }
 
 function stepBack() {
-  if (step.value.step == 1) return;
-
-  step.value = steps.filter((s) => s.step == step.value.step - 1)[0];
-}
-
-function register() {
-  const formData = new FormData();
-  formData.append("diploma", file.value);
-  let i;
-  for (i in data) {
-    if (i == "images") continue;
-    formData.append(i, data[i]);
-  }
-  formData.append("images[]", data.images[0]);
-
-  form.value.validate().then((r) => {
-    sending.value = true;
-    if (r.valid) {
-      useAuth()
-        .register(formData)
-        .then(() => {
-          store.dispatch("ui/toastr/success", "Usuario credo correctamente");
-          goToLogin();
-        })
-        .catch((errors) => {
-          form.value.setErrors(errors);
-          sending.value = false;
-        });
-    }
-  });
+  if (stage.value === 'form') stage.value = 'dni'
 }
 
 function goToLogin() {
-  ionRouter.navigate("/login", "forward", "replace");
+  ionRouter.navigate('/login', 'forward', 'replace')
 }
-
-function setImage(response) {
-  data.thumb = response.thumb;
-  data.images = [response.id];
-}
-
-// File
-const file = ref(false);
-
-const uploadFile = (event) => {
-  file.value = event.target.files[0];
-};
 </script>
 
 <style scoped>
@@ -521,91 +486,53 @@ ion-item ion-icon {
   align-self: end;
 }
 .graduate-type {
-  margin-top: 40px;
+  margin-top: 24px;
 }
 
-ion-card ion-card-content {
+.graduate-type ion-card ion-card-content {
   border: 1px solid var(--ion-color-step-750);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-ion-card.selected ion-card-content {
+.graduate-type ion-card.selected ion-card-content {
   border-color: var(--ion-color-primary);
 }
 
-ion-card ion-text {
+.graduate-type ion-card ion-text {
   flex-grow: 1;
   max-width: 60vw;
 }
-</style>
 
-<style>
-.image-upload .thumb .button {
-  width: 100%;
-  height: 160px !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 35px;
-  border: 1px dashed;
-  border-color: var(--ion-color-step-750);
+.link {
+  display: inline-block;
+  margin-top: 16px;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
-.image-upload .thumb .button ion-icon {
-  font-size: 40px;
-}
-
-.image-upload .thumb ion-img {
-  margin: auto;
-  margin-top: 20px;
-  height: 40vw !important;
-  width: 40vw !important;
-  border-radius: 50%;
-  overflow: hidden;
-  object-fit: cover;
-  object-position: center;
-  height: 100%;
-  width: 100%;
-}
-
-.image-upload .thumb.has-image .button {
-  width: 35px !important;
-  height: 35px !important;
-  border: 2px solid var(--ion-color-step-750);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  left: calc(50% + 10vw);
-  background: white;
-  top: 76%;
-}
-
-.image-upload .thumb.has-image .button ion-icon {
-  font-size: 20px;
-}
-
-#comprobante {
-  display: none;
-}
 .box {
-  padding: 50px 80px;
+  padding: 32px;
   border: dashed 1px #cacbcc;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 12px;
+}
+
+.box input[type='file'] {
+  display: none;
 }
 
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 4px;
 }
 
-/* Estilos para las tarjetas informativas */
+/* Tarjetas informativas */
 .info-card {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-left: 4px solid var(--ion-color-primary);
@@ -637,11 +564,6 @@ ion-card ion-text {
 
 .info-content ion-text p:last-child {
   margin-bottom: 0;
-}
-
-.info-content ion-text p strong {
-  color: var(--ion-color-dark);
-  font-weight: 600;
 }
 
 .info-detail {

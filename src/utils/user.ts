@@ -1,4 +1,5 @@
 import ApiToken from "./apitoken";
+import { setCurrentUser, clearCurrentUser } from "@/uses/currentUser";
 
 const LOCAL_STORAGE_KEY = (process.env.VUE_APP_APPLICATION_NAME.toUpperCase()) + "_USER";
 
@@ -18,6 +19,8 @@ const User = {
 
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
         if(token) ApiToken.set(token);
+
+        setCurrentUser(user);
     },
     isSet: () => {
         return localStorage.getItem(LOCAL_STORAGE_KEY) !== null;
@@ -25,6 +28,8 @@ const User = {
     refresh: () => {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         ApiToken.refresh()
+
+        clearCurrentUser();
     }
 }
 
