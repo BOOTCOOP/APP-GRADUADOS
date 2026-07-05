@@ -244,6 +244,7 @@ import { useStore } from "vuex";
 import SocialShare from "@/components/SocialShare.vue";
 import { analyzeCourseForModality } from "@/utils/modalityDetector";
 import { useCurrentUser } from "@/uses/currentUser";
+import { refreshUser } from "@/uses/session";
 
 const loaded = ref(false);
 const enrolling = ref(false);
@@ -320,6 +321,8 @@ async function showInscriptionInfo() {
 }
 
 onMounted(() => {
+  // Gate al día: refrescamos can_operate antes de habilitar la inscripción.
+  refreshUser();
   const { slug } = route.params;
   store
     .dispatch("courses/fetch", slug)

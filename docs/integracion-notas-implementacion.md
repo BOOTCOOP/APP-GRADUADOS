@@ -87,6 +87,27 @@ can_operate, operability_issue, type_validation_status`.
 
 ---
 
+## 3b. Refresh del estado del usuario (validación / can_operate)
+
+**Problema:** el `type_validation_status` y `can_operate`/`operability_issue` los cambia el **admin**
+desde el panel web, fuera de banda. El `user` era un snapshot de login en localStorage; sin refresh, la
+app mostraba el estado congelado hasta re-loguear. El backend **no tenía** endpoint de lectura del
+usuario (`/api/profile` era solo `PUT`).
+
+**Solución:**
+- Backend expone **`GET /api/profile`** → `UserResource` (agregado en el back; coordinar si cambia el path).
+- `src/uses/profile.ts` → `me()` = `GET profile` + `persistUser` (actualiza localStorage y el ref reactivo).
+- `src/uses/session.ts` → `refreshUser(force?)` con **throttle de 15s** (dedupe de request en vuelo);
+  `force` saltea el throttle. No-op si no hay token. Errores de red silenciados (401 lo maneja `authenticate`).
+- **Disparadores:**
+  - Arranque + `resume` de la app (`@capacitor/app`) → `App.vue`, con `force`.
+  - Entrar a pantallas de estado: `Home.vue`, `Profile.vue`, `TypeValidation.vue` (throttled).
+  - Antes del gate de inscripción: `activities/Detail.vue`, `courses/Detail.vue` (throttled).
+
+Como todo el estado que muestran badges y gate se lee de `useCurrentUser()` (reactivo), al refrescar se
+recalcula solo. (La card de aviso de validación en Home se removió del diseño; el estado se ve en Perfil y
+en la pantalla "Validá tu tipo".)
+
 ## 4. Decisiones de arquitectura de esta sesión
 
 1. **Estado reactivo del usuario sin Pinia.** Nuevo `src/uses/currentUser.ts`: `ref` a nivel módulo,
@@ -113,6 +134,7 @@ Auth (`/api/auth`, público salvo aclaración):
 - `POST auth/forgot-password` `{dni}` → `200` siempre. (Reset se completa en web del backend.)
 
 Perfil (`/api`, autenticado):
+- `GET profile` → `UserResource` (refresh del usuario; usado por `refreshUser()`).
 - `PUT profile` `{firstname, lastname, phone?, birth_date?(YYYY-MM-DD), password?, password_confirmation?}` — DNI/email NO editables.
 - `PUT profile/password`
 - `POST profile/type-validation` (multipart `documento` requerido: pdf/jpg/jpeg/png/webp ≤5MB) → UserResource

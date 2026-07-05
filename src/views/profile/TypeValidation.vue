@@ -75,10 +75,11 @@
 import TypeValidationBadge from "@/components/TypeValidationBadge.vue";
 import { useCurrentUser } from "@/uses/currentUser";
 import { useProfile } from "@/uses/profile";
+import { refreshUser } from "@/uses/session";
 import { isGraduateType, isOtherUniversity, typeLabel } from "@/utils/userTypes";
 import { IonButton, IonIcon, IonText, useIonRouter } from "@ionic/vue";
 import { cloudUploadOutline, documentOutline } from "ionicons/icons";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useStore } from "vuex";
 
 const MAX_DOC_BYTES = 5 * 1024 * 1024;
@@ -88,6 +89,10 @@ const { user, typeValidationStatus } = useCurrentUser();
 
 const documento = ref<File | null>(null);
 const sending = ref(false);
+
+// La pantalla es 100% reactiva a useCurrentUser: al refrescar, el badge y las
+// acciones disponibles se recalculan solos.
+onMounted(() => refreshUser());
 
 // Solo "otra universidad" (4) puede subir documento, cuando está sin-registro (null) o rechazado (3).
 const showSubmit = computed(

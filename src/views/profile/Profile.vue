@@ -145,6 +145,7 @@
 import TypeValidationBadge from "@/components/TypeValidationBadge.vue";
 import { useCurrentUser } from "@/uses/currentUser";
 import { useProfile } from "@/uses/profile";
+import { refreshUser } from "@/uses/session";
 import { USER_TYPES, isGraduateType, isOtherUniversity } from "@/utils/userTypes";
 import {
   IonButton,
@@ -199,6 +200,8 @@ const showValidateLink = computed(
 );
 
 onMounted(() => {
+  // Refresca estado de validación (reactivo via badge) desde el backend.
+  refreshUser();
   useProfile()
     .get()
     .then((p) => {

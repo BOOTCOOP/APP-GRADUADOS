@@ -16,6 +16,17 @@ export const useProfile = () => {
         })
     }
 
+    // GET /api/profile — trae el UserResource fresco del backend. Se usa para
+    // refrescar estado que cambia fuera de banda (type_validation_status / can_operate,
+    // que el admin aprueba o rechaza desde el panel web). Ver src/uses/session.ts.
+    const me = () => {
+        return new Promise((resolve, reject) => {
+            axios.get("profile")
+                .then(response => resolve(persistUser(response)))
+                .catch(error => reject(error))
+        })
+    }
+
     // PUT /api/profile — solo datos personales del legacy.
     // DNI y email NO se editan desde acá. El tipo tampoco (ver changeType).
     const update = (data) => {
@@ -70,6 +81,7 @@ export const useProfile = () => {
 
     return {
         get,
+        me,
         update,
         password,
         typeValidation,

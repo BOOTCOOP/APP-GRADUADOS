@@ -16,13 +16,15 @@
 
 | Tipo declarado | Documento | `type_validation_status` inicial |
 |---|---|---|
-| Graduado UBA | no requiere | `1` pendiente |
-| Título en trámite | no requiere | `1` pendiente |
+| Graduado UBA | no requiere | `null` sin-registro |
+| Título en trámite | no requiere | `null` sin-registro |
 | Graduado otra universidad | subió documento | `1` pendiente |
 | Graduado otra universidad | "verificar luego" (sin doc) | `null` sin-registro |
 | Otros | — | `2` aprobado |
 
-Un usuario que se registró reclamando un DNI del padrón legacy (Caso A de la Fase 1) queda **sin-registro** hasta que valide (subir documento si es otra universidad, o el admin lo valida).
+> **Solo el "graduado de otra universidad con documento" genera una entrada de validación pendiente** (el admin tiene que revisar el documento). UBA y Título en trámite **no generan entrada**: quedan `null` (sin-registro) y el admin los valida "por única vez" desde el panel; recién ahí queda una entrada **aprobada**. Diferenciación: `null` = no chequeado todavía, `2` = ya validado, `3` = rechazado. En todos los casos, mientras no esté **rechazado** el usuario puede inscribirse.
+
+Un usuario que se registró reclamando un DNI del padrón legacy (Caso A de la Fase 1) también queda **sin-registro** hasta que el admin lo valide (o suba documento si es otra universidad).
 
 ## `UserResource` — campos relevantes (Fase 2)
 

@@ -192,6 +192,7 @@ import { useStore } from 'vuex'
 import BibliographyItem from '../bibliography/components/BibliographyItem.vue'
 import SocialShare from '@/components/SocialShare.vue'
 import { useCurrentUser } from '@/uses/currentUser'
+import { refreshUser } from '@/uses/session'
 
 const ionRouter = useIonRouter()
 const loaded = ref(false)
@@ -311,6 +312,8 @@ const preEnroll = function () {
 }
 
 onMounted(() => {
+  // Gate al día: refrescamos can_operate antes de habilitar la inscripción.
+  refreshUser()
   const { slug } = route.params
   store.dispatch('workshops/fetch', slug).then((response) => {
     workshop.value = response.data.data
