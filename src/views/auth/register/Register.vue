@@ -185,15 +185,21 @@
       </ion-card>
 
       <Form ref="disputeForm">
-        <Field v-model="contacto" name="contacto" v-slot="{ field }" rules="required">
+        <Field v-model="contacto" name="contacto" v-slot="{ field }" rules="required|email">
           <IonItem>
-            <IonLabel position="floating">Datos de contacto (mail o teléfono)</IonLabel>
-            <IonTextarea v-bind="field" :auto-grow="true" :rows="2" />
+            <IonLabel position="floating">Email de contacto</IonLabel>
+            <IonInput v-bind="field" type="email" />
           </IonItem>
           <ErrorMessage name="contacto" #default="{ message }">
             <ion-text color="danger"><small>{{ message }}</small></ion-text>
           </ErrorMessage>
         </Field>
+        <ion-text color="medium">
+          <p><small>
+            A este email te va a contactar administración y puede llegarte el
+            enlace para crear tu contraseña.
+          </small></p>
+        </ion-text>
       </Form>
     </div>
 
@@ -202,7 +208,7 @@
       <ion-icon :icon="checkmarkCircleOutline" color="success" style="font-size: 64px"></ion-icon>
       <ion-text><h6><strong>Solicitud recibida</strong></h6></ion-text>
       <ion-text color="medium">
-        <p><small>Administración revisará tu caso y se pondrá en contacto. Gracias.</small></p>
+        <p><small>Administración revisará tu caso y te responderá al email que informaste. Gracias.</small></p>
       </ion-text>
     </div>
 
@@ -242,7 +248,6 @@ import {
   IonItem,
   IonLabel,
   IonText,
-  IonTextarea,
   useIonRouter,
 } from '@ionic/vue'
 import {
@@ -466,7 +471,11 @@ async function submitDispute() {
     await useAuth().dispute({ dni: dni.value, contacto: contacto.value })
     stage.value = 'disputeDone'
   } catch (e: any) {
-    store.dispatch('ui/toastr/danger', 'No pudimos enviar la solicitud. Intentá de nuevo.')
+    if (e.response?.status === 422 && e.response?.data?.message) {
+      store.dispatch('ui/toastr/danger', e.response.data.message)
+    } else {
+      store.dispatch('ui/toastr/danger', 'No pudimos enviar la solicitud. Intentá de nuevo.')
+    }
   } finally {
     sending.value = false
   }
