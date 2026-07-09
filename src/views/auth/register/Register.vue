@@ -142,6 +142,9 @@
           <IonCheckbox v-model="verifyLater" @ionChange="onVerifyLaterChange" slot="start"></IonCheckbox>
           <IonLabel class="ion-text-wrap"><small>Verificar luego (subir el documento más tarde)</small></IonLabel>
         </IonItem>
+        <ion-text v-if="docError" color="danger">
+          <small>Adjuntá el documento o marcá "Verificar luego" para continuar.</small>
+        </ion-text>
       </div>
     </Form>
 
@@ -292,6 +295,7 @@ const mailMode = ref<'A' | 'B'>('B')
 const disputeReason = ref<string>('')
 
 const typeError = ref(false)
+const docError = ref(false)
 const verifyLater = ref(false)
 const documento = ref<File | null>(null)
 
@@ -333,6 +337,7 @@ const footerButton = computed(() => {
 function selectType(id: number) {
   data.type_id = id
   typeError.value = false
+  docError.value = false
   // Al cambiar de tipo, limpiamos el documento si ya no aplica.
   if (!isOtherUniversity(id)) {
     documento.value = null
@@ -341,7 +346,10 @@ function selectType(id: number) {
 }
 
 function onVerifyLaterChange() {
-  if (verifyLater.value) documento.value = null
+  if (verifyLater.value) {
+    documento.value = null
+    docError.value = false
+  }
 }
 
 function onDocumentPicked(event: any) {
@@ -354,6 +362,7 @@ function onDocumentPicked(event: any) {
   }
   documento.value = file
   verifyLater.value = false
+  docError.value = false
 }
 
 function clearDocument() {
@@ -409,6 +418,11 @@ async function submitRegister() {
   const valid = await registerForm.value.validate()
   if (!data.type_id) {
     typeError.value = true
+    return
+  }
+  // Otra universidad: exige documento o el opt-in explícito de "verificar luego".
+  if (isOtherUniversity(data.type_id) && !documento.value && !verifyLater.value) {
+    docError.value = true
     return
   }
   if (!valid.valid) return
