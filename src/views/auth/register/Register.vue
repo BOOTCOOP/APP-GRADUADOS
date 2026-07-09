@@ -485,7 +485,9 @@ async function submitDispute() {
     await useAuth().dispute({ dni: dni.value, contacto: contacto.value })
     stage.value = 'disputeDone'
   } catch (e: any) {
-    if (e.response?.status === 422 && e.response?.data?.message) {
+    if (e.response?.status === 409 && e.response?.data?.status === 'account_exists') {
+      stage.value = 'accountExists'
+    } else if (e.response?.status === 422 && e.response?.data?.message) {
       store.dispatch('ui/toastr/danger', e.response.data.message)
     } else {
       store.dispatch('ui/toastr/danger', 'No pudimos enviar la solicitud. Intentá de nuevo.')
