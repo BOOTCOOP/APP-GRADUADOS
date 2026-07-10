@@ -114,6 +114,8 @@ Para publicar cambios de solo código web (ej. de `1.1.0` a `1.1.1`):
 
 **Probar antes de publicar**: en un device, apuntar `VUE_APP_OTA_MANIFEST_URL` a un server local que sirva un `latest.json` de prueba, y verificar el ciclo completo (descarga → arranque en frío → `notifyAppReady()` → la app funciona).
 
+**"Arranque en frío" en Android**: deslizar la app de las apps recientes NO siempre mata el proceso (depende del fabricante) — para forzar la aplicación de un bundle pendiente durante una prueba, usar **Ajustes → Apps → Forzar cierre**. Para usuarios reales no hace falta nada: el bundle se aplica solo en su próximo arranque natural (Android mata los procesos en background con el tiempo).
+
 Actualizar también `CHANGELOG.md` con la entrada de la versión.
 
 ---
