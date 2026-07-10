@@ -27,6 +27,7 @@ export function clearCurrentUser() {
 }
 
 export function useCurrentUser() {
+  const isLoggedIn = computed(() => !!currentUser.value);
   const profileComplete = computed(() => currentUser.value?.profile_complete ?? true);
   const canOperate = computed(() => currentUser.value?.can_operate ?? true);
   const operabilityIssue = computed(() => currentUser.value?.operability_issue ?? null);
@@ -36,6 +37,7 @@ export function useCurrentUser() {
 
   return {
     user: currentUser,
+    isLoggedIn,
     profileComplete,
     canOperate,
     operabilityIssue,

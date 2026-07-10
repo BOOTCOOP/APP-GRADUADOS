@@ -16,6 +16,11 @@ function validationManager (instance) {
                 store.dispatch("ui/toastr/danger", data.errors[first][0]);
             } else if (data.desc) {
                 store.dispatch("ui/toastr/danger", data.desc);
+            } else if (data.message) {
+                // Rechazos de reglas de negocio (p.ej. enroll: "El taller ya
+                // finalizó."). No pisa los casos anteriores: los 422 de
+                // validación Laravel traen errors y entran por esa rama.
+                store.dispatch("ui/toastr/danger", data.message);
             }
         }
         return Promise.reject(error);

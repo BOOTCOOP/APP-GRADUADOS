@@ -40,13 +40,15 @@
     import { IonButton, IonInput, IonItem, IonLabel, IonImg, IonText } from '@ionic/vue';
     import{ ref } from 'vue';
     import { useIonRouter } from '@ionic/vue';
+    import { useRoute } from 'vue-router';
     import { useAuth } from '@/uses/auth';
     import { Form, Field, ErrorMessage } from "vee-validate";
 
     const ionRouter = useIonRouter();
+    const route = useRoute();
 
     function goToLogin(){
-        ionRouter.navigate('/login', 'forward', 'replace');
+        ionRouter.navigate({ name: 'login', query: { redirect: route.query.redirect } }, 'forward', 'replace');
     }
 
     const dni = ref('')

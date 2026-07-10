@@ -83,7 +83,8 @@
           :ios="journalOutline"
           color="primary"
         ></ion-icon>
-        <ion-text color="medium" v-if="workshop.price.value > 0"
+        <!-- price puede venir null (talleres sin valor cargado = gratuitos) -->
+        <ion-text color="medium" v-if="workshop.price && workshop.price.raw > 0"
           ><strong>Costo:</strong> {{ workshop.price.value }}</ion-text
         >
         <ion-text color="medium" v-else
@@ -104,8 +105,24 @@
       </ion-list>
     </div>
     <template v-if="workshop && loaded" #footer>
+      <!-- Anónimo: primero login (con retorno a este detalle) -->
+      <div v-if="!isLoggedIn">
+        <ion-button
+          @click="goToLogin()"
+          shape="round"
+          expand="full"
+          color="primary"
+        >
+          <ion-icon :icon="schoolOutline" slot="start"></ion-icon>
+          Iniciá sesión para inscribirte
+        </ion-button>
+        <ion-text color="medium" class="ion-text-center ion-margin-top">
+          <small>Para inscribirte necesitás iniciar sesión con tu cuenta de graduado.</small>
+        </ion-text>
+      </div>
+
       <!-- Botón de inscripción -->
-      <div v-if="workshop.can_enroll || (!workshop.is_enrolled && !workshop.can_unenroll)">
+      <div v-else-if="workshop.can_enroll || (!workshop.is_enrolled && !workshop.can_unenroll)">
         <ion-button 
           @click="confirm" 
           shape="round" 
@@ -192,6 +209,7 @@ import { useStore } from 'vuex'
 import BibliographyItem from '../bibliography/components/BibliographyItem.vue'
 import SocialShare from '@/components/SocialShare.vue'
 import { useCurrentUser } from '@/uses/currentUser'
+import { useRequireAuth } from '@/uses/requireAuth'
 import { refreshUser } from '@/uses/session'
 
 const ionRouter = useIonRouter()
@@ -203,6 +221,9 @@ const router = useIonRouter()
 
 // Gate a nivel usuario (can_operate / operability_issue).
 const { canOperate, operabilityIssue } = useCurrentUser()
+
+// Anónimos: el footer muestra "Iniciá sesión para inscribirte" (con retorno acá).
+const { isLoggedIn, goToLogin } = useRequireAuth()
 
 // Mensaje para estados de inscripción
 const enrollmentMessage = computed(() => {
@@ -225,16 +246,19 @@ function canEnrollNow() {
   // Gate a nivel usuario: si no puede operar, no se puede inscribir.
   if (!canOperate.value) return false;
 
+  // Los bloqueos ganan siempre, incluso si can_enroll viene en true:
+  // el enroll del backend valida estas condiciones y rechazaría igual.
+  if (workshop.value.is_ended ||
+      workshop.value.is_full ||
+      workshop.value.registration_closed) {
+    return false;
+  }
+
   // Si el backend permite explícitamente la inscripción
   if (workshop.value.can_enroll) return true;
 
-  // Si no está inscrito y no está lleno/cerrado
-  if (!workshop.value.is_enrolled &&
-      !workshop.value.is_full &&
-      !workshop.value.is_ended &&
-      !workshop.value.registration_closed) {
-    return true;
-  }
+  // Si no está inscrito
+  if (!workshop.value.is_enrolled) return true;
 
   return false;
 }
@@ -256,11 +280,22 @@ function mustPay() {
 function goBack() {
   router.replace({ name: 'activities.index' })
 }
-const confirm = () =>
-  store.dispatch('ui/alert/confirm', {
+const confirm = () => {
+  if (!isLoggedIn.value) return goToLogin()
+  return store.dispatch('ui/alert/confirm', {
     header: 'Inscripción',
     subHeader: '¿Estás seguro de que deseas inscribirte a este taller?',
     handler: mustPay() ? preEnroll : enroll,
+  })
+}
+
+// Si el backend rechaza la operación, sus flags (can_enroll, is_ended, etc.)
+// quedaron desactualizados en pantalla: los re-sincronizamos para que el
+// botón se deshabilite y aparezca el motivo. El toast lo muestra el
+// interceptor global de 422 (validationManager).
+const refreshWorkshop = () =>
+  store.dispatch('workshops/fetch', workshop.value?.id).then((response) => {
+    workshop.value = response.data.data
   })
 
 const unenroll = () =>
@@ -277,26 +312,20 @@ const unenroll = () =>
             'replace'
           )
         })
-        .catch((response) => {
-          console.log(response)
-        }),
+        .catch(() => refreshWorkshop()),
   })
 
 const enroll = function () {
-  console.log('enroll')
   store
     .dispatch('workshops/enroll', workshop.value?.id)
     .then(() => {
       const route = mustPay() ? 'pago-exitoso' : 'inscripcion-exitosa'
       ionRouter.navigate(`/talleres/${route}`, 'forward', 'replace')
     })
-    .catch((response) => {
-      console.log(response)
-    })
+    .catch(() => refreshWorkshop())
 }
 
 const preEnroll = function () {
-  console.log('preEnroll')
   store
     .dispatch('workshops/preEnroll', workshop.value?.id)
     .then((response) => {
@@ -306,9 +335,7 @@ const preEnroll = function () {
         'replace'
       )
     })
-    .catch((response) => {
-      console.log(response)
-    })
+    .catch(() => refreshWorkshop())
 }
 
 onMounted(() => {
@@ -317,6 +344,8 @@ onMounted(() => {
   const { slug } = route.params
   store.dispatch('workshops/fetch', slug).then((response) => {
     workshop.value = response.data.data
+    loaded.value = true
+  }).catch(() => {
     loaded.value = true
   })
 })

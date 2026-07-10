@@ -9,9 +9,13 @@
       <!-- Gradient header with avatar + user info -->
       <div class="menu-header">
         <div class="menu-avatar">{{ userInitial }}</div>
-        <div class="menu-user-info">
-          <span class="menu-user-name">{{ User.get()?.firstname }} {{ User.get()?.lastname }}</span>
+        <div class="menu-user-info" v-if="isLoggedIn">
+          <span class="menu-user-name">{{ user?.firstname }} {{ user?.lastname }}</span>
           <span class="menu-user-sub">Graduado UBA Derecho</span>
+        </div>
+        <div class="menu-user-info" v-else>
+          <span class="menu-user-name">Bienvenido/a</span>
+          <span class="menu-user-sub">Iniciá sesión para inscribirte y más</span>
         </div>
       </div>
 
@@ -32,11 +36,12 @@
         </ion-menu-toggle>
       </ion-list>
 
-      <!-- Logout -->
+      <!-- Cerrar / Iniciar sesión -->
       <div class="menu-footer">
         <ion-list lines="none">
           <ion-menu-toggle auto-hide="false">
             <ion-item
+              v-if="isLoggedIn"
               @click="logout"
               detail="false"
               class="menu-item logout-item"
@@ -45,6 +50,17 @@
                 <ion-icon :icon="logOutOutline" />
               </div>
               <ion-label color="danger">Cerrar sesión</ion-label>
+            </ion-item>
+            <ion-item
+              v-else
+              router-link="/login"
+              detail="false"
+              class="menu-item login-item"
+            >
+              <div class="menu-icon-wrap" slot="start">
+                <ion-icon :icon="logInOutline" />
+              </div>
+              <ion-label color="primary">Iniciar sesión</ion-label>
             </ion-item>
           </ion-menu-toggle>
         </ion-list>
@@ -77,20 +93,25 @@ import {
   informationCircleOutline,
   personOutline,
   logOutOutline,
+  logInOutline,
   homeOutline,
   ribbonOutline,
   callOutline,
 } from "ionicons/icons";
 import { useRoute } from "vue-router";
 import { useAuth } from "@/uses/auth";
-import User from "@/utils/user";
+import { useCurrentUser } from "@/uses/currentUser";
 
 const route = useRoute();
 const router = useIonRouter();
 const active = ref(null);
 
+// Fuente reactiva: el header y el footer del menú cambian al loguear/desloguear
+// sin necesidad de recargar la app.
+const { user, isLoggedIn } = useCurrentUser();
+
 const userInitial = computed(() => {
-  const name = User.get()?.firstname ?? '';
+  const name = user.value?.firstname ?? '';
   return name.charAt(0).toUpperCase() || '?';
 });
 
@@ -118,7 +139,7 @@ function setActiveItem(curr) {
 function logout() {
   useAuth()
     .logout()
-    .then(() => router.push({ name: "login" }));
+    .then(() => router.push("/"));
 }
 </script>
 
@@ -244,6 +265,10 @@ ion-item.menu-item ion-label {
 
 .logout-item.menu-item {
   --background: rgba(254, 61, 61, 0.06);
+}
+
+.login-item.menu-item {
+  --background: rgba(171, 73, 204, 0.08);
 }
 
 .menu-icon-wrap.danger-icon {

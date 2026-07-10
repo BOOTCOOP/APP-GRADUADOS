@@ -1,17 +1,23 @@
 import router from '@/router';
 import User from '@/utils/user';
+import ApiToken from '@/utils/apitoken';
 import store from '@/store';
 
 function authenticate (instance) {
     instance.interceptors.response.use(response => {
         return response;
     }, error => {
-        if ([401].includes(error.response?.status)) {
+        // Solo expulsar si había sesión (token expirado/revocado).
+        // Un 401 sin token corresponde a un anónimo: se rechaza en silencio.
+        if ([401].includes(error.response?.status) && ApiToken.isSet()) {
             User.refresh();
 
             store.dispatch("ui/toastr/create", "Volvé a iniciar sesión");
 
-            router.replace({name:"login"})
+            const current = router.currentRoute.value;
+            if (current.name !== "login") {
+                router.replace({ name: "login", query: { redirect: current.fullPath } });
+            }
         }
         
         if ([403].includes(error.response?.status)) {

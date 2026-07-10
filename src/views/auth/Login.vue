@@ -29,7 +29,7 @@
       </Field>
 
       <ion-text
-        router-link="/recuperar-contrasena"
+        :router-link="{ name: 'forgot-password', query: { redirect: route.query.redirect } }"
         class="forgot-link"
       ><small>¿Olvidaste tu contraseña?</small></ion-text>
 
@@ -102,7 +102,9 @@ import {
 } from '@ionic/vue'
 import { ErrorMessage, Field, Form } from 'vee-validate'
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
+import { safeRedirect } from '@/uses/requireAuth'
 
 const sending = ref(false)
 const form = ref<any>(false)
@@ -115,6 +117,7 @@ const newEmail = ref('')
 const resending = ref(false)
 
 const ionRouter = useIonRouter()
+const route = useRoute()
 const store = useStore()
 
 function login() {
@@ -125,7 +128,8 @@ function login() {
       useAuth()
         .login(dni.value, password.value)
         .then(() => {
-          ionRouter.navigate('/', 'forward', 'replace')
+          // Si el login se disparó desde una acción/ruta protegida, volvemos ahí.
+          ionRouter.navigate(safeRedirect(route.query.redirect) ?? '/', 'forward', 'replace')
         })
         .catch((err) => {
           sending.value = false
@@ -180,7 +184,7 @@ function resend() {
 }
 
 function register() {
-  ionRouter.push({ name: 'register' })
+  ionRouter.push({ name: 'register', query: { redirect: route.query.redirect } })
 }
 </script>
 

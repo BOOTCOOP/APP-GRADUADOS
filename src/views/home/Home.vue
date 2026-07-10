@@ -1,7 +1,8 @@
 <template>
   <graduados-app :hideFabButton="true">
     <template #header-end>
-      <ion-menu-button menu="notification-content" color="primary">
+      <!-- El menú de notificaciones solo se monta con sesión (App.vue) -->
+      <ion-menu-button v-if="isLoggedIn" menu="notification-content" color="primary">
         <ion-icon
           :md="notificationsOutline"
           :ios="notificationsOutline"
@@ -31,6 +32,9 @@ import Shortcuts from "./Shortcuts.vue";
 // import Links from "./Links.vue";
 // import Social from "./Social.vue";
 import { refreshUser } from "@/uses/session";
+import { useCurrentUser } from "@/uses/currentUser";
+
+const { isLoggedIn } = useCurrentUser();
 
 // Home es la pantalla de entrada: refrescamos el estado del usuario (validación /
 // can_operate) para mantener badges y gate al día.

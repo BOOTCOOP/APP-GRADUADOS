@@ -1,7 +1,7 @@
 <template>
     <graduados-app header-title="Cursos de Perfeccionamiento">
         <template #header-end>
-            <ion-button color="primary" @click="goToHistory()">
+            <ion-button v-if="isLoggedIn" color="primary" @click="goToHistory()">
                 <ion-icon src="/assets/icons/history-2.svg"></ion-icon>
             </ion-button>
         </template>
@@ -87,9 +87,10 @@ import {
     IonLabel, 
     useIonRouter 
 } from '@ionic/vue';
-import { ref, onMounted, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useStore } from 'vuex';
 import { starOutline } from 'ionicons/icons';
+import { useCurrentUser } from '@/uses/currentUser';
 
 import MyCourses from "./components/MyCourses.vue";
 import Course from "./components/Course.vue";
@@ -120,6 +121,7 @@ const filters = computed(() => {
 
 const myCourses = ref([]);
 const store = useStore();
+const { isLoggedIn } = useCurrentUser();
 
 // Computed para filtrar cursos válidos (no datos de prueba)
 const validMyCourses = computed(() => {
@@ -133,11 +135,17 @@ const validMyCourses = computed(() => {
     });
 });
 
-onMounted(() => {
-    store.dispatch("courses/own").then((response) => {
-        myCourses.value = response.data.data;
-    })
-});
+// "Mis cursos" requiere sesión: solo pedimos courses/own con usuario logueado.
+// El watch (y no onMounted) cubre el caso de loguearse y volver sin recargar.
+watch(isLoggedIn, (logged) => {
+    if (logged) {
+        store.dispatch("courses/own").then((response) => {
+            myCourses.value = response.data.data;
+        })
+    } else {
+        myCourses.value = [];
+    }
+}, { immediate: true });
 
 const router = useIonRouter();
 

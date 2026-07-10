@@ -129,15 +129,16 @@
 <script setup lang="ts">
 import { IonCard, IonCardContent, IonIcon, IonButton, IonBadge, useIonRouter } from '@ionic/vue';
 import { defineProps } from 'vue';
-import { 
-    personCircleOutline, 
-    calendarOutline, 
-    starOutline, 
-    timeOutline, 
+import {
+    personCircleOutline,
+    calendarOutline,
+    starOutline,
+    timeOutline,
     hourglassOutline,
     schoolOutline,
     globeOutline
 } from 'ionicons/icons';
+import { parseApiDate } from '@/libs/dates';
 
 interface ActivityItem {
     id: string | number;
@@ -172,32 +173,13 @@ function showDetail() {
 }
 
 function isStartingSoon(activity: any): boolean {
-    if (!activity.start) return false;
-    
-    try {
-        let startDate: Date;
-        
-        if (activity.start.includes('/') && activity.start.split('/').length === 3) {
-            // Formato DD/MM/YYYY
-            const [day, month, year] = activity.start.split('/');
-            startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        } else {
-            // Otros formatos
-            startDate = new Date(activity.start);
-        }
-        
-        // Verificar si la fecha es válida
-        if (isNaN(startDate.getTime())) {
-            return false;
-        }
-        
-        const today = new Date();
-        const diffTime = startDate.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays <= 7 && diffDays >= 0;
-    } catch {
-        return false;
-    }
+    const startDate = parseApiDate(activity.start);
+    if (!startDate) return false;
+
+    const today = new Date();
+    const diffTime = startDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 7 && diffDays >= 0;
 }
 
 function getShortDescription(content: string): string {
@@ -208,33 +190,15 @@ function getShortDescription(content: string): string {
 
 function formatDate(dateString?: string): string {
     if (!dateString) return 'Por confirmar';
-    
-    try {
-        // Si ya viene en formato DD/MM/YYYY, lo parseamos correctamente
-        let date: Date;
-        
-        if (dateString.includes('/') && dateString.split('/').length === 3) {
-            // Formato DD/MM/YYYY
-            const [day, month, year] = dateString.split('/');
-            date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        } else {
-            // Otros formatos (ISO, etc.)
-            date = new Date(dateString);
-        }
-        
-        // Verificar si la fecha es válida
-        if (isNaN(date.getTime())) {
-            return 'Fecha por confirmar';
-        }
-        
-        return date.toLocaleDateString('es-AR', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-    } catch {
-        return 'Fecha por confirmar';
-    }
+
+    const date = parseApiDate(dateString);
+    if (!date) return 'Fecha por confirmar';
+
+    return date.toLocaleDateString('es-AR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
 }
 
 function getEnrollButtonColor(activity: any): string {

@@ -265,6 +265,7 @@ import {
 } from 'ionicons/icons'
 import { ErrorMessage, Field, Form, defineRule } from 'vee-validate'
 import { computed, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 const MAX_DOC_BYTES = 5 * 1024 * 1024
@@ -276,6 +277,7 @@ defineRule('passwordIsValid', () => {
 })
 
 const ionRouter = useIonRouter()
+const route = useRoute()
 const store = useStore()
 
 const dniForm = ref<any>(null)
@@ -502,7 +504,8 @@ function stepBack() {
 }
 
 function goToLogin() {
-  ionRouter.navigate('/login', 'forward', 'replace')
+  // Preservamos el redirect original (detalle → login → registro → login → detalle).
+  ionRouter.navigate({ name: 'login', query: { redirect: route.query.redirect } }, 'forward', 'replace')
 }
 </script>
 

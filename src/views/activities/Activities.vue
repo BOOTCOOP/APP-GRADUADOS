@@ -1,7 +1,7 @@
 <template>
   <graduados-app header-title="Talleres y Jornadas">
     <template #header-end>
-      <ion-button color="primary" @click="goToHistory()">
+      <ion-button v-if="isLoggedIn" color="primary" @click="goToHistory()">
         <ion-icon src="/assets/icons/history-2.svg"></ion-icon>
       </ion-button>
     </template>
@@ -80,9 +80,11 @@ import {
   useIonRouter,
   actionSheetController,
 } from "@ionic/vue";
-import { ref, onMounted, computed } from "vue";
+import { ref, computed, watch } from "vue";
+import { useCurrentUser } from "@/uses/currentUser";
 import { useStore } from "vuex";
 import { filterOutline, schoolOutline } from "ionicons/icons";
+import { parseApiDate } from "@/libs/dates";
 
 import MyActivities from "./components/MyActivities.vue";
 import Activity from "./components/Activity.vue";
@@ -492,40 +494,25 @@ function extractModality(activity: any): string {
 
 // Función para extraer mes
 function extractMonth(activity: any): string {
-  if (!activity.start) return "all";
+  const date = parseApiDate(activity.start);
+  if (!date) return "all";
 
-  try {
-    let date: Date;
-
-    if (
-      activity.start.includes("/") &&
-      activity.start.split("/").length === 3
-    ) {
-      // Formato DD/MM/YYYY
-      const [day, month, year] = activity.start.split("/");
-      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    } else {
-      // Otros formatos
-      date = new Date(activity.start);
-    }
-
-    // Verificar si la fecha es válida
-    if (isNaN(date.getTime())) {
-      return "all";
-    }
-
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    return month;
-  } catch {
-    return "all";
-  }
+  return (date.getMonth() + 1).toString().padStart(2, "0");
 }
 
-onMounted(() => {
-  store.dispatch("workshops/own").then((response) => {
-    myActivities.value = response.data.data;
-  });
-});
+// "Mis actividades" requiere sesión: solo pedimos workshops/own con usuario
+// logueado. El watch cubre el caso de loguearse y volver sin recargar.
+const { isLoggedIn } = useCurrentUser();
+
+watch(isLoggedIn, (logged) => {
+  if (logged) {
+    store.dispatch("workshops/own").then((response) => {
+      myActivities.value = response.data.data;
+    });
+  } else {
+    myActivities.value = [];
+  }
+}, { immediate: true });
 
 const router = useIonRouter();
 

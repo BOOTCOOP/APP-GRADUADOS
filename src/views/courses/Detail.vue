@@ -140,9 +140,21 @@
     </div>
     <template v-if="course && loaded" #footer>
       <div class="footer-actions">
+        <!-- Anónimo: primero login (con retorno a este detalle) -->
+        <ion-button
+          v-if="!isLoggedIn"
+          @click="goToLogin()"
+          shape="round"
+          expand="full"
+          color="primary"
+          class="main-action-btn"
+        >
+          Iniciá sesión para inscribirte
+        </ion-button>
+
         <!-- Botón de inscripción real -->
         <ion-button
-          v-if="canEnroll"
+          v-else-if="canEnroll"
           @click="enroll"
           shape="round"
           expand="full"
@@ -182,7 +194,10 @@
         <!-- Mensaje informativo -->
         <div class="info-message ion-text-center ion-margin-top">
           <ion-text color="medium">
-            <p v-if="!canOperate && operabilityIssue">
+            <p v-if="!isLoggedIn">
+              <small>Para inscribirte en este curso necesitás iniciar sesión con tu cuenta de graduado.</small>
+            </p>
+            <p v-else-if="!canOperate && operabilityIssue">
               <small>{{ operabilityIssue }}</small>
             </p>
             <p v-else-if="canEnroll">
@@ -244,6 +259,7 @@ import { useStore } from "vuex";
 import SocialShare from "@/components/SocialShare.vue";
 import { analyzeCourseForModality } from "@/utils/modalityDetector";
 import { useCurrentUser } from "@/uses/currentUser";
+import { useRequireAuth } from "@/uses/requireAuth";
 import { refreshUser } from "@/uses/session";
 
 const loaded = ref(false);
@@ -256,6 +272,9 @@ const router = useIonRouter();
 // Gate a nivel usuario (can_operate / operability_issue).
 const { canOperate, operabilityIssue } = useCurrentUser();
 
+// Anónimos: el footer muestra "Iniciá sesión para inscribirte" (con retorno acá).
+const { isLoggedIn, goToLogin } = useRequireAuth();
+
 // Puede inscribirse si el recurso lo permite Y el usuario puede operar.
 const canEnroll = computed(
   () => !course.value.is_enrolled && course.value.can_enroll && canOperate.value
@@ -267,6 +286,7 @@ function goBack() {
 
 // Función para inscribirse al curso
 async function enroll() {
+  if (!isLoggedIn.value) return goToLogin();
   enrolling.value = true;
 
   try {

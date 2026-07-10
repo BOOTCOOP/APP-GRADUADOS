@@ -3,13 +3,14 @@ import { useCurrentUser } from '@/uses/currentUser'
 import { createRouter, createWebHistory } from '@ionic/vue-router'
 import { RouteRecordRaw } from 'vue-router'
 
-const auth = true
+// Modelo de acceso: la app es PÚBLICA por defecto. Solo las rutas con
+// meta: { auth: true } exigen sesión (el guard de abajo redirige a /login
+// preservando el destino en ?redirect=).
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'home',
     component: () => import('../views/home/Home.vue'),
-    meta: { auth },
   },
   {
     path: '/login',
@@ -20,11 +21,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/QuizList',
     name: 'QuizList',
     component: () => import('../views/entertainment/QuizList.vue'),
+    meta: { auth: true },
   },
   {
     path: '/QuizDetail/:id',
     name: 'QuizDetail',
     component: () => import('../views/entertainment/QuizDetail.vue'),
+    meta: { auth: true },
   },
   {
     path: '/registro',
@@ -40,153 +43,147 @@ const routes: Array<RouteRecordRaw> = [
     path: '/completar-perfil',
     name: 'complete-profile',
     component: () => import('../views/profile/CompleteProfile.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/validar-tipo',
     name: 'type-validation',
     component: () => import('../views/profile/TypeValidation.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/perfil',
     name: 'profile',
     component: () => import('../views/profile/Profile.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/perfil/contrasena',
     name: 'profile.password',
     component: () => import('../views/profile/ProfilePassword.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/noticias',
     name: 'feeds.index',
     component: () => import('../views/feeds/Feeds.vue'),
-    meta: { auth },
   },
   {
     path: '/beneficios',
     name: 'benefits',
     component: () => import('../views/benefits/Benefits.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/beneficios/:id',
     name: 'benefitDetail',
     component: () => import('../views/benefits/BenefitDetail.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },  
   {
     path: '/classifieds',
     name: 'Classifieds',
     component: () => import('@/views/classifieds/Classifieds.vue'),
-    meta: { requiresAuth: true }
+    meta: { auth: true },
   },
   {
     path: '/classifieds/create',
     name: 'CreateAviso',
     component: () => import('@/views/classifieds/CreateAviso.vue'),
-    meta: { requiresAuth: true }
+    meta: { auth: true },
   },
   {
     path: '/classifieds/:id',
     name: 'AvisoDetail',
     component: () => import('@/views/classifieds/AvisoDetail.vue'),
     props: true,
-    meta: { requiresAuth: true }
+    meta: { auth: true },
   },
   {
     path: '/noticia/:slug',
     name: 'feeds.show',
     component: () => import('../views/feeds/Show.vue'),
-    meta: { auth },
   },
   {
     path: '/informacion-de-interes',
     name: 'interests.index',
     component: () =>
       import('../views/information-of-interest/InformationOfInterest.vue'),
-    meta: { auth },
   },
   {
     path: '/talleres',
     name: 'activities.index',
     component: () => import('../views/activities/Activities.vue'),
-    meta: { auth },
   },
   {
     path: '/talleres/historial',
     name: 'activities.history',
     component: () => import('../views/activities/History.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/taller/:slug',
     name: 'activities.show',
     component: () => import('../views/activities/Detail.vue'),
-    meta: { auth },
   },
   {
     path: '/talleres/inscripcion-exitosa',
     name: 'activities.success',
     component: () => import('../views/activities/Success.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/talleres/pago-exitoso',
     name: 'activities.success-pay',
     component: () => import('../views/activities/SuccessPay.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/talleres/desinscripcion-exitosa',
     name: 'activities.unenroll.success',
     component: () => import('../views/activities/SuccessUnenroll.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/material-bibliografico',
     name: 'material',
     component: () => import('../views/bibliography/Bibliography.vue'),
-    meta: { auth },
   },
   {
     path: '/busqueda-laboral',
     name: 'jobs.index',
     component: () => import('../views/jobs/Jobs.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/busqueda-laboral/:slug',
     name: 'jobs.show',
     component: () => import('../views/jobs/Show.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/busqueda-laboral/crear',
     name: 'jobs.create',
     component: () => import('../views/jobs/form/Form.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/busqueda-laboral/favoritos',
     name: 'jobs.favorites',
     component: () => import('../views/jobs/Favorites.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/busqueda-laboral/job/:slug',
     name: 'jobs.edit',
     component: () => import('../views/jobs/form/Form.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/busqueda-laboral/usuario',
     name: 'jobs.own',
     component: () => import('../views/jobs/MyJobs.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/form',
@@ -196,49 +193,46 @@ const routes: Array<RouteRecordRaw> = [
     path: '/cursos',
     name: 'courses.index',
     component: () => import('../views/courses/Courses.vue'),
-    meta: { auth },
   },
   {
     path: '/cursos/hisotry',
     name: 'courses.history',
     component: () => import('../views/courses/History.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/curso/:slug',
     name: 'courses.show',
     component: () => import('../views/courses/Detail.vue'),
-    meta: { auth },
   },
   {
     path: '/cursos/inscripcion-exitosa',
     name: 'courses.success',
     component: () => import('../views/courses/Success.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/cursos/desinscripcion-exitosa',
     name: 'courses.unenroll.success',
     component: () => import('../views/activities/SuccessUnenroll.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/inscripciones/:id/datos-bancarios',
     name: 'inscripciones.accountData',
     component: () => import('../views/inscriptions/AccountData.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/inscripciones/:id/subir-comprobante',
     name: 'inscripciones.attachProof',
     component: () => import('../views/inscriptions/AttachProof.vue'),
-    meta: { auth },
+    meta: { auth: true },
   },
   {
     path: '/contacto',
     name: 'contacto',
     component: () => import('../views/contacto/Contacto.vue'),
-    meta: { auth },
   },
 ]
 
@@ -249,7 +243,8 @@ const router = createRouter({
 
 router.beforeEach((route, from, next) => {
   if (route.meta?.auth && !ApiToken.isSet()) {
-    return next({ name: 'login' })
+    // Preservamos el destino para volver después del login (returnUrl).
+    return next({ name: 'login', query: { redirect: route.fullPath } })
   }
 
   // Gate de perfil incompleto: si el usuario está logueado y profile_complete es
