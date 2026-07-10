@@ -122,7 +122,7 @@ Actualizar también `CHANGELOG.md` con la entrada de la versión.
 
 ## Proceso de release de tienda paso a paso
 
-Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Antes del primero de todos: resolver el [aviso del bundle ID](#️-aviso-crítico-mismatch-de-bundle-id-resolver-antes-de-la-primera-subida-a-tiendas).
+Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Las fichas de las tiendas se crean con el ID `ar.uba.derecho.graduados` (ver [Bundle ID](#bundle-id)).
 
 1. **Bump de versiones nativas**:
    - Android (`android/app/build.gradle`): `versionName` nuevo + `versionCode` **+1**.
@@ -133,11 +133,9 @@ Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Antes del pri
    npm run build:native
    npx cap sync
    ```
-3. **Android**:
-   ```bash
-   npx cap open android
-   ```
-   En Android Studio: generar **AAB firmado** (Build → Generate Signed Bundle; usa `keystore.properties`) y subirlo a **Play Console**.
+3. **Android** — dos caminos:
+   - **GitHub Actions (recomendado, no requiere Android Studio)**: pestaña Actions → workflow **"Build AAB (release, para Play Store)"** → Run workflow → descargar el artifact `app-release-aab` → subir el `.aab` a **Play Console**. Requiere los secrets del repo `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` (ver comentario del workflow). El keystore es la **upload key** (Play App Signing custodia la clave final); backup del `.jks` fuera del repo — jamás commitearlo (`.gitignore` ya lo cubre).
+   - **Local**: `npx cap open android` y en Android Studio: Build → Generate Signed Bundle (usa `android/keystore.properties`) → subir a Play Console.
 4. **iOS** (requiere Mac con **Xcode 16+**):
    ```bash
    npx cap open ios
@@ -152,10 +150,11 @@ Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Antes del pri
 
 ⚠️ **NO es parte del ciclo normal de actualización.** Es la palanca de emergencia para obligar a los usuarios de versiones viejas a actualizar por tienda (ej. cuando el backend rompe compatibilidad o hay un bug grave en shells viejos). Para cambios de JS nunca hace falta: el OTA los distribuye solo, sin tocar nada de la API.
 
-- **Endpoint** (implementado y verificado en producción el 2026-07-10): `GET /api/app/config` — público, sin auth — devuelve `{ "data": { "min_version", "latest_version", "store_urls": { "android", "ios" }, "message" } }`. Del lado del backend los valores se administran por variables de entorno del server (`APP_MIN_VERSION`, `APP_LATEST_VERSION`, `APP_STORE_URL_ANDROID`, `APP_STORE_URL_IOS`, `APP_UPDATE_MESSAGE` en `config/app_version.php`), sin deploy de código.
+- **Endpoint** (implementado y verificado en producción el 2026-07-10): `GET /api/app/config` — público, sin auth — devuelve `{ "data": { "min_version", "latest_version", "store_urls": { "android", "ios" }, "message" } }`. Contrato y reglas documentados también del lado de la API en `docs/force-update.md` de su repo.
+- **Administración (esquema híbrido del backend)**: la fuente de verdad son los defaults versionados en `config/app_version.php` del repo de la API — un bump "normal" de versión (salió release nueva) es un commit chico ahí y sale con el próximo deploy. Los overrides por `.env` del server (`APP_MIN_VERSION`, etc.) existen solo para **emergencias** (efecto inmediato, editar `.env` + refrescar config cache) o para que un entorno difiera de producción; después de la emergencia el valor se consolida por commit y se limpia el override.
 - **En la app**: al arrancar y en `resume` (throttle 30 min, solo plataforma nativa) compara la **versión NATIVA instalada** (`App.getInfo().version` — la del APK/tienda, NO la del bundle OTA) con `min_version`. Si `instalada < min_version` → **alert bloqueante** con botón a la tienda.
 - **Red de seguridad** (fase 2, EN ESPERA del lado del backend): la app ya manda el header `X-App-Version` en cada request y maneja el status **426** mostrando el mismo alert. El middleware del backend que emite el 426 no está activado — se confirma explícitamente cuando se decida (la fase 1 cubre el flujo completo).
-- **La palanca operativa** es subir `APP_MIN_VERSION` en el `.env` del server de la API. Usarla con cuidado — bloquea a TODOS los usuarios por debajo del umbral hasta que instalen desde la tienda. Probado end-to-end el 2026-07-10 (con `9.9.9` de prueba).
+- **La palanca operativa**: pedir el bump al equipo de la API — commit en su config si es un bump normal, override por `.env` si es emergencia (avisar explícitamente que es emergencia). Usarla con cuidado — bloquea a TODOS los usuarios por debajo del umbral hasta que instalen desde la tienda. Probado end-to-end el 2026-07-10 (con `9.9.9` de prueba).
 
 Relación con OTA: force update empuja hacia la **tienda** (shell nativo); OTA empuja el **bundle JS**. Como `min_version` se compara contra la versión nativa, subirla solo tiene sentido cuando existe una versión de tienda más nueva que instalar.
 

@@ -1,0 +1,66 @@
+name: Build AAB (release, para Play Store)
+
+# Se dispara manualmente desde la pestaña Actions de GitHub.
+# Compila el Android App Bundle firmado con el keystore de release,
+# listo para subir a Play Console.
+#
+# Requiere estos secrets del repo (Settings → Secrets → Actions):
+#   KEYSTORE_BASE64    — el .jks codificado en base64
+#   KEYSTORE_PASSWORD  — contraseña del keystore
+#   KEY_ALIAS          — alias de la clave (ej. "graduados")
+#   KEY_PASSWORD       — contraseña de la clave
+on:
+  workflow_dispatch:
+
+jobs:
+  build-aab:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web (base nativa)
+        run: npm run build:native
+
+      - name: Capacitor sync
+        run: npx cap sync android
+
+      - name: Restore keystore from secrets
+        run: |
+          if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "::error::Falta el secret KEYSTORE_BASE64 (ver comentario al tope de este workflow)"; exit 1
+          fi
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/release.jks
+          cat > android/keystore.properties <<EOF
+          storeFile=../release.jks
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
+      - name: Build release AAB
+        run: ./gradlew bundleRelease
+        working-directory: android
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30

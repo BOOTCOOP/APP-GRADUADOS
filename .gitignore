@@ -33,4 +33,5 @@ npm-debug.log*
 
 graduados-app.code-workspace
 android/keystore.properties
-android/upload-keystore.jks
+android/*.jks
+android/*.keystore
