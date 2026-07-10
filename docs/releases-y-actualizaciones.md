@@ -150,14 +150,14 @@ Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Antes del pri
 
 ## Force update: forzar migración desde el backend
 
-Mecanismo para obligar a los usuarios de versiones viejas a actualizar por tienda (ej. cuando el backend rompe compatibilidad o hay un bug grave en shells viejos). El contrato del endpoint está pedido en `BACKEND-PROMPT-min-version.md`.
+⚠️ **NO es parte del ciclo normal de actualización.** Es la palanca de emergencia para obligar a los usuarios de versiones viejas a actualizar por tienda (ej. cuando el backend rompe compatibilidad o hay un bug grave en shells viejos). Para cambios de JS nunca hace falta: el OTA los distribuye solo, sin tocar nada de la API.
 
-- **Endpoint**: `GET /api/app/config` devuelve `min_version`, `latest_version`, `store_urls` y `message`.
-- **En la app**: al arrancar y en `resume` (throttle 30 min, solo plataforma nativa) compara la versión instalada con `min_version`. Si `instalada < min_version` → **alert bloqueante** con botón a la tienda.
-- **Red de seguridad**: la app manda el header `X-App-Version` en cada request; si la API responde **426** a cualquier request, se muestra el mismo alert bloqueante. Cubre el caso de una app que quedó abierta o cuyo chequeo de config falló.
-- **La palanca operativa** es subir `min_version` en el backend: no requiere tocar la app. Usarla con cuidado — bloquea a todos los usuarios por debajo del umbral hasta que actualicen.
+- **Endpoint** (implementado y verificado en producción el 2026-07-10): `GET /api/app/config` — público, sin auth — devuelve `{ "data": { "min_version", "latest_version", "store_urls": { "android", "ios" }, "message" } }`. Del lado del backend los valores se administran por variables de entorno del server (`APP_MIN_VERSION`, `APP_LATEST_VERSION`, `APP_STORE_URL_ANDROID`, `APP_STORE_URL_IOS`, `APP_UPDATE_MESSAGE` en `config/app_version.php`), sin deploy de código.
+- **En la app**: al arrancar y en `resume` (throttle 30 min, solo plataforma nativa) compara la **versión NATIVA instalada** (`App.getInfo().version` — la del APK/tienda, NO la del bundle OTA) con `min_version`. Si `instalada < min_version` → **alert bloqueante** con botón a la tienda.
+- **Red de seguridad** (fase 2, EN ESPERA del lado del backend): la app ya manda el header `X-App-Version` en cada request y maneja el status **426** mostrando el mismo alert. El middleware del backend que emite el 426 no está activado — se confirma explícitamente cuando se decida (la fase 1 cubre el flujo completo).
+- **La palanca operativa** es subir `APP_MIN_VERSION` en el `.env` del server de la API. Usarla con cuidado — bloquea a TODOS los usuarios por debajo del umbral hasta que instalen desde la tienda. Probado end-to-end el 2026-07-10 (con `9.9.9` de prueba).
 
-Relación con OTA: force update empuja hacia la **tienda** (shell nativo); OTA empuja el **bundle JS**. Si un cambio del backend solo requiere JS nuevo, alcanza con un OTA y no hace falta tocar `min_version`.
+Relación con OTA: force update empuja hacia la **tienda** (shell nativo); OTA empuja el **bundle JS**. Como `min_version` se compara contra la versión nativa, subirla solo tiene sentido cuando existe una versión de tienda más nueva que instalar.
 
 ---
 
@@ -166,10 +166,10 @@ Relación con OTA: force update empuja hacia la **tienda** (shell nativo); OTA e
 Antes de dar por publicado un release (tienda u OTA):
 
 - [ ] **Versiones sincronizadas**: `package.json` / `versionName` + `versionCode` / `MARKETING_VERSION` + `CURRENT_PROJECT_VERSION` según el esquema de versionado (OTA: solo `package.json`; tienda: todo realineado).
-- [ ] **Bundle ID verificado** (solo mientras siga pendiente el mismatch — ver aviso crítico).
+- [ ] **Bundle ID**: las fichas de las tiendas se crean con `ar.uba.derecho.graduados` (ver sección Bundle ID).
 - [ ] **`CHANGELOG.md` actualizado** con la versión y la fecha.
 - [ ] **Build correcto**: `build:native` para nativo/OTA, nunca un build web sincronizado a Capacitor.
 - [ ] **OTA probado en un device real** (manifiesto local vía `VUE_APP_OTA_MANIFEST_URL`) antes de publicar el manifiesto real.
-- [ ] **`latest.json` consistente**: `version` = la del zip, `url` apunta al asset del release `bundle-x.y.z`, `min_native_version` correcto.
+- [ ] **`latest.json` consistente**: `version` = la del zip, `url` apunta al asset del release `bundle-x.y.z` (o al zip en `public/ota/`), `min_native_version` correcto.
 - [ ] **Tag creado**: `bundle-x.y.z` para OTA, versión nativa para tienda.
 - [ ] **Retrocompatibilidad con la API** pensada (o `min_version` del backend actualizado si se rompe).
