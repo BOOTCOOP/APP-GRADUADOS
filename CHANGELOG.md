@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-07-10
+
+### Fixed
+- El bundle OTA 1.1.1 se compiló con la URL de API del `.env` local (localhost) y rompía todas las llamadas a la API en los teléfonos; `make-bundle.js` ahora aborta si detecta una URL de desarrollo embebida en el build
+
 ## [1.1.1] - 2026-07-10
 
 ### Added

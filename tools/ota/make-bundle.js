@@ -52,6 +52,27 @@ if (!indexHtml.includes('<base href="/"/>') && !indexHtml.includes('<base href="
   );
 }
 
+// --- Validación de URL de API ------------------------------------------------
+// VUE_APP_API_URL queda embebida en el JS en build time. Si el build se hizo con
+// el .env local (localhost / IP de LAN), el bundle rompe la app en los teléfonos.
+const jsDir = path.join(distDir, "js");
+if (fs.existsSync(jsDir)) {
+  // Solo URLs de API de desarrollo (terminan en /api, como en .env): un
+  // "localhost:3000" suelto dentro de una librería de terceros no es problema.
+  const devUrl = /https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+):\d+\/api/;
+  for (const f of fs.readdirSync(jsDir)) {
+    if (!f.endsWith(".js")) continue;
+    const m = fs.readFileSync(path.join(jsDir, f), "utf8").match(devUrl);
+    if (m) {
+      abort(
+        `El build tiene una URL de desarrollo embebida ("${m[0]}" en js/${f}). ` +
+          "Tu .env local está pisando VUE_APP_API_URL. Corré el build forzando la URL de producción:\n" +
+          '  $env:VUE_APP_API_URL="https://graduados.derecho.uba.ar/api"; npm run ota:build'
+      );
+    }
+  }
+}
+
 // --- Zip --------------------------------------------------------------------
 let AdmZip;
 try {
