@@ -1,7 +1,6 @@
 import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  // appId: "com.kamecode.graduados",
   appId: "ar.uba.derecho.graduados",
   appName: "Graduados Derecho",
   webDir: "dist",

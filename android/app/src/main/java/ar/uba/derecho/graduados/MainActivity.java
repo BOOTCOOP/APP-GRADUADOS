@@ -1,4 +1,4 @@
-package com.kamecode.graduados;
+package ar.uba.derecho.graduados;
 
 import com.getcapacitor.BridgeActivity;
 

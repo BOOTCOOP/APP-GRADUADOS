@@ -9,21 +9,15 @@
 
 ---
 
-## ⚠️ AVISO CRÍTICO: mismatch de bundle ID (resolver ANTES de la primera subida a tiendas)
+## Bundle ID
 
-Hoy el proyecto tiene **dos IDs distintos**:
+El ID oficial y definitivo de la app es **`ar.uba.derecho.graduados`** (decisión del 2026-07-10; el ID histórico `com.kamecode.graduados` fue eliminado del proyecto). Está unificado en:
 
-| Dónde | ID |
-|---|---|
-| `android/app/build.gradle` (`applicationId` y `namespace`) | `com.kamecode.graduados` |
-| `capacitor.config.ts` (`appId`) e iOS (`PRODUCT_BUNDLE_IDENTIFIER`) | `ar.uba.derecho.graduados` |
+- `capacitor.config.ts` → `appId`
+- `android/app/build.gradle` → `applicationId` y `namespace` (+ paquete de `MainActivity.java` y `strings.xml`)
+- iOS → `PRODUCT_BUNDLE_IDENTIFIER`
 
-**Antes de la primera subida a cada tienda** hay que verificar con qué ID existe (o se va a crear) la ficha en Play Console / App Store Connect, y unificar:
-
-- Si la ficha usa `ar.uba.derecho.graduados` → cambiar `applicationId` en `android/app/build.gradle`.
-- Si la ficha usa `com.kamecode.graduados` → cambiar `appId` en `capacitor.config.ts` y `PRODUCT_BUNDLE_IDENTIFIER` en iOS.
-
-El bundle ID es **IRREVERSIBLE** una vez publicada la app: elegir mal significa perder la ficha, las reseñas y los usuarios instalados. No subir nada a ninguna tienda sin resolver esto primero.
+⚠️ Las fichas en Play Console y App Store Connect deben crearse con **este** ID. El bundle ID es **irreversible** una vez publicada la app: si alguna ficha se hubiera creado con otro ID, hay que darla de baja y crear una nueva con `ar.uba.derecho.graduados` — nunca adaptar el proyecto a un ID equivocado.
 
 ---
 

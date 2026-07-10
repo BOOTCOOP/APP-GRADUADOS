@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Graduados Derecho</string>
     <string name="title_activity_main">Graduados Derecho</string>
-    <string name="package_name">com.kamecode.graduados</string>
-    <string name="custom_url_scheme">com.kamecode.graduados</string>
+    <string name="package_name">ar.uba.derecho.graduados</string>
+    <string name="custom_url_scheme">ar.uba.derecho.graduados</string>
 </resources>
