@@ -102,11 +102,14 @@ Para publicar cambios de solo código web (ej. de `1.1.0` a `1.1.1`):
    npm run ota:build
    ```
    Corre `build:native` y después `tools/ota/make-bundle.js`, que valida que la base sea `/` y genera `bundle-1.1.1.zip`.
-3. **Publicar el zip** en GitHub Releases:
-   ```bash
-   gh release create bundle-1.1.1 bundle-1.1.1.zip -t "OTA 1.1.1"
-   ```
-4. **Editar `public/ota/latest.json`**: actualizar `version`, `url` (la del asset del release) y `notes`. Ajustar `min_native_version` solo si este bundle depende de algo nativo nuevo.
+3. **Publicar el zip**, por cualquiera de las dos vías:
+   - **GitHub Releases** (recomendado — no engorda el repo):
+     ```bash
+     gh release create bundle-1.1.1 bundle-1.1.1.zip -t "OTA 1.1.1"
+     ```
+     Sin `gh` CLI: crear el release desde el navegador (GitHub → Releases → "Draft a new release", tag `bundle-1.1.1`, adjuntar el zip).
+   - **Pages** (alternativa sin release, usada por ej. en el bundle 1.1.1): mover el zip a `public/ota/` y commitearlo — queda servido en `https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-x.y.z.zip`. Contra: cada bundle suma ~7 MB al historial del repo. `make-bundle.js` excluye `ota/` del zip para que los bundles no se aniden entre sí.
+4. **Editar `public/ota/latest.json`**: actualizar `version`, `url` (la del asset del release o la de Pages) y `notes`. Ajustar `min_native_version` solo si este bundle depende de algo nativo nuevo.
 5. **Commit + push a `master`** → el workflow de Pages redeploya el manifiesto. Contar ~10 min de cache CDN hasta que todos los devices lo vean.
 
 **Probar antes de publicar**: en un device, apuntar `VUE_APP_OTA_MANIFEST_URL` a un server local que sirva un `latest.json` de prueba, y verificar el ciclo completo (descarga → arranque en frío → `notifyAppReady()` → la app funciona).

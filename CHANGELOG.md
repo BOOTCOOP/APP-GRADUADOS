@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-07-10
+
+### Added
+- Versión de la app visible al pie del menú lateral (primer bundle publicado por OTA)
+
+### Changed
+- Bundle ID definitivo unificado en `ar.uba.derecho.graduados` (se elimina `com.kamecode.graduados` de Android)
+- `make-bundle.js` excluye `ota/` del zip (evita anidar bundles anteriores)
+- Los bundles OTA también pueden servirse desde `public/ota/` vía Pages (alternativa a GitHub Releases)
+
 ## [1.1.0] - 2026-07-10
 
 ### Added

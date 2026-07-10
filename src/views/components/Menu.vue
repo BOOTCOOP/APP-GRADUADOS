@@ -64,6 +64,7 @@
             </ion-item>
           </ion-menu-toggle>
         </ion-list>
+        <div class="menu-version">v{{ appVersion }}</div>
       </div>
     </ion-content>
   </ion-menu>
@@ -105,6 +106,10 @@ import { useCurrentUser } from "@/uses/currentUser";
 const route = useRoute();
 const router = useIonRouter();
 const active = ref(null);
+
+// Versión del bundle JS (package.json, inyectada por vue.config.js). Cambia
+// con cada OTA: sirve para verificar qué versión tiene instalada un usuario.
+const appVersion = process.env.VUE_APP_VERSION;
 
 // Fuente reactiva: el header y el footer del menú cambian al loguear/desloguear
 // sin necesidad de recargar la app.
@@ -277,5 +282,14 @@ ion-item.menu-item ion-label {
 
 .menu-icon-wrap.danger-icon ion-icon {
   color: var(--ion-color-danger);
+}
+
+/* ── Versión de la app ──────────────────────────── */
+.menu-version {
+  text-align: center;
+  font-size: 11px;
+  color: #9a9aa8;
+  margin-top: 10px;
+  letter-spacing: 0.3px;
 }
 </style>

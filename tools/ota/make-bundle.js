@@ -66,7 +66,10 @@ const zipPath = path.join(ROOT, zipName);
 try {
   const zip = new AdmZip();
   // Contenido de dist/ en la raíz del zip (index.html en la raíz, sin carpeta dist/).
-  zip.addLocalFolder(distDir);
+  // Se excluye ota/: ahí viven el manifiesto y los zips de bundles anteriores
+  // (artefactos del servidor, no de la app) — sin esto, cada bundle contendría
+  // los zips de los bundles previos y crecería sin límite.
+  zip.addLocalFolder(distDir, "", (p) => !p.replace(/\\/g, "/").startsWith("ota/"));
   zip.writeZip(zipPath);
 } catch (e) {
   abort(`No pude generar el zip: ${e.message}`);
