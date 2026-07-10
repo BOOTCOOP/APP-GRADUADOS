@@ -14,6 +14,8 @@
   import Menu from "@/views/components/Menu.vue";
   import Notifications from "@/views/components/Notifications.vue";
   import { refreshUser } from "@/uses/session";
+  import { checkMinVersion } from "@/uses/appUpdate";
+  import { notifyReady, checkOtaUpdate } from "@/uses/otaUpdate";
   import { useCurrentUser } from "@/uses/currentUser";
 
   // El Menu se monta siempre (la app es pública); Notifications solo con sesión.
@@ -25,8 +27,17 @@
   let removeResume: (() => void) | null = null;
 
   onMounted(async () => {
+    // Primero de todo: avisa al updater que el bundle arrancó bien. Si un bundle
+    // OTA no llega a esta línea, el plugin lo revierte en el próximo arranque.
+    notifyReady();
     refreshUser(true);
-    const handle = await CapacitorApp.addListener('resume', () => refreshUser(true));
+    checkMinVersion(true);
+    checkOtaUpdate(true);
+    const handle = await CapacitorApp.addListener('resume', () => {
+      refreshUser(true);
+      checkMinVersion();
+      checkOtaUpdate();
+    });
     removeResume = () => handle.remove();
   });
 

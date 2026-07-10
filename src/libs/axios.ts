@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 import authenticate from '@/middlewares/authenticate'
+import forceUpdate from '@/middlewares/forceUpdate'
 import token from '@/middlewares/token'
 import validationManager from '@/middlewares/validationManager'
 
@@ -14,5 +15,6 @@ const axiosIns = axios.create({
 token(axiosIns)
 authenticate(axiosIns)
 validationManager(axiosIns)
+forceUpdate(axiosIns)
 
 export default axiosIns

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-07-10
+
+### Added
+- Actualizaciones OTA self-hosted con `@capgo/capacitor-updater` (modo manual): manifiesto `public/ota/latest.json` en GitHub Pages, bundles en GitHub Releases (tag `bundle-x.y.z`), rollback automático vía `notifyAppReady()` y campo `min_native_version` en el manifiesto
+- Force update: chequeo de `min_version` contra `GET /api/app/config` al arrancar y en resume, más manejo del status 426 de la API (alert bloqueante con botón a la tienda)
+- Scripts `build:native` (build con base `/` para el shell Capacitor) y `ota:build` (build nativo + empaquetado del bundle OTA con `tools/ota/make-bundle.js`)
+- Documentación del proceso de releases y actualizaciones en `docs/releases-y-actualizaciones.md`
+
+### Changed
+- Migración de Capacitor 5 a 7 (targetSdk 35)
+- Versionado unificado en 1.1.0: `package.json` (bundle JS), Android `versionName` 1.1.0 / `versionCode` 14, iOS `MARKETING_VERSION` 1.1.0 / `CURRENT_PROJECT_VERSION` 3
+- Fix de `publicPath` para builds nativos: flag `CAPACITOR_BUILD=1` en `vue.config.js` fuerza base `/` (los builds web siguen usando `/APP-GRADUADOS/`)
+- CI actualizado a Node 20
+
 ## [Unreleased] - 2024-09-15
 
 ### Added

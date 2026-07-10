@@ -53,6 +53,27 @@ export default {
             };
 
             alertController.create(options).then(alert => alert.present());
+        },
+        // Alert bloqueante: sin backdrop dismiss, sin botón cancelar y el botón
+        // de acción retorna false para que el alert NUNCA se cierre (force update).
+        blocking(ctx, config) {
+            const options = {
+                cssClass: config.cssClass || defaultOptions.cssClass,
+                header: config.header || defaultOptions.header,
+                message: config.message || '',
+                backdropDismiss: false,
+                buttons: [
+                    {
+                        text: config.buttonText || 'Actualizar',
+                        handler: () => {
+                            config.handler?.();
+                            return false;
+                        },
+                    }
+                ],
+            };
+
+            alertController.create(options).then(alert => alert.present());
         }
     }
 }

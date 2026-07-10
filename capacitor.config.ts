@@ -13,6 +13,11 @@ const config: CapacitorConfig = {
     CapacitorHttp: {
       enabled: true,
     },
+    CapacitorUpdater: {
+      // Modo manual/self-hosted: la app decide cuándo descargar y aplicar
+      // (ver src/uses/otaUpdate.ts y docs/releases-y-actualizaciones.md).
+      autoUpdate: false,
+    },
   },
 };
 

@@ -1,6 +1,7 @@
 import Vuex from 'vuex'
 
 // Modules
+import appVersion from './modules/app/version'
 import images from './modules/app/images'
 import quizzes from './modules/entertainment/quizzes'
 import benefits from './modules/benefits/benefits'
@@ -19,6 +20,7 @@ import ui from './modules/ui'
 export default new Vuex.Store({
   strict: true,
   modules: {
+    appVersion,
     bibliographies,
     courses,
     feeds,
