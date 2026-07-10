@@ -10,12 +10,12 @@
     >
         <ion-card-content>
             <!-- Estado de inscripción -->
-            <div v-if="inscribed" class="enrollment-status" aria-label="Estado de inscripción">
-                <ion-badge 
-                    :color="inscribed.inscriptions[0].status.class"
-                    :aria-label="`Estado: ${inscribed.inscriptions[0].status.value}`"
+            <div v-if="inscriptionStatus" class="enrollment-status" aria-label="Estado de inscripción">
+                <ion-badge
+                    :color="inscriptionStatus.class"
+                    :aria-label="`Estado: ${inscriptionStatus.value}`"
                 >
-                    {{ inscribed.inscriptions[0].status.value }}
+                    {{ inscriptionStatus.value }}
                 </ion-badge>
             </div>
             
@@ -42,13 +42,22 @@
                     Abierto
                 </ion-badge>
                 
-                <ion-badge 
-                    v-if="isStartingSoon(activity)" 
-                    class="urgent-badge" 
+                <ion-badge
+                    v-if="isStartingSoon(activity) && !unavailableLabel"
+                    class="urgent-badge"
                     color="warning"
                     aria-label="Taller próximo a iniciar"
                 >
                     ¡Próximo a iniciar!
+                </ion-badge>
+
+                <ion-badge
+                    v-if="unavailableLabel"
+                    class="unavailable-badge"
+                    color="medium"
+                    :aria-label="`Taller no disponible: ${unavailableLabel}`"
+                >
+                    {{ unavailableLabel }}
                 </ion-badge>
             </div>
 
@@ -128,7 +137,7 @@
 
 <script setup lang="ts">
 import { IonCard, IonCardContent, IonIcon, IonButton, IonBadge, useIonRouter } from '@ionic/vue';
-import { defineProps } from 'vue';
+import { computed, defineProps } from 'vue';
 import {
     personCircleOutline,
     calendarOutline,
@@ -150,11 +159,17 @@ interface ActivityItem {
     classes_count?: number;
     price?: number;
     is_only_for_graduado_uba?: boolean;
+    // Flags de disponibilidad (mismos que el detalle, ahora también en el listado)
+    is_enrolled?: boolean;
+    is_ended?: boolean;
+    is_full?: boolean;
+    registration_closed?: boolean;
+    can_enroll?: boolean;
 }
 
 interface InscribedItem {
-    inscriptions: Array<{
-        status: {
+    inscriptions?: Array<{
+        status?: {
             class: string;
             value: string;
         };
@@ -167,6 +182,20 @@ const props = defineProps<{
 }>();
 
 const router = useIonRouter();
+
+// workshops/own puede devolver la inscripción recién creada sin status poblado:
+// el badge solo se muestra si el estado realmente vino.
+const inscriptionStatus = computed(() => props.inscribed?.inscriptions?.[0]?.status ?? null);
+
+// Motivo por el que ya no se puede inscribir (null = disponible). Si el usuario
+// está inscripto, el estado de inscripción manda y no mostramos este badge.
+const unavailableLabel = computed(() => {
+    if (props.inscribed || props.activity.is_enrolled) return null;
+    if (props.activity.is_ended) return 'Finalizado';
+    if (props.activity.is_full) return 'Sin cupos';
+    if (props.activity.registration_closed) return 'Inscripciones cerradas';
+    return null;
+});
 
 function showDetail() {
     router.push({ name: 'activities.show', params: { slug: props.activity.id } });
@@ -202,16 +231,16 @@ function formatDate(dateString?: string): string {
 }
 
 function getEnrollButtonColor(activity: any): string {
-    if (props.inscribed) return 'medium';
+    if (props.inscribed || unavailableLabel.value) return 'medium';
     return isStartingSoon(activity) ? 'warning' : 'primary';
 }
 
 function getEnrollButtonFill(): 'outline' | 'solid' | 'default' | 'clear' {
-    return props.inscribed ? 'outline' : 'solid';
+    return (props.inscribed || unavailableLabel.value) ? 'outline' : 'solid';
 }
 
 function getEnrollButtonText(activity: any): string {
-    if (props.inscribed) return 'Ver detalles';
+    if (props.inscribed || unavailableLabel.value) return 'Ver detalles';
     return isStartingSoon(activity) ? '¡Inscribirse ahora!' : 'Inscribirse';
 }
 
@@ -264,6 +293,11 @@ function handleEnrollClick(event: Event) {
     font-size: 10px;
     font-weight: 700;
     animation: pulse 2s infinite;
+}
+
+.unavailable-badge {
+    font-size: 11px;
+    font-weight: 600;
 }
 
 @keyframes pulse {

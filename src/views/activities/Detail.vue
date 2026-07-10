@@ -105,8 +105,10 @@
       </ion-list>
     </div>
     <template v-if="workshop && loaded" #footer>
-      <!-- Anónimo: primero login (con retorno a este detalle) -->
-      <div v-if="!isLoggedIn">
+      <!-- Anónimo con taller disponible: login (con retorno a este detalle).
+           Si el taller no está disponible, cae a la rama siguiente y ve el
+           mismo botón deshabilitado + motivo que un usuario logueado. -->
+      <div v-if="!isLoggedIn && workshopAvailable">
         <ion-button
           @click="goToLogin()"
           shape="round"
@@ -224,6 +226,14 @@ const { canOperate, operabilityIssue } = useCurrentUser()
 
 // Anónimos: el footer muestra "Iniciá sesión para inscribirte" (con retorno acá).
 const { isLoggedIn, goToLogin } = useRequireAuth()
+
+// Disponibilidad pura del taller (independiente del usuario).
+const workshopAvailable = computed(
+  () =>
+    !workshop.value?.is_ended &&
+    !workshop.value?.is_full &&
+    !workshop.value?.registration_closed
+)
 
 // Mensaje para estados de inscripción
 const enrollmentMessage = computed(() => {

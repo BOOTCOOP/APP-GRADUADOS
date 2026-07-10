@@ -140,9 +140,11 @@
     </div>
     <template v-if="course && loaded" #footer>
       <div class="footer-actions">
-        <!-- Anónimo: primero login (con retorno a este detalle) -->
+        <!-- Anónimo con curso disponible: login (con retorno a este detalle).
+             Si el curso no admite inscripción (can_enroll anónimo = disponibilidad),
+             cae a la rama "No disponible para inscripción". -->
         <ion-button
-          v-if="!isLoggedIn"
+          v-if="!isLoggedIn && course.can_enroll"
           @click="goToLogin()"
           shape="round"
           expand="full"
@@ -194,7 +196,7 @@
         <!-- Mensaje informativo -->
         <div class="info-message ion-text-center ion-margin-top">
           <ion-text color="medium">
-            <p v-if="!isLoggedIn">
+            <p v-if="!isLoggedIn && course.can_enroll">
               <small>Para inscribirte en este curso necesitás iniciar sesión con tu cuenta de graduado.</small>
             </p>
             <p v-else-if="!canOperate && operabilityIssue">
