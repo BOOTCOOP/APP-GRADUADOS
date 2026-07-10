@@ -1,6 +1,6 @@
 {
-  "version": "1.1.0",
-  "url": "https://github.com/BOOTCOOP/APP-GRADUADOS/releases/download/bundle-1.1.0/bundle-1.1.0.zip",
+  "version": "1.1.1",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.1.1.zip",
   "min_native_version": "1.1.0",
-  "notes": ""
+  "notes": "Versión de la app visible en el menú"
 }
