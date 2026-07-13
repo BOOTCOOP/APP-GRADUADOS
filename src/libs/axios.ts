@@ -5,7 +5,7 @@ import forceUpdate from '@/middlewares/forceUpdate'
 import token from '@/middlewares/token'
 import validationManager from '@/middlewares/validationManager'
 
-const api_url = process.env.VUE_APP_API_URL
+const api_url = import.meta.env.VITE_API_URL
 
 const axiosIns = axios.create({
   baseURL: api_url,

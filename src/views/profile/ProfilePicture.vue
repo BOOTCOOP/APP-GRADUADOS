@@ -10,8 +10,8 @@
 
 
 <script setup lang="ts">
-    import { cameraOutline } from 'ionicons/icons';
-    import { IonImg, IonIcon, IonSpinner } from '@ionic/vue';
+    import { cameraOutline, imageOutline } from 'ionicons/icons';
+    import { IonImg, IonIcon, IonSpinner, actionSheetController } from '@ionic/vue';
     import { computed, defineProps } from 'vue';
     import { useStore } from 'vuex';
     import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -29,10 +29,23 @@
     })
 
     const takePicture = async () => {
+        const actionSheet = await actionSheetController.create({
+            header: "Foto de perfil",
+            buttons: [
+                { text: "Sacar foto", icon: cameraOutline, data: CameraSource.Camera },
+                { text: "Elegir de la galería", icon: imageOutline, data: CameraSource.Photos },
+                { text: "Cancelar", role: "cancel" },
+            ],
+        });
+        await actionSheet.present();
+
+        const { data: source, role } = await actionSheet.onDidDismiss();
+        if (role === "cancel" || !source) return;
+
         const image = await Camera.getPhoto({
             quality: 90,
             allowEditing: true,
-            source: CameraSource.Camera,
+            source,
             resultType: CameraResultType.Uri
         });
 

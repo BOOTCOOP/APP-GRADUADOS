@@ -1,7 +1,7 @@
 import ApiToken from "./apitoken";
 import { setCurrentUser, clearCurrentUser } from "@/uses/currentUser";
 
-const LOCAL_STORAGE_KEY = (process.env.VUE_APP_APPLICATION_NAME.toUpperCase()) + "_USER";
+const LOCAL_STORAGE_KEY = (import.meta.env.VITE_APPLICATION_NAME.toUpperCase()) + "_USER";
 
 const User = {
     get() {

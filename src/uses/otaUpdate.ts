@@ -11,7 +11,7 @@ import { compareVersions } from "@/utils/semver";
 // set() para no interrumpir al usuario en medio de una sesión).
 
 const MANIFEST_URL =
-  process.env.VUE_APP_OTA_MANIFEST_URL ||
+  import.meta.env.VITE_OTA_MANIFEST_URL ||
   "https://bootcoop.github.io/APP-GRADUADOS/ota/latest.json";
 
 // Throttle: con un chequeo por hora alcanza; `force` lo saltea (arranque/resume).
@@ -82,11 +82,11 @@ async function doCheck(): Promise<void> {
   }
 
   // Versión del bundle actual. Si corre el bundle embebido ('builtin'), el
-  // plugin no conoce la versión: usamos la del build (inyectada por vue.config.js).
+  // plugin no conoce la versión: usamos la del build (inyectada por vite.config.ts).
   const cur = await CapacitorUpdater.current();
   const actual =
     cur.bundle.id === "builtin" || !cur.bundle.version
-      ? (process.env.VUE_APP_VERSION as string)
+      ? import.meta.env.VITE_APP_VERSION
       : cur.bundle.version;
 
   if (compareVersions(manifest.version, actual) <= 0) return;

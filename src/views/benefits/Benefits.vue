@@ -74,7 +74,7 @@ export default defineComponent({
       }
 
       // 1) Base de tu API: quita la parte “/api” si existe
-      const raw = process.env.VUE_APP_API_URL || "";
+      const raw = import.meta.env.VITE_API_URL || "";
       const apiBase =
         raw.replace(/\/api\/?$/, "") || "https://graduados.derecho.uba.ar";
 

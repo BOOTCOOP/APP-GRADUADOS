@@ -1,4 +1,4 @@
-const LOCAL_STORAGE_KEY = (process.env.VUE_APP_APPLICATION_NAME.toUpperCase()) + "_API_TOKEN";
+const LOCAL_STORAGE_KEY = (import.meta.env.VITE_APPLICATION_NAME.toUpperCase()) + "_API_TOKEN";
 
 const ApiToken = {
     get() {

@@ -38,7 +38,7 @@ import {
 
 const router = useIonRouter();
 
-const logoUrl = (process.env.BASE_URL ?? '/') + 'assets/logo/logo.png';
+const logoUrl = import.meta.env.BASE_URL + 'assets/logo/logo.png';
 
 function openYouTubeChannel() {
   window.open(
