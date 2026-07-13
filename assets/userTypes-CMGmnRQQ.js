@@ -1,0 +1,1 @@
+var e=[{id:2,label:`Graduado (UBA)`},{id:4,label:`Graduado (otra universidad)`},{id:6,label:`Título en trámite (UBA)`},{id:5,label:`Otros`}],t=e=>[2,4,6].includes(Number(e)),n=e=>Number(e)===4,r=t=>{var n,r;return(n=(r=e.find(e=>e.id===Number(t)))==null?void 0:r.label)==null?``:n};export{r as i,t as n,n as r,e as t};
