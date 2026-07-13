@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Sin publicar]
+## [1.1.5] - 2026-07-13
+
+### Added
+- Foto de perfil: action sheet para elegir entre sacar foto con la cámara o elegir de la galería
 
 ### Changed
 - Migración del build de Vue CLI 5 (webpack) a **Vite 8** y de Jest 27 a **Vitest 4**: `npm audit` queda en 0 vulnerabilidades (eran 28 sin fix posible en Vue CLI), el build baja de ~100 s a ~20 s y el bundle OTA de ~6.8 MB a ~2.8 MB (ya no se empaqueta bundle legacy duplicado)
