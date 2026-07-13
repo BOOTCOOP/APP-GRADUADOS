@@ -1,6 +1,6 @@
 {
-  "version": "1.1.5",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.1.5.zip",
+  "version": "1.1.6",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.1.6.zip",
   "min_native_version": "1.1.0",
-  "notes": "Build con Vite (bundle mas liviano) y foto de perfil desde la galeria"
+  "notes": "Fix: la foto de perfil ahora se guarda correctamente"
 }
