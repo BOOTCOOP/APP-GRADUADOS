@@ -44,7 +44,7 @@ Hay **dos versiones** que evolucionan a ritmos distintos:
 | Versión | Dónde vive | Cuándo se bumpea |
 |---|---|---|
 | **Nativa** (versión del shell) | `versionName` en `android/app/build.gradle` = `MARKETING_VERSION` en iOS = tag del release de tienda | En cada **release de tienda** |
-| **Bundle JS** | `version` en `package.json` (expuesta al código como `VUE_APP_VERSION` vía `vue.config.js`) | En cada **OTA**, y se **realinea con la nativa** en cada release de tienda |
+| **Bundle JS** | `version` en `package.json` (expuesta al código como `VITE_APP_VERSION` vía `vite.config.ts`) | En cada **OTA**, y se **realinea con la nativa** en cada release de tienda |
 
 Estado actual (versión unificada 1.1.0):
 
@@ -65,7 +65,7 @@ Reglas:
 | Comando | Base (`publicPath`) | Para qué |
 |---|---|---|
 | `npm run build` | `/APP-GRADUADOS/` | Web en GitHub Pages. Deploy automático por push a `master` vía `.github/workflows/deploy.yml`. |
-| `npm run build:native` | `/` (flag `CAPACITOR_BUILD=1`, ver `vue.config.js`) | Shell nativo (Capacitor) y bundles OTA. |
+| `npm run build:native` | `/` (flag `CAPACITOR_BUILD=1`, ver `vite.config.ts`) | Shell nativo (Capacitor) y bundles OTA. |
 
 ⚠️ **NUNCA sincronizar a Capacitor un build web** (`npm run build` + `npx cap sync`): el WebView sirve desde la raíz, así que los assets con base `/APP-GRADUADOS/` dan **404** y la app queda en blanco. `tools/ota/make-bundle.js` valida esto antes de empaquetar.
 
@@ -112,7 +112,7 @@ Para publicar cambios de solo código web (ej. de `1.1.0` a `1.1.1`):
 4. **Editar `public/ota/latest.json`**: actualizar `version`, `url` (la del asset del release o la de Pages) y `notes`. Ajustar `min_native_version` solo si este bundle depende de algo nativo nuevo.
 5. **Commit + push a `master`** → el workflow de Pages redeploya el manifiesto. Contar ~10 min de cache CDN hasta que todos los devices lo vean.
 
-**Probar antes de publicar**: en un device, apuntar `VUE_APP_OTA_MANIFEST_URL` a un server local que sirva un `latest.json` de prueba, y verificar el ciclo completo (descarga → arranque en frío → `notifyAppReady()` → la app funciona).
+**Probar antes de publicar**: en un device, apuntar `VITE_OTA_MANIFEST_URL` a un server local que sirva un `latest.json` de prueba, y verificar el ciclo completo (descarga → arranque en frío → `notifyAppReady()` → la app funciona).
 
 **"Arranque en frío" en Android**: deslizar la app de las apps recientes NO siempre mata el proceso (depende del fabricante) — para forzar la aplicación de un bundle pendiente durante una prueba, usar **Ajustes → Apps → Forzar cierre**. Para usuarios reales no hace falta nada: el bundle se aplica solo en su próximo arranque natural (Android mata los procesos en background con el tiempo).
 
@@ -168,7 +168,8 @@ Antes de dar por publicado un release (tienda u OTA):
 - [ ] **Bundle ID**: las fichas de las tiendas se crean con `ar.uba.derecho.graduados` (ver sección Bundle ID).
 - [ ] **`CHANGELOG.md` actualizado** con la versión y la fecha.
 - [ ] **Build correcto**: `build:native` para nativo/OTA, nunca un build web sincronizado a Capacitor.
-- [ ] **OTA probado en un device real** (manifiesto local vía `VUE_APP_OTA_MANIFEST_URL`) antes de publicar el manifiesto real.
+- [ ] **OTA probado en un device real** (manifiesto local vía `VITE_OTA_MANIFEST_URL`) antes de publicar el manifiesto real.
+- [ ] **make-bundle validando**: la prueba negativa (`$env:VITE_API_URL="http://localhost:8000/api"; npm run ota:build` debe abortar) confirma que el escaneo de URLs de dev sigue encontrando los `.js` del build.
 - [ ] **`latest.json` consistente**: `version` = la del zip, `url` apunta al asset del release `bundle-x.y.z` (o al zip en `public/ota/`), `min_native_version` correcto.
 - [ ] **Tag creado**: `bundle-x.y.z` para OTA, versión nativa para tienda.
 - [ ] **Retrocompatibilidad con la API** pensada (o `min_version` del backend actualizado si se rompe).

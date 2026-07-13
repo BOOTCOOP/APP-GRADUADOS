@@ -34,7 +34,7 @@ Solo estos 4 valores de `type_id` son válidos al registrarse:
 
 ## Endpoints
 
-Base: host de la API (`VUE_APP_API_URL`). Los de auth cuelgan de `/api/auth`, los de perfil/inscripción de `/api`.
+Base: host de la API (`VITE_API_URL`). Los de auth cuelgan de `/api/auth`, los de perfil/inscripción de `/api`.
 
 ### 1. `POST /api/auth/register/check-dni`
 Paso 1 del wizard. Read-only, sin efectos. Sirve para saber a qué rama ir.
