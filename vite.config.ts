@@ -32,6 +32,14 @@ export default defineConfig(({ command }) => {
       globals: true,
       environment: "jsdom",
       include: ["tests/unit/**/*.spec.ts"],
+      deps: {
+        // Ionic/Stencil usan directory imports que Node ESM no soporta: el
+        // optimizador los pre-bundlea (ex transformIgnorePatterns de Jest).
+        optimizer: {
+          client: { enabled: true, include: ["@ionic/vue", "@ionic/vue-router", "@ionic/core", "@stencil/core", "ionicons"] },
+          ssr: { enabled: true, include: ["@ionic/vue", "@ionic/vue-router", "@ionic/core", "@stencil/core", "ionicons"] },
+        },
+      },
     },
   };
 });
