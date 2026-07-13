@@ -8,7 +8,10 @@
     <ion-content>
       <!-- Gradient header with avatar + user info -->
       <div class="menu-header">
-        <div class="menu-avatar">{{ userInitial }}</div>
+        <div class="menu-avatar">
+          <span v-if="userInitials">{{ userInitials }}</span>
+          <ion-icon v-else :icon="person" />
+        </div>
         <div class="menu-user-info" v-if="isLoggedIn">
           <span class="menu-user-name">{{ user?.firstname }} {{ user?.lastname }}</span>
           <span class="menu-user-sub">Graduado UBA Derecho</span>
@@ -92,6 +95,7 @@ import {
   schoolOutline,
   briefcaseOutline,
   informationCircleOutline,
+  person,
   personOutline,
   logOutOutline,
   logInOutline,
@@ -115,9 +119,12 @@ const appVersion = process.env.VUE_APP_VERSION;
 // sin necesidad de recargar la app.
 const { user, isLoggedIn } = useCurrentUser();
 
-const userInitial = computed(() => {
-  const name = user.value?.firstname ?? '';
-  return name.charAt(0).toUpperCase() || '?';
+// Iniciales estilo Google: nombre + apellido si están, una sola si falta la
+// otra, y cadena vacía (→ ícono de silueta) si no hay ninguna o no hay sesión.
+const userInitials = computed(() => {
+  const first = (user.value?.firstname ?? '').trim().charAt(0);
+  const last = (user.value?.lastname ?? '').trim().charAt(0);
+  return (first + last).toUpperCase();
 });
 
 const items = [
@@ -172,11 +179,16 @@ ion-content {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: #ffffff;
   flex-shrink: 0;
   letter-spacing: -0.5px;
+}
+
+.menu-avatar ion-icon {
+  font-size: 26px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .menu-user-info {
