@@ -40,6 +40,11 @@ export const useProfile = () => {
             payload.password = data.password;
             payload.password_confirmation = data.password_confirmation;
         }
+        // El avatar se sube antes vía POST app/images/upload (ver ProfilePicture.vue),
+        // que devuelve el id; acá solo se asocia la imagen al usuario.
+        if (data.images?.length) {
+            payload.images = data.images;
+        }
 
         return new Promise((resolve, reject) => {
             axios.put("profile", payload)

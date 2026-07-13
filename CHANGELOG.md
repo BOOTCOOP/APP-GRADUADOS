@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] - 2026-07-13
+
+### Fixed
+- La foto de perfil no se guardaba: el refactor del perfil (`9937b25`) dejó de enviar el id de la imagen subida en el `PUT /profile`, así que el avatar se subía pero nunca quedaba asociado al usuario
+- Cancelar la cámara o el selector de galería ya no deja una promesa rechazada sin manejar
+
 ## [1.1.5] - 2026-07-13
 
 ### Added

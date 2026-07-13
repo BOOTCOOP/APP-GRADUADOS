@@ -42,12 +42,18 @@
         const { data: source, role } = await actionSheet.onDidDismiss();
         if (role === "cancel" || !source) return;
 
-        const image = await Camera.getPhoto({
-            quality: 90,
-            allowEditing: true,
-            source,
-            resultType: CameraResultType.Uri
-        });
+        let image;
+        try {
+            image = await Camera.getPhoto({
+                quality: 90,
+                allowEditing: true,
+                source,
+                resultType: CameraResultType.Uri
+            });
+        } catch {
+            // El usuario canceló la cámara o el selector de la galería.
+            return;
+        }
 
         store.dispatch("images/upload", {resource: "users", column:"avatar", image}).then((response) => {
             // props.thumb = image.webPath;
