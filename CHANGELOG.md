@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2026-07-12
+
+### Security
+- `swiper` 9 → 12.2: corrige prototype pollution crítica (GHSA-hmx5-qpq5-p643), la única vulnerabilidad que viajaba en el bundle de la app
+- Saneamiento de devDependencies: se eliminan `cypress` (sin tests e2e reales) y `@capacitor/assets` (usar `npx @capacitor/assets` on demand); `npm audit` pasa de 41 vulnerabilidades (3 críticas) a 28 (0 críticas); las restantes esperan la migración a Vite/Vitest
+
+### Fixed
+- El test unitario de ejemplo apuntaba a un componente inexistente; ahora testea `safeRedirect`
+
 ## [1.1.3] - 2026-07-12
 
 ### Fixed
