@@ -7,7 +7,9 @@
     :content-full-screen="contentFullscreen"
     :body="body"
   >
-    <template #header><span></span></template>
+    <!-- Sin back button ocultamos el header por completo (look "blank");
+         con back button dejamos que GraduadosApp renderice su toolbar. -->
+    <template v-if="!headerShowBackButton" #header><span></span></template>
     
     <slot></slot>
 

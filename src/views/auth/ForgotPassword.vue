@@ -1,5 +1,5 @@
 <template>
-    <graduados-blank body="white" :hideFabButton="true">        
+    <graduados-blank body="white" :hideFabButton="true" :header-show-back-button="true">
         <div v-if="!sent">
             <ion-text class="ion-margin-bottom">
                 <h5 style="display:flex; align-items: center;">

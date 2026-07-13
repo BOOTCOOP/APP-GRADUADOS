@@ -1,5 +1,5 @@
 <template>
-  <graduados-blank body="white" :hideFabButton="true">
+  <graduados-blank body="white" :hideFabButton="true" :header-show-back-button="true">
     <div class="login-hero">
       <ion-img :src="logo" alt="Logo Graduados" />
     </div>
