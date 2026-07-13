@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Qué es este proyecto
 
-App móvil/web del Centro de Graduados de la Facultad de Derecho (UBA). Frontend **Ionic 6 + Vue 3 + TypeScript** sobre **Vue CLI** (webpack), empaquetada como nativa con **Capacitor** (carpetas `android/` e `ios/`). El backend es una API Laravel externa (`VUE_APP_API_URL` en `.env`, hoy `https://api.graduados.kame-code.com/api`); en este repo solo vive el frontend.
+App móvil/web del Centro de Graduados de la Facultad de Derecho (UBA). Frontend **Ionic 6 + Vue 3 + TypeScript** sobre **Vue CLI** (webpack), empaquetada como nativa con **Capacitor** (carpetas `android/` e `ios/`). El backend es una API Laravel externa (`VUE_APP_API_URL` en `.env`, hoy `https://graduados.derecho.uba.ar/api`); en este repo solo vive el frontend.
 
 Idioma del proyecto: código, comentarios, commits y docs en **español**.
 

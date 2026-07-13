@@ -166,7 +166,7 @@ npm run serve
 ### **Configuración de Entorno**
 ```bash
 # .env
-VUE_APP_API_URL=https://api.graduados.kame-code.com/api
+VUE_APP_API_URL=https://graduados.derecho.uba.ar/api
 VUE_APP_ENVIRONMENT=development
 ```
 
@@ -394,7 +394,7 @@ git push origin feature/nueva-funcionalidad
 - 👥 [**GUIA_USUARIO_MEJORAS.md**](./GUIA_USUARIO_MEJORAS.md) - Guía de mejoras para usuarios
 
 ### **APIs y Servicios**
-- **API Base**: `https://api.graduados.kame-code.com/api`
+- **API Base**: `https://graduados.derecho.uba.ar/api`
 - **Documentación API**: Disponible para desarrolladores autorizados
 - **Swagger/OpenAPI**: Endpoints documentados
 
