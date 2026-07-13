@@ -166,8 +166,8 @@ npm run serve
 ### **Configuración de Entorno**
 ```bash
 # .env
-VUE_APP_API_URL=https://graduados.derecho.uba.ar/api
-VUE_APP_ENVIRONMENT=development
+VITE_API_URL=https://graduados.derecho.uba.ar/api
+VITE_APPLICATION_NAME=graduados
 ```
 
 ---

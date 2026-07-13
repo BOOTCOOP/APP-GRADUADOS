@@ -9,7 +9,7 @@ import { ref, computed } from "vue";
 // localStorage directamente en lugar de importar User.
 
 const LOCAL_STORAGE_KEY =
-  (process.env.VUE_APP_APPLICATION_NAME as string).toUpperCase() + "_USER";
+  import.meta.env.VITE_APPLICATION_NAME.toUpperCase() + "_USER";
 
 function hydrate() {
   const data = localStorage.getItem(LOCAL_STORAGE_KEY);

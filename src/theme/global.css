@@ -1,6 +1,7 @@
 @font-face {
     font-family: 'Nunito';
-    src: url('../../public/assets/fonts/NunitoSans-Regular.ttf');
+    /* Desde src/assets: Vite lo procesa y hashea (importar desde public/ no está permitido) */
+    src: url('../assets/fonts/NunitoSans-Regular.ttf');
 }
 
 /* Common */

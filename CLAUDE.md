@@ -4,26 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Qué es este proyecto
 
-App móvil/web del Centro de Graduados de la Facultad de Derecho (UBA). Frontend **Ionic 6 + Vue 3 + TypeScript** sobre **Vue CLI** (webpack), empaquetada como nativa con **Capacitor** (carpetas `android/` e `ios/`). El backend es una API Laravel externa (`VUE_APP_API_URL` en `.env`, hoy `https://graduados.derecho.uba.ar/api`); en este repo solo vive el frontend.
+App móvil/web del Centro de Graduados de la Facultad de Derecho (UBA). Frontend **Ionic 6 + Vue 3 + TypeScript** sobre **Vite** (tests con **Vitest**), empaquetada como nativa con **Capacitor** (carpetas `android/` e `ios/`). El backend es una API Laravel externa (`VITE_API_URL` en `.env`, hoy `https://graduados.derecho.uba.ar/api`); en este repo solo vive el frontend.
 
 Idioma del proyecto: código, comentarios, commits y docs en **español**.
 
 ## Comandos
 
 ```bash
-npm run serve          # dev server (http://localhost:8080)
-npm run build          # build producción (publicPath /APP-GRADUADOS/)
-npm run lint           # eslint via vue-cli-service
-npm run test:unit      # jest
-npm run test:unit -- --testPathPattern=tests/unit/example.spec   # un solo archivo
-npm run test:unit -- -t "nombre del test"                        # un solo test
-npm run test:e2e       # cypress
+npm run serve          # dev server Vite (http://localhost:8080)
+npm run build          # build producción web (base /APP-GRADUADOS/)
+npm run lint           # eslint directo (usa .eslintignore)
+npm run type-check     # tsc --noEmit (el build de Vite no typechequea)
+npm run test:unit      # vitest run
+npm run test:unit -- tests/unit/example.spec.ts   # un solo archivo
+npm run test:unit -- -t "nombre del test"         # un solo test
 npm run deploy         # build + gh-pages -d dist (GitHub Pages)
 ```
 
-Deploy web: GitHub Pages en `https://BOOTCOOP.github.io/APP-GRADUADOS`. El `postbuild` copia `dist/index.html` a `dist/404.html` para que las rutas SPA funcionen en Pages. En producción `publicPath` es `/APP-GRADUADOS/` (ver `vue.config.js`).
+Deploy web: GitHub Pages en `https://BOOTCOOP.github.io/APP-GRADUADOS`. El `postbuild` copia `dist/index.html` a `dist/404.html` para que las rutas SPA funcionen en Pages. En producción la base es `/APP-GRADUADOS/` (ver `vite.config.ts`).
 
-Variables de entorno (`.env`, no commiteado con valores reales): `VUE_APP_API_URL` (base de la API) y `VUE_APP_APPLICATION_NAME` (prefijo de las claves de localStorage para token y usuario).
+Variables de entorno (`.env`): `VITE_API_URL` (base de la API) y `VITE_APPLICATION_NAME` (su **valor** deriva las claves de localStorage para token y usuario — cambiarlo desloguea a todos). `VITE_APP_VERSION` no va en `.env`: la inyecta `vite.config.ts` desde `package.json`.
 
 ## Arquitectura
 
@@ -60,7 +60,7 @@ Vuex es el store real (Pinia está instalada pero no es el patrón dominante). L
 
 ### Actualizaciones OTA y force update
 
-OTA self-hosted con `@capgo/capacitor-updater` en modo manual: al montar la app llama `notifyAppReady()` (rollback automático si un bundle crashea antes) y después chequea el manifiesto `public/ota/latest.json` servido por Pages; los zips van en GitHub Releases (tag `bundle-x.y.z`) o en `public/ota/`. Los cambios de JS se distribuyen SIEMPRE por OTA (bump de `package.json` + `npm run ota:build` + manifiesto), sin tocar la API ni las tiendas. Force update: palanca de EMERGENCIA — la app compara su versión **nativa** (no la del bundle) contra `min_version` de `GET /api/app/config` (y ante un 426 de la API) → alert bloqueante hacia la tienda; se opera subiendo `APP_MIN_VERSION` en el `.env` del server de la API y solo sirve para forzar instalaciones de tienda. **Regla de oro**: `npm run build:native` (base `/`) para Capacitor/OTA, `npm run build` (base `/APP-GRADUADOS/`) solo para Pages — nunca sincronizar un build web a Capacitor, y jamás empaquetar un bundle OTA con el `.env` local apuntando a localhost (`make-bundle.js` lo valida). Detalle completo en [docs/releases-y-actualizaciones.md](docs/releases-y-actualizaciones.md).
+OTA self-hosted con `@capgo/capacitor-updater` en modo manual: al montar la app llama `notifyAppReady()` (rollback automático si un bundle crashea antes) y después chequea el manifiesto `public/ota/latest.json` servido por Pages; los zips van en GitHub Releases (tag `bundle-x.y.z`) o en `public/ota/`. Los cambios de JS se distribuyen SIEMPRE por OTA (bump de `package.json` + `npm run ota:build` + manifiesto), sin tocar la API ni las tiendas. Force update: palanca de EMERGENCIA — la app compara su versión **nativa** (no la del bundle) contra `min_version` de `GET /api/app/config` (y ante un 426 de la API) → alert bloqueante hacia la tienda; se opera subiendo `APP_MIN_VERSION` en el `.env` del server de la API y solo sirve para forzar instalaciones de tienda. **Regla de oro**: `npm run build:native` (base `/`) para Capacitor/OTA, `npm run build` (base `/APP-GRADUADOS/`) solo para Pages — nunca sincronizar un build web a Capacitor, y jamás empaquetar un bundle OTA con el `.env` local apuntando a localhost (`make-bundle.js` lo valida escaneando los `.js` de `dist/`). Detalle completo en [docs/releases-y-actualizaciones.md](docs/releases-y-actualizaciones.md).
 
 ## Documentación de contexto
 

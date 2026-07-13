@@ -111,9 +111,9 @@ const route = useRoute();
 const router = useIonRouter();
 const active = ref(null);
 
-// Versión del bundle JS (package.json, inyectada por vue.config.js). Cambia
+// Versión del bundle JS (package.json, inyectada por vite.config.ts). Cambia
 // con cada OTA: sirve para verificar qué versión tiene instalada un usuario.
-const appVersion = process.env.VUE_APP_VERSION;
+const appVersion = import.meta.env.VITE_APP_VERSION;
 
 // Fuente reactiva: el header y el footer del menú cambian al loguear/desloguear
 // sin necesidad de recargar la app.

@@ -11,15 +11,15 @@
 
 ## 1. Stack y datos de entorno
 
-- **Vue 3 + Ionic 6 (`@ionic/vue`) + Capacitor 5.** Vue CLI (`vue-cli-service`). Estado con **Vuex 4**
+- **Vue 3 + Ionic 6 (`@ionic/vue`) + Capacitor 7.** Build con **Vite** (antes Vue CLI). Estado con **Vuex 4**
   (módulos en `src/store`) + composables (`src/uses`). Pinia está en `package.json` pero **no se usa**.
 - **Validación de forms:** `vee-validate` v4 + `@vee-validate/rules` (registro global en `src/main.ts`,
   mensajes en español via `@vee-validate/i18n`).
-- **HTTP:** `axios` instancia única en `src/libs/axios.ts`. `baseURL = process.env.VUE_APP_API_URL`
+- **HTTP:** `axios` instancia única en `src/libs/axios.ts`. `baseURL = import.meta.env.VITE_API_URL`
   (que **ya incluye `/api`**), `withCredentials: true` (backend Laravel/Sanctum).
-- **Env (`.env`):** `VUE_APP_APPLICATION_NAME=graduados`. `VUE_APP_API_URL` tiene varias líneas; **gana la
-  última no comentada** → hoy `http://localhost:8000/api`. Prod comentada: `graduados.derecho.uba.ar/api`.
-  **Testeo de esta integración: contra `http://localhost:8000/api` (backend local ya migrado).**
+- **Env (`.env`):** `VITE_APPLICATION_NAME=graduados` (su valor deriva las claves de localStorage, no
+  cambiarlo). `VITE_API_URL`: activa la de producción (`graduados.derecho.uba.ar/api`), con variantes
+  de localhost comentadas para desarrollo.
 - Scripts: `npm run serve` (dev), `npm run build`, `npm run lint`.
 
 ---
