@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/web-Bq-flGDg.js","assets/dist-B90gpHqd.js"])))=>i.map(i=>d[i]);
+import{h as e}from"./client-CKsQmTL8.js";import{a as t}from"./dist-B90gpHqd.js";var n=t(`Share`,{web:()=>e(()=>import(`./web-Bq-flGDg.js`).then(e=>new e.ShareWeb),__vite__mapDeps([0,1]))});export{n as t};
