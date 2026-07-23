@@ -6,7 +6,7 @@ name: Build APK (debug, para pruebas)
 on:
   workflow_dispatch:
   push:
-    branches: [test/capacitor-7]
+    branches: [capacitor-8-target-sdk-36]
 
 jobs:
   build-apk:

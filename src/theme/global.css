@@ -4,6 +4,27 @@
     src: url('../assets/fonts/NunitoSans-Regular.ttf');
 }
 
+/*
+ * Safe areas con edge-to-edge (Android 15+ / targetSdk 36: el WebView dibuja
+ * detrás de las barras del sistema, sin opción de opt-out desde Android 16).
+ * Capacitor 8 inyecta --safe-area-inset-* en el WebView (insetsHandling "css",
+ * el default) porque env(safe-area-inset-*) llega mal en WebViews < 140.
+ * Ionic 6 solo lee env(): este puente prioriza los valores de Capacitor para
+ * las --ion-safe-area-* que ya consumen ion-header, ion-footer, etc.
+ * En web e iOS --safe-area-inset-* no existe y cae al env() de siempre.
+ */
+html {
+    --ion-safe-area-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+    --ion-safe-area-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+    --ion-safe-area-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+    --ion-safe-area-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+}
+
+/* El FAB flotante vive fuera de header/footer: esquivar la barra de gestos */
+ion-fab[vertical="bottom"] {
+    margin-bottom: var(--ion-safe-area-bottom, 0);
+}
+
 /* Common */
 .cursor-pointer { cursor: pointer; }
 

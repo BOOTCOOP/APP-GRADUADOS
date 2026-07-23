@@ -4,8 +4,9 @@
 > cuándo se empuja un bundle JS por OTA y cuándo hay que pasar por las tiendas.
 > Escrita para un dev (o agente) que nunca hizo un release de esta app.
 >
-> Stack relevante: **Capacitor 7**, targetSdk 35, OTA self-hosted con `@capgo/capacitor-updater` v7
-> (modo manual, sin el cloud pago de Capgo), manifiesto servido por GitHub Pages y bundles en GitHub Releases.
+> Stack relevante: **Capacitor 8**, targetSdk 36 (Android 16, requisito de Google Play desde el 31/8/2026),
+> OTA self-hosted con `@capgo/capacitor-updater` v8 (modo manual, sin el cloud pago de Capgo),
+> manifiesto servido por GitHub Pages y bundles en GitHub Releases.
 
 ---
 
@@ -46,11 +47,11 @@ Hay **dos versiones** que evolucionan a ritmos distintos:
 | **Nativa** (versión del shell) | `versionName` en `android/app/build.gradle` = `MARKETING_VERSION` en iOS = tag del release de tienda | En cada **release de tienda** |
 | **Bundle JS** | `version` en `package.json` (expuesta al código como `VITE_APP_VERSION` vía `vite.config.ts`) | En cada **OTA**, y se **realinea con la nativa** en cada release de tienda |
 
-Estado actual (versión unificada 1.1.0):
+Estado actual (versión unificada 1.2.0, release de tienda por Capacitor 8 / targetSdk 36):
 
-- `package.json`: `1.1.0`
-- Android: `versionName "1.1.0"` / `versionCode 14`
-- iOS: `MARKETING_VERSION 1.1.0` / `CURRENT_PROJECT_VERSION 3`
+- `package.json`: `1.2.0`
+- Android: `versionName "1.2.0"` / `versionCode 15`
+- iOS: `MARKETING_VERSION 1.2.0` / `CURRENT_PROJECT_VERSION 4`
 
 Reglas:
 
@@ -136,7 +137,7 @@ Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Las fichas de
 3. **Android** — dos caminos:
    - **GitHub Actions (recomendado, no requiere Android Studio)**: pestaña Actions → workflow **"Build AAB (release, para Play Store)"** → Run workflow → descargar el artifact `app-release-aab` → subir el `.aab` a **Play Console**. Requiere los secrets del repo `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` (ver comentario del workflow). El keystore es la **upload key** (Play App Signing custodia la clave final); backup del `.jks` fuera del repo — jamás commitearlo (`.gitignore` ya lo cubre).
    - **Local**: `npx cap open android` y en Android Studio: Build → Generate Signed Bundle (usa `android/keystore.properties`) → subir a Play Console.
-4. **iOS** (requiere Mac con **Xcode 16+**):
+4. **iOS** (requiere Mac con **Xcode 26+**, exigido por Capacitor 8):
    ```bash
    npx cap open ios
    ```
