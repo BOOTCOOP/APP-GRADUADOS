@@ -53,7 +53,13 @@ Object.keys(AllRules).forEach((rule) => {
 // });
 /* End Form Validation configuration */
 
-const app = createApp(App).use(IonicVue).use(router).use(store);
+const app = createApp(App)
+  .use(IonicVue, {
+    // El default de Ionic en modo iOS es "Back" (en MD el botón no lleva texto)
+    backButtonText: "Atrás",
+  })
+  .use(router)
+  .use(store);
 // Global Components
 app.component("graduados-app", GraduadosApp);
 app.component("graduados-blank", GraduadosBlank);

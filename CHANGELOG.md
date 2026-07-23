@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-07-23
+
+### Changed
+- Migración a **Capacitor 8** y `targetSdkVersion` **36** (Android 16): requisito de Google Play para poder seguir publicando actualizaciones después del 31/8/2026. AGP 8.13, Gradle 8.14.3, minSdk 23 → 24 (se pierde soporte de Android 6.0, ~2015), deployment target iOS 14 → 15
+- `@capgo/capacitor-updater` 7 → 8 (misma configuración, mismo flujo OTA)
+- Edge-to-edge obligatorio en Android 15+: la app dibuja detrás de las barras del sistema; los insets se resuelven con el puente CSS `--safe-area-inset-*` → `--ion-safe-area-*` en `src/theme/global.css` y el plugin core SystemBars (`style: "DARK"`)
+
+### Fixed
+- La barra de estado de Android (reloj/batería) tapaba el contenido desde la migración a targetSdk 35: el puente de safe areas empuja el header debajo de la barra, y las pantallas sin header (ej. completar perfil) ganan un espaciador en el layout blank
+- El botón de volver en iOS decía "Back": ahora "Atrás" global vía `backButtonText` de Ionic
+
 ## [1.1.6] - 2026-07-13
 
 ### Fixed

@@ -8,8 +8,12 @@
     :body="body"
   >
     <!-- Sin back button ocultamos el header por completo (look "blank");
-         con back button dejamos que GraduadosApp renderice su toolbar. -->
-    <template v-if="!headerShowBackButton" #header><span></span></template>
+         con back button dejamos que GraduadosApp renderice su toolbar.
+         El espaciador cubre la safe area superior: sin ion-header nadie
+         absorbe la barra de estado en edge-to-edge (Android 15+ / notch iOS). -->
+    <template v-if="!headerShowBackButton" #header>
+      <div class="safe-area-spacer" aria-hidden="true"></div>
+    </template>
     
     <slot></slot>
 
@@ -29,5 +33,12 @@
     headerShowBackButton: {default: false},
     contentFullscreen: {default: true},
     body: {default: ''},
-  })  
+  })
 </script>
+
+<style scoped>
+.safe-area-spacer {
+  height: var(--ion-safe-area-top, 0px);
+  flex-shrink: 0;
+}
+</style>
