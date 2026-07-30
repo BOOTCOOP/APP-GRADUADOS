@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-30
+
+### Added
+- Avatar del usuario en la navbar
+- Registro silencioso de postulación al contactar una búsqueda laboral
+
+### Changed
+- Rediseño UX/UI general de la app
+- "Actividades Online" abre la playlist de YouTube directamente desde el menú lateral y el inicio, con ícono de YouTube; antes el menú navegaba a `/classifieds`, que pedía login sin necesidad
+- El enlace "Canal de Youtube" de Contacto apunta al canal `@DerechoUBA` (antes a una playlist vieja)
+
 ## [1.2.0] - 2026-07-23
 
 ### Changed
