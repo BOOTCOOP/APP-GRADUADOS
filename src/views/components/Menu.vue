@@ -25,11 +25,32 @@
       <!-- Navigation items -->
       <ion-list lines="none" class="menu-list">
         <ion-menu-toggle auto-hide="false" v-for="(p, i) in items" :key="i">
+          <!--
+            Los ítems que salen de la app (Actividades Online → YouTube) usan
+            @click en vez de router-link: antes apuntaban a una ruta interna que
+            además pedía login, así que desde el menú había que loguearse y pasar
+            por una pantalla intermedia para llegar al mismo video que el acceso
+            del inicio abría directo.
+          -->
           <ion-item
+            v-if="p.action"
+            button
+            detail="false"
+            class="menu-item"
+            @click="p.action"
+          >
+            <div class="menu-icon-wrap" slot="start">
+              <ion-icon :icon="p.icon" />
+            </div>
+            <ion-label>{{ p.title }}</ion-label>
+          </ion-item>
+          <ion-item
+            v-else
             :router-link="p.url"
             detail="false"
             class="menu-item"
             :class="{ selected: active === i }"
+            :aria-current="active === i ? 'page' : undefined"
           >
             <div class="menu-icon-wrap" slot="start" :class="{ 'selected-icon': active === i }">
               <ion-icon :icon="p.icon" />
@@ -82,7 +103,6 @@ import {
   IonList,
   IonMenu,
   IonMenuToggle,
-  menuController,
   useIonRouter,
 } from "@ionic/vue";
 import { ref, computed, watch } from "vue";
@@ -91,7 +111,6 @@ import {
   newspaperOutline,
   libraryOutline,
   giftOutline,
-  megaphoneOutline,
   schoolOutline,
   briefcaseOutline,
   informationCircleOutline,
@@ -102,10 +121,13 @@ import {
   homeOutline,
   ribbonOutline,
   callOutline,
+  logoYoutube,
 } from "ionicons/icons";
 import { useRoute } from "vue-router";
 import { useAuth } from "@/uses/auth";
 import { useCurrentUser } from "@/uses/currentUser";
+import { openYoutubePlaylist } from "@/uses/externalLinks";
+import { useNotifications } from "@/uses/notifications";
 
 const route = useRoute();
 const router = useIonRouter();
@@ -127,11 +149,13 @@ const userInitials = computed(() => {
   return (first + last).toUpperCase();
 });
 
+// `url` = ruta interna; `action` = abre algo fuera de la app.
 const items = [
   { title: "Inicio",                   url: "/",                        icon: homeOutline },
   { title: "Cursos",                   url: "/cursos",                  icon: ribbonOutline },
   { title: "Talleres y Jornadas",      url: "/talleres",                icon: schoolOutline },
-  { title: "Actividades Online",       url: "/classifieds",             icon: megaphoneOutline },
+  // Mismo destino que el acceso rápido del inicio: la playlist, sin intermediarios.
+  { title: "Actividades Online",       action: openYoutubePlaylist,     icon: logoYoutube },
   { title: "Búsquedas Laborales",      url: "/busqueda-laboral",        icon: briefcaseOutline },
   { title: "Bibliografía",             url: "/material-bibliografico",  icon: libraryOutline },
   { title: "Noticias",                 url: "/noticias",                icon: newspaperOutline },
@@ -151,20 +175,27 @@ function setActiveItem(curr) {
 function logout() {
   useAuth()
     .logout()
-    .then(() => router.push("/"));
+    .then(() => {
+      // Limpiamos el estado compartido para que el próximo usuario no vea el
+      // contador ni las notificaciones del anterior.
+      useNotifications().reset();
+      router.push("/");
+    });
 }
 </script>
 
 <style scoped>
 /* ── Content background ─────────────────────────── */
 ion-content {
-  --background: #F4F5F8;
+  --background: var(--app-bg);
 }
 
 /* ── Gradient header ────────────────────────────── */
 .menu-header {
-  background: linear-gradient(145deg, #AB49CC 0%, #7A35AB 100%);
-  padding: 48px 20px 24px;
+  background: var(--app-gradient-primary);
+  /* El padding-top respeta la barra de estado en edge-to-edge: con 48px fijos el
+     avatar quedaba pisado por la status bar en Android 15+. */
+  padding: calc(24px + var(--ion-safe-area-top, 0px)) 20px 24px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -276,7 +307,7 @@ ion-item.menu-item ion-label {
 
 /* ── Logout ─────────────────────────────────────── */
 .menu-footer {
-  padding: 8px 12px 24px;
+  padding: 8px 12px calc(24px + var(--ion-safe-area-bottom, 0px));
   margin-top: 4px;
 }
 

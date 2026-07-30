@@ -2,224 +2,305 @@
   <graduados-app header-title="Contacto" :header-show-back-button="true">
     <div class="contacto-container">
       <!-- Enlaces de interés -->
-      <div class="ion-margin-top links">
-        <ion-text color="primary" class="section-title">
-          <h2>Enlaces de interés</h2>
-        </ion-text>
+      <section class="links">
+        <h2 class="section-title">Enlaces de interés</h2>
 
-        <ion-card @click="goToWhatsapp" class="ion-no-margin ion-margin-top link-whatsapp">
-          <ion-card-content>
-            <div class="link-content">
-              <ion-text color="dark">Atención y consultas</ion-text>
-              <ion-icon :md="logoWhatsapp" size="large" :ios="logoWhatsapp" color="medium"></ion-icon>
-            </div>
-          </ion-card-content>
-        </ion-card>
+        <!--
+          Botones reales (no ion-card con @click): así el tap, el foco y el
+          teclado funcionan sin agregar role/tabindex a mano, y se entiende que
+          la fila COMPLETA es tappable, no solo el ícono.
+        -->
+        <button type="button" class="link-row" @click="goToWhatsapp">
+          <span class="link-icon whatsapp">
+            <ion-icon :icon="logoWhatsapp" aria-hidden="true"></ion-icon>
+          </span>
+          <span class="link-text">
+            <span class="link-title">Atención y consultas</span>
+            <span class="link-sub">Escribinos por WhatsApp</span>
+          </span>
+          <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
+        </button>
 
-        <ion-card @click="goToYoutube" class="ion-no-margin ion-margin-top link-youtube">
-          <ion-card-content>
-            <div class="link-content">
-              <ion-text color="dark">Canal de Youtube</ion-text>
-              <ion-icon :md="logoYoutube" size="large" :ios="logoYoutube" color="medium"></ion-icon>
-            </div>
-          </ion-card-content>
-        </ion-card>
-      </div>
+        <button type="button" class="link-row" @click="goToYoutube">
+          <span class="link-icon youtube">
+            <ion-icon :icon="logoYoutube" aria-hidden="true"></ion-icon>
+          </span>
+          <span class="link-text">
+            <span class="link-title">Canal de YouTube</span>
+            <span class="link-sub">Videos de la Facultad</span>
+          </span>
+          <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
+        </button>
+      </section>
 
       <!-- Redes sociales -->
-      <div class="ion-margin-top socials">
-        <ion-text color="primary" class="section-title">
-          <h2>Síguenos en redes sociales</h2>
-        </ion-text>
-        
-        <ion-grid>
-          <ion-row>
-            <ion-col>
-              <ion-card
-                @click="goToFacebook()"
-                class="ion-no-margin ion-margin-top ion-text-center social"
-              >
-                <ion-card-content>
-                  <ion-icon
-                    :md="logoFacebook"
-                    size="large"
-                    :ios="logoFacebook"
-                  ></ion-icon>
-                </ion-card-content>
-              </ion-card>
-            </ion-col>
-            <ion-col>
-              <ion-card
-                @click="goToTwitter()"
-                class="ion-no-margin ion-margin-top ion-text-center social"
-              >
-                <ion-card-content>
-                  <font-awesome-icon
-                    icon="fa-brands fa-x-twitter"
-                    font-size="36px"
-                  />
-                </ion-card-content>
-              </ion-card>
-            </ion-col>
-            <ion-col>
-              <ion-card
-                @click="goToInstagram()"
-                class="ion-no-margin ion-margin-top ion-text-center social"
-              >
-                <ion-card-content>
-                  <ion-icon
-                    :md="logoInstagram"
-                    size="large"
-                    :ios="logoInstagram"
-                  ></ion-icon>
-                </ion-card-content>
-              </ion-card>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </div>
+      <section class="socials">
+        <h2 class="section-title">Seguinos en redes</h2>
+
+        <div class="social-grid">
+          <button
+            type="button"
+            class="social-tile"
+            aria-label="Facebook del Centro de Graduados"
+            @click="goToFacebook()"
+          >
+            <ion-icon :icon="logoFacebook" aria-hidden="true"></ion-icon>
+            <span>Facebook</span>
+          </button>
+
+          <button
+            type="button"
+            class="social-tile"
+            aria-label="X del Centro de Graduados"
+            @click="goToTwitter()"
+          >
+            <font-awesome-icon icon="fa-brands fa-x-twitter" aria-hidden="true" />
+            <span>X</span>
+          </button>
+
+          <button
+            type="button"
+            class="social-tile"
+            aria-label="Instagram del Centro de Graduados"
+            @click="goToInstagram()"
+          >
+            <ion-icon :icon="logoInstagram" aria-hidden="true"></ion-icon>
+            <span>Instagram</span>
+          </button>
+        </div>
+      </section>
     </div>
   </graduados-app>
 </template>
 
 <script setup lang="ts">
-import { 
-  logoWhatsapp, 
-  logoYoutube, 
-  logoFacebook, 
-  logoInstagram 
+import {
+  logoWhatsapp,
+  logoYoutube,
+  logoFacebook,
+  logoInstagram,
+  chevronForwardOutline
 } from 'ionicons/icons';
 
-import {
-  IonCard, 
-  IonCardContent,
-  IonCol,
-  IonGrid,
-  IonIcon, 
-  IonRow,
-  IonText
-} from '@ionic/vue';
+import { IonIcon } from '@ionic/vue';
 
-// Funciones para WhatsApp y YouTube
+import {
+  openExternal,
+  openWhatsapp,
+  openYoutubeChannel,
+  FACEBOOK_URL,
+  TWITTER_URL,
+  INSTAGRAM_URL,
+} from '@/uses/externalLinks';
+import { tapFeedback } from '@/uses/haptics';
+
+/*
+ * Todos los destinos viven en src/uses/externalLinks.ts. El de WhatsApp pasó de
+ * `web.whatsapp.com/send?phone=…` (que en el celular abre el cliente WEB y
+ * muestra el cartel de "escaneá el QR") a `wa.me/…`, que el sistema operativo
+ * reconoce como link de la app y abre el chat directo en WhatsApp.
+ */
 function goToWhatsapp() {
-  window.open('https://web.whatsapp.com/send?phone=541138315897', '_system');
+  tapFeedback();
+  openWhatsapp();
 }
 
+// Al canal, NO a la playlist de "Actividades Online": son destinos distintos.
 function goToYoutube() {
-  window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy', '_system');
+  tapFeedback();
+  openYoutubeChannel();
 }
 
 // Funciones para redes sociales
 function goToFacebook() {
-  window.open('https://www.facebook.com/Centrodegraduadasygraduados', '_system');
+  tapFeedback();
+  openExternal(FACEBOOK_URL);
 }
 
 function goToTwitter() {
-  window.open('https://x.com/graduadodchouba?s=21', '_system');
+  tapFeedback();
+  openExternal(TWITTER_URL);
 }
 
 function goToInstagram() {
-  window.open('https://www.instagram.com/centrodegraduados', '_system');
+  tapFeedback();
+  openExternal(INSTAGRAM_URL);
 }
 </script>
 
 <style scoped>
+/* El padding horizontal ya lo pone el layout (.page-body): antes se sumaba y
+   quedaban 32px de gutter en un celular angosto. */
 .contacto-container {
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-xl);
 }
 
 .section-title {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 16px;
+  margin: 0 0 var(--app-spacing-md);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--app-text-secondary);
 }
 
-.section-title h2 {
-  margin: 0;
-  font-size: 1.2rem;
+/* ── Enlaces de interés ─────────────────────────── */
+.links {
+  display: flex;
+  flex-direction: column;
 }
 
-/* Estilos para Enlaces de interés */
-.links ion-card {
-  background-color: var(--ion-color-light);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.links ion-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.links ion-card-content {
-  position: relative;
-  padding: 16px;
-}
-
-.link-content {
+.link-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--app-spacing-md);
   width: 100%;
-}
-
-.link-content ion-text {
-  font-weight: 500;
-  font-size: 1rem;
-}
-
-.links ion-card-content:after {
-  content: "";
-  display: block;
-  height: 100%;
-  width: 6px;
-  position: absolute;
-  right: 0px;
-  top: 0;
-  border-radius: 0 12px 12px 0;
-}
-
-.links .link-whatsapp ion-card-content::after {
-  background-color: #25D366;
-}
-
-.links .link-youtube ion-card-content::after {
-  background-color: #FF0000;
-}
-
-/* Estilos para Redes sociales */
-ion-card.social {
-  background-color: var(--ion-color-light);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  text-align: left;
+  appearance: none;
+  font-family: inherit;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow-sm);
+  padding: var(--app-spacing-md) var(--app-spacing-lg);
+  margin-bottom: var(--app-spacing-md);
+  min-height: 72px;
   cursor: pointer;
-  min-height: 80px;
+  transition: box-shadow var(--app-duration) var(--app-ease),
+              transform var(--app-duration-fast) var(--app-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.link-row:hover {
+  box-shadow: var(--app-shadow-md);
+}
+
+.link-row:active {
+  transform: scale(0.99);
+  box-shadow: var(--app-shadow-xs);
+}
+
+.link-row:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+/*
+ * Ícono con el color real de la marca sobre un tinte suave. Antes los logos
+ * iban en `color="medium"` (gris) y la única pista de color era una barrita
+ * vertical pegada al borde derecho de la card, que se leía como un glitch.
+ */
+.link-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-ion-card.social:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.link-icon ion-icon {
+  font-size: 24px;
 }
 
-ion-card.social ion-card-content {
+.link-icon.whatsapp {
+  background: rgba(37, 211, 102, 0.12);
+}
+.link-icon.whatsapp ion-icon {
+  color: #128C4A; /* verde WhatsApp oscurecido para llegar a 4.5:1 sobre el tinte */
+}
+
+.link-icon.youtube {
+  background: rgba(255, 0, 0, 0.10);
+}
+.link-icon.youtube ion-icon {
+  color: #D90000;
+}
+
+.link-text {
   display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.link-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--app-text-title);
+  line-height: 1.3;
+}
+
+.link-sub {
+  font-size: 13px;
+  color: var(--app-text-secondary);
+  line-height: 1.3;
+}
+
+.link-chevron {
+  font-size: 18px;
+  color: var(--app-text-secondary);
+  flex-shrink: 0;
+}
+
+/* ── Redes sociales ─────────────────────────────── */
+/* Grid propio en lugar de ion-grid/row/col: menos anidado y gaps consistentes
+   con el resto de la app. */
+.social-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--app-spacing-md);
+}
+
+.social-tile {
+  appearance: none;
+  font-family: inherit;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow-sm);
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  gap: var(--app-spacing-sm);
+  padding: var(--app-spacing-lg) var(--app-spacing-sm);
+  min-height: 88px;
+  cursor: pointer;
+  transition: box-shadow var(--app-duration) var(--app-ease),
+              transform var(--app-duration-fast) var(--app-ease);
+  -webkit-tap-highlight-color: transparent;
 }
 
-ion-card.social ion-icon {
-  color: var(--ion-color-medium);
+.social-tile:hover {
+  box-shadow: var(--app-shadow-md);
 }
 
-.share-button font-awesome-icon {
-  font-size: 42px;
-  color: var(--ion-color-medium);
+.social-tile:active {
+  transform: scale(0.97);
+  box-shadow: var(--app-shadow-xs);
+}
+
+.social-tile:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+.social-tile ion-icon,
+.social-tile :deep(svg) {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+  color: var(--app-text-title);
+}
+
+.social-tile span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-text-secondary);
 }
 </style>

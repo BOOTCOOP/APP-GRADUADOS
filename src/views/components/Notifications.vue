@@ -1,81 +1,120 @@
 <template>
   <ion-menu
-    @ionDidOpen="markAsRead"
+    @ionDidOpen="onOpen"
     :swipeGesture="false"
     side="end"
     content-id="main-content"
     type="overlay"
     menu-id="notification-content"
+    class="notifications-menu"
   >
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Notificaciones</ion-title>
+    <ion-header class="ion-no-border">
+      <ion-toolbar class="notifications-toolbar">
+        <ion-buttons slot="start">
+          <ion-button
+            fill="clear"
+            color="dark"
+            aria-label="Cerrar notificaciones"
+            @click="close"
+          >
+            <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+
+        <ion-title>
+          <span class="toolbar-title">Notificaciones</span>
+        </ion-title>
+
         <ion-buttons slot="end">
-          <ion-button @click="markAllAsRead" fill="clear">
-            <ion-icon :icon="checkmarkDoneOutline"></ion-icon>
+          <ion-button
+            v-if="unreadCount > 0"
+            fill="clear"
+            size="small"
+            class="mark-all-btn"
+            aria-label="Marcar todas como leídas"
+            @click="markAllAsRead"
+          >
+            <ion-icon slot="start" :icon="checkmarkDoneOutline"></ion-icon>
+            Leer todas
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content>
-      <div v-if="notifications.length === 0" class="empty-state">
-        <ion-icon :icon="notificationsOffOutline" size="large"></ion-icon>
-        <h3>No hay notificaciones</h3>
-        <p>Cuando tengas nuevas notificaciones, aparecerán aquí.</p>
+
+    <ion-content class="notifications-content">
+      <!-- Cargando: skeletons con la forma real de la fila, no un spinner suelto -->
+      <div v-if="loading && !loaded" class="notifications-list" aria-busy="true">
+        <div v-for="i in 4" :key="i" class="notification-row skeleton-row">
+          <ion-skeleton-text :animated="true" class="skeleton-avatar" />
+          <div class="skeleton-lines">
+            <ion-skeleton-text :animated="true" style="width: 45%; height: 12px" />
+            <ion-skeleton-text :animated="true" style="width: 85%; height: 14px" />
+            <ion-skeleton-text :animated="true" style="width: 60%; height: 12px" />
+          </div>
+        </div>
       </div>
 
-      <ion-list v-else class="notifications-container">
-        <ion-item
-          v-for="item in notifications"
-          :key="item?.id || Math.random()"
-          class="notification"
-          :class="[
-            !item?.read ? 'unread' : '',
-            `notification-type-${getNotificationType(item)}`,
-          ]"
-          @click="() => handleNotificationClick(item)"
-          button
-        >
-          <div class="notification-icon" slot="start">
-            <ion-icon
-              :icon="getNotificationIcon(item)"
-              :color="getNotificationColor(item)"
-              size="large"
-            ></ion-icon>
-          </div>
+      <!-- Vacío -->
+      <div v-else-if="!items.length" class="empty-state">
+        <div class="empty-icon-wrap">
+          <ion-icon :icon="notificationsOffOutline" aria-hidden="true"></ion-icon>
+        </div>
+        <h3>Todo al día</h3>
+        <p>Cuando haya novedades de cursos, talleres o noticias las vas a ver acá.</p>
+      </div>
 
-          <ion-label class="ion-padding">
-            <div class="notification-header">
-              <h3>{{ item?.subject || item?.title || "Sin título" }}</h3>
-              <span
-                class="notification-type-badge"
-                :class="`badge-${getNotificationType(item)}`"
-              >
+      <!-- Lista -->
+      <div v-else class="notifications-list">
+        <p class="list-caption">
+          {{ unreadCount > 0 ? `${unreadCount} sin leer` : "Sin novedades nuevas" }}
+        </p>
+
+        <button
+          v-for="(item, index) in items"
+          :key="item?.id ?? index"
+          type="button"
+          class="notification-row"
+          :class="{ unread: !item?.read }"
+          @click="handleNotificationClick(item)"
+        >
+          <span
+            class="notification-avatar"
+            :style="{ '--type-color': getTypeColor(item) }"
+          >
+            <ion-icon :icon="getNotificationIcon(item)" aria-hidden="true"></ion-icon>
+          </span>
+
+          <span class="notification-main">
+            <span class="notification-top">
+              <span class="notification-type" :style="{ color: getTypeColor(item) }">
                 {{ getNotificationTypeLabel(item) }}
               </span>
-            </div>
+              <span class="notification-date">{{
+                formatDate(item?.created_at || item?.date)
+              }}</span>
+            </span>
 
-            <p class="content">
-              {{ truncateText(item?.message || item?.content || "", 100) }}
-            </p>
+            <span class="notification-title">
+              {{ item?.subject || item?.title || "Sin título" }}
+            </span>
 
-            <div class="notification-meta">
-              <p class="date">
-                {{ formatDate(item?.created_at || item?.date) }}
-              </p>
-              <p
-                v-if="item?.priority"
-                class="priority"
-                :class="`priority-${item.priority}`"
-              >
-                {{ getPriorityLabel(item.priority) }}
-              </p>
-            </div>
+            <span v-if="item?.message || item?.content" class="notification-text">
+              {{ truncateText(item?.message || item?.content || "", 110) }}
+            </span>
 
-            <span v-if="!item?.read" class="mark-as-read"></span>
-          </ion-label>
-        </ion-item>
-      </ion-list>
+            <span
+              v-if="item?.priority === 'high'"
+              class="priority-tag"
+            >
+              <ion-icon :icon="alertCircleOutline" aria-hidden="true"></ion-icon>
+              Importante
+            </span>
+          </span>
+
+          <!-- Punto de "no leída": indicador de estado, no un botón -->
+          <span v-if="!item?.read" class="unread-dot" aria-label="Sin leer"></span>
+        </button>
+      </div>
     </ion-content>
   </ion-menu>
 </template>
@@ -83,9 +122,6 @@
 <script setup lang="ts">
 import {
   IonMenu,
-  IonList,
-  IonItem,
-  IonLabel,
   IonContent,
   IonIcon,
   IonHeader,
@@ -93,405 +129,424 @@ import {
   IonTitle,
   IonButtons,
   IonButton,
+  IonSkeletonText,
   useIonRouter,
   menuController,
 } from "@ionic/vue";
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import { useStore } from "vuex";
 import User from "@/utils/user";
 import {
   checkmarkDoneOutline,
+  closeOutline,
   notificationsOffOutline,
   newspaperOutline,
   calendarOutline,
   megaphoneOutline,
   schoolOutline,
   informationCircleOutline,
+  alertCircleOutline,
 } from "ionicons/icons";
-
-const notifications = ref<any[]>([]);
-
-function markAsRead() {
-  setTimeout(() => {
-    notifications.value.forEach((n: any) => (n.read = true));
-    const ids = notifications.value.map((n: any) => n.id);
-    store.dispatch("notifications/markAsRead", { ids });
-  }, 1500);
-}
+import { useNotifications, type AppNotification } from "@/uses/notifications";
 
 const store = useStore();
-
-onMounted(() => {
-  if (User.isSet()) {
-    store
-      .dispatch("notifications/fetchAll")
-      .then((response) => {
-        // Verificación más segura de la respuesta
-        if (response && response.data && Array.isArray(response.data.data)) {
-          notifications.value = response.data.data;
-        } else if (response && Array.isArray(response.data)) {
-          notifications.value = response.data;
-        } else {
-          notifications.value = [];
-        }
-      })
-      .catch(() => {
-        notifications.value = []; // Asegurar que sea un array vacío en caso de error
-      });
-  }
-});
-
 const router = useIonRouter();
 
-// NUEVAS FUNCIONES PARA NOTIFICACIONES
+// Estado compartido: la campana del inicio lee el mismo `unreadCount`.
+const { items, loading, loaded, unreadCount, fetchAll, markAsRead, markAllAsRead } =
+  useNotifications(store);
 
-// Obtener icono según el tipo de notificación
-const getNotificationIcon = (notification) => {
-  if (!notification) return informationCircleOutline;
-  const type = notification.type || "general";
-  switch (type) {
-    case "news":
-      return newspaperOutline;
-    case "workshop":
-      return calendarOutline;
-    case "classified":
-      return megaphoneOutline;
-    case "course":
-      return schoolOutline;
-    default:
-      return informationCircleOutline;
+onMounted(() => {
+  if (User.isSet()) fetchAll();
+});
+
+/**
+ * Al abrir el panel, las no leídas se marcan como leídas DESPUÉS de un momento:
+ * si se marcaran al instante, el resaltado de "nuevo" desaparecería justo
+ * mientras la persona lo está mirando y no llegaría a ver qué era novedad.
+ *
+ * A diferencia del código anterior, el timer se guarda para poder cancelarlo si
+ * el panel se cierra o se desmonta antes, y solo se envían los ids que estaban
+ * sin leer (antes machacaba `read = true` en todas y mandaba ids de más).
+ */
+let markTimer: ReturnType<typeof setTimeout> | null = null;
+
+function onOpen() {
+  if (unreadCount.value === 0) return;
+
+  clearMarkTimer();
+  markTimer = setTimeout(() => markAllAsRead(), 1500);
+}
+
+function clearMarkTimer() {
+  if (markTimer) {
+    clearTimeout(markTimer);
+    markTimer = null;
   }
+}
+
+onUnmounted(clearMarkTimer);
+
+function close() {
+  clearMarkTimer();
+  menuController.close("notification-content");
+}
+
+// ── Presentación por tipo ───────────────────────────────────────────────────
+type NotificationType = "news" | "workshop" | "classified" | "course" | "general";
+
+function getType(notification?: AppNotification): NotificationType {
+  const type = (notification?.type || "general") as NotificationType;
+  return ["news", "workshop", "classified", "course"].includes(type) ? type : "general";
+}
+
+const TYPE_META: Record<NotificationType, { label: string; color: string; icon: string }> = {
+  news: { label: "Noticia", color: "#0891B2", icon: newspaperOutline },
+  workshop: { label: "Taller", color: "#2563EB", icon: calendarOutline },
+  classified: { label: "Aviso", color: "#D97706", icon: megaphoneOutline },
+  course: { label: "Curso", color: "#7A35AB", icon: schoolOutline },
+  general: { label: "General", color: "#6B6B78", icon: informationCircleOutline },
 };
 
-// Obtener color según el tipo
-const getNotificationColor = (notification) => {
-  if (!notification) return "medium";
-  const type = notification.type || "general";
-  switch (type) {
-    case "news":
-      return "primary";
-    case "workshop":
-      return "secondary";
-    case "classified":
-      return "warning";
-    case "course":
-      return "success";
-    default:
-      return "medium";
-  }
-};
+const getNotificationIcon = (n?: AppNotification) => TYPE_META[getType(n)].icon;
+const getTypeColor = (n?: AppNotification) => TYPE_META[getType(n)].color;
+const getNotificationTypeLabel = (n?: AppNotification) => TYPE_META[getType(n)].label;
 
-// Obtener tipo simplificado
-const getNotificationType = (notification) => {
-  if (!notification) return "general";
-  return notification.type || "general";
-};
-
-// Obtener etiqueta del tipo
-const getNotificationTypeLabel = (notification) => {
-  if (!notification) return "General";
-  const type = notification.type || "general";
-  switch (type) {
-    case "news":
-      return "Noticia";
-    case "workshop":
-      return "Taller";
-    case "classified":
-      return "Aviso";
-    case "course":
-      return "Curso";
-    default:
-      return "General";
-  }
-};
-
-// Truncar texto
-const truncateText = (text, maxLength) => {
+const truncateText = (text: string, maxLength: number) => {
   if (!text) return "";
-  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+  return text.length > maxLength ? text.substring(0, maxLength).trimEnd() + "…" : text;
 };
 
-// Formatear fecha
-const formatDate = (dateString) => {
+/**
+ * Fecha en lenguaje natural ("hace 5 min", "ayer"): en una lista de novedades
+ * importa cuán reciente es, no la fecha exacta. Si la API ya manda un texto
+ * relativo lo respetamos.
+ */
+function formatDate(dateString?: string) {
   if (!dateString) return "";
+  if (typeof dateString === "string" && dateString.includes("hace")) return dateString;
 
-  // Si ya viene formateada como "hace X tiempo", devolverla tal como está
-  if (typeof dateString === "string" && dateString.includes("hace")) {
-    return dateString;
-  }
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
 
-  // Si es una fecha válida, formatearla
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      return dateString; // Devolver tal como viene si no es válida
-    }
+  const diffMinutes = Math.floor((Date.now() - date.getTime()) / 60000);
 
-    return date.toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return dateString || "Fecha no disponible";
-  }
+  if (diffMinutes < 1) return "Ahora";
+  if (diffMinutes < 60) return `hace ${diffMinutes} min`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `hace ${diffHours} h`;
+  if (diffHours < 48) return "Ayer";
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `hace ${diffDays} días`;
+
+  return date.toLocaleDateString("es-AR", { day: "numeric", month: "short" });
+}
+
+// ── Navegación ──────────────────────────────────────────────────────────────
+const ROUTE_BY_LINK: Record<string, string> = {
+  "activities.index": "/talleres",
+  "courses.index": "/cursos",
+  "news.index": "/noticias",
+  "classifieds.index": "/classifieds",
 };
 
-// Obtener etiqueta de prioridad
-const getPriorityLabel = (priority) => {
-  switch (priority) {
-    case "high":
-      return "Alta";
-    case "medium":
-      return "Media";
-    case "low":
-      return "Baja";
-    default:
-      return "";
-  }
+const ROUTE_BY_TYPE: Record<NotificationType, string> = {
+  news: "/noticias",
+  workshop: "/talleres",
+  classified: "/classifieds",
+  course: "/cursos",
+  general: "/",
 };
 
-// Mejorar navegación
-const handleNotificationClick = async (notification) => {
+async function handleNotificationClick(notification?: AppNotification) {
   if (!notification) return;
 
-  // Marcar como leída
-  if (!notification.read) {
-    await markAsRead();
+  if (!notification.read && notification.id !== undefined) {
+    markAsRead([notification.id]);
   }
 
-  // Cerrar menú
-  await menuController.close();
+  await menuController.close("notification-content");
 
-  // Navegar según el tipo o link
-  const type = notification.type || "general";
-  let targetRoute: string | null = null;
+  const link = notification.link;
+  const target =
+    (link && ROUTE_BY_LINK[link]) ||
+    (link?.startsWith("/") ? link : null) ||
+    ROUTE_BY_TYPE[getType(notification)];
 
-  try {
-    // Primero intentar usar el link si existe
-    if (notification.link) {
-      // Convertir route names a URLs reales
-      switch (notification.link) {
-        case "activities.index":
-          targetRoute = "/talleres";
-          break;
-        case "courses.index":
-          targetRoute = "/cursos";
-          break;
-        case "news.index":
-          targetRoute = "/noticias";
-          break;
-        case "classifieds.index":
-          targetRoute = "/classifieds";
-          break;
-        default:
-          // Si es una URL válida, usarla directamente
-          if (notification.link.startsWith("/")) {
-            targetRoute = notification.link;
-          }
-      }
-    }
-
-    // Si no hay link válido, usar el tipo
-    if (!targetRoute) {
-      switch (type) {
-        case "news":
-          targetRoute = "/noticias";
-          break;
-        case "workshop":
-          targetRoute = "/talleres";
-          break;
-        case "classified":
-          targetRoute = "/classifieds";
-          break;
-        case "course":
-          targetRoute = "/cursos";
-          break;
-        default:
-          targetRoute = "/"; // Home por defecto
-      }
-    }
-
-    if (targetRoute) {
-      router.push(targetRoute);
-    } else {
-      // Fallback: ir al home si no hay ruta válida
-      router.push("/");
-    }
-  } catch (error) {
-    // Error en navegación
-  }
-};
-
-// Marcar todas como leídas
-const markAllAsRead = async () => {
-  try {
-    if (!notifications.value || !Array.isArray(notifications.value)) {
-      return;
-    }
-
-    notifications.value.forEach((n: any) => {
-      if (n && typeof n === "object") {
-        n.read = true;
-      }
-    });
-
-    const ids = notifications.value
-      .filter((n: any) => n && n.id)
-      .map((n: any) => n.id);
-
-    if (ids.length > 0) {
-      await store.dispatch("notifications/markAsRead", { ids });
-    }
-  } catch (error) {
-    // Error al marcar como leídas
-  }
-};
+  router.push(target);
+}
 </script>
 
 <style scoped>
-ion-menu ion-text {
-  background-color: white;
-  color: black;
-  display: flex;
-  border-bottom: 1px solid #ededed;
-  align-items: center;
+/* ── Panel ──────────────────────────────────────────────────────────────── */
+.notifications-menu {
+  --width: min(92vw, 400px);
 }
 
-ion-list.notifications-container {
-  min-height: 100%;
-  padding: 0;
+.notifications-toolbar {
+  --background: var(--app-surface);
+  --border-width: 0;
+  --min-height: 56px;
+  padding-top: var(--ion-safe-area-top, 0px);
+  border-bottom: 1px solid var(--app-border);
 }
 
-ion-list.notifications-container ion-item {
-  --padding-start: 0;
-  --padding-end: 0;
-  --inner-padding-end: 0;
-  --border-color: var(--ion-color-step-900);
-  --ion-item-background: #fff;
-  margin: 0;
+.toolbar-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--app-text-title);
+  letter-spacing: -0.2px;
 }
 
-ion-list.notifications-container ion-item ion-label {
-  margin: 0;
-  position: relative;
-  transition: all 0.5s 0.2s;
+/* "Leer todas" con texto y no un ícono suelto: antes era un ✓✓ sin etiqueta y
+   no había forma de saber qué hacía sin tocarlo. */
+.mark-all-btn {
+  --color: var(--ion-color-primary);
+  font-size: 13px;
+  font-weight: 700;
+  height: var(--app-tap-target);
+  --padding-start: 10px;
+  --padding-end: 10px;
 }
 
-ion-list.notifications-container ion-item ion-label p {
-  text-overflow: unset;
-  white-space: break-spaces;
-}
-
-ion-list.notifications-container ion-item ion-label p.content {
-  font-weight: 500;
-}
-
-ion-list.notifications-container ion-item ion-label p.date {
-  color: var(--ion-color-step-700);
-}
-
-ion-list.notifications-container ion-item ion-label h3 {
-  font-weight: 600;
+.mark-all-btn ion-icon {
   font-size: 16px;
+  margin-right: 4px;
 }
 
-ion-list.notifications-container ion-item ion-label span.mark-as-read {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: var(--ion-color-danger);
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  margin: 10px;
+.notifications-content {
+  --background: var(--app-bg);
+  --padding-bottom: calc(var(--app-spacing-xl) + var(--ion-safe-area-bottom, 0px));
 }
 
-ion-list.notifications-container .notification.unread ion-label {
-  background-color: var(--ion-color-step-950);
+/* ── Lista ──────────────────────────────────────────────────────────────── */
+.notifications-list {
+  padding: var(--app-spacing-md) var(--app-spacing-md) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-sm);
 }
 
-/* NUEVOS ESTILOS PARA NOTIFICACIONES MEJORADAS */
-.notification-icon {
-  margin-right: 8px;
-  margin-top: 2px;
-  min-width: 24px;
-}
-
-.notification-type-badge {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 8px;
-  margin-bottom: 4px;
+.list-caption {
+  margin: 0 4px var(--app-spacing-xs);
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--app-text-secondary);
 }
 
-.badge-news {
-  background-color: #e3f2fd;
-  color: #1976d2;
+/*
+ * Cada notificación es una card independiente en vez de filas de ion-item
+ * pegadas con bordes: se distingue una de otra de un vistazo y el estado "no
+ * leída" se puede pintar en toda la card, no solo en el label interno.
+ */
+.notification-row {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--app-spacing-md);
+  width: 100%;
+  text-align: left;
+  appearance: none;
+  font-family: inherit;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow-xs);
+  padding: var(--app-spacing-md);
+  /* Espacio a la derecha para que el texto no pase por debajo del punto */
+  padding-right: var(--app-spacing-xl);
+  cursor: pointer;
+  transition: box-shadow var(--app-duration) var(--app-ease),
+              transform var(--app-duration-fast) var(--app-ease);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.badge-workshop {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
+.notification-row:active {
+  transform: scale(0.99);
+  box-shadow: none;
 }
 
-.badge-classified {
-  background-color: #fff3e0;
-  color: #f57c00;
+.notification-row:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
 }
 
-.badge-course {
-  background-color: #e8f5e8;
-  color: #388e3c;
+/* No leída: fondo apenas teñido + barra de acento a la izquierda. El color no es
+   el único indicador (también está el punto y el peso del título). */
+.notification-row.unread {
+  background: linear-gradient(
+    90deg,
+    var(--app-primary-soft) 0%,
+    var(--app-surface) 42%
+  );
+  border-color: var(--app-primary-soft-strong);
 }
 
-.badge-general {
-  background-color: #f5f5f5;
-  color: #666;
+.notification-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: color-mix(in srgb, var(--type-color) 12%, transparent);
 }
 
-.notification-type-news {
-  border-left-color: #1976d2 !important;
+.notification-avatar ion-icon {
+  font-size: 20px;
+  color: var(--type-color);
 }
 
-.notification-type-workshop {
-  border-left-color: #7b1fa2 !important;
+@supports not (background: color-mix(in srgb, red 10%, transparent)) {
+  .notification-avatar {
+    background-color: rgba(0, 0, 0, 0.06);
+  }
 }
 
-.notification-type-classified {
-  border-left-color: #f57c00 !important;
+.notification-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
 }
 
-.notification-type-course {
-  border-left-color: #388e3c !important;
+.notification-top {
+  display: flex;
+  align-items: center;
+  gap: var(--app-spacing-sm);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-.priority {
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  display: inline-block;
+.notification-date {
+  color: var(--app-text-secondary);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.notification-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--app-text-title);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notification-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--app-text-body);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.priority-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
   margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--app-radius-pill);
+  background: rgba(254, 61, 61, 0.10);
+  color: #C62828;
 }
 
-.priority-high {
-  background-color: #ffebee;
-  color: #c62828;
+.priority-tag ion-icon {
+  font-size: 13px;
 }
 
-.priority-medium {
-  background-color: #fff3e0;
-  color: #ef6c00;
+.unread-dot {
+  position: absolute;
+  top: var(--app-spacing-md);
+  right: var(--app-spacing-md);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ion-color-primary);
+  flex-shrink: 0;
 }
 
-.priority-low {
-  background-color: #f3e5f5;
-  color: #8e24aa;
+/* ── Skeleton ───────────────────────────────────────────────────────────── */
+.skeleton-row {
+  cursor: default;
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Vacío ──────────────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* Centrado vertical real dentro del panel en vez de arrancar pegado arriba */
+  min-height: 70vh;
+  padding: var(--app-spacing-xl);
+}
+
+.empty-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--app-primary-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--app-spacing-lg);
+}
+
+.empty-icon-wrap ion-icon {
+  font-size: 32px;
+  color: var(--ion-color-primary);
+}
+
+.empty-state h3 {
+  margin: 0 0 var(--app-spacing-sm);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--app-text-title);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--app-text-body);
+  max-width: 260px;
 }
 </style>

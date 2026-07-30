@@ -81,10 +81,13 @@ const routes: Array<RouteRecordRaw> = [
     meta: { auth: true },
   },  
   {
+    // "Actividades Online" ya no pasa por acá: tanto el acceso del inicio como
+    // el ítem del menú abren la playlist de YouTube directo (ver
+    // src/uses/externalLinks.ts). La ruta queda solo para deep-links viejos de
+    // notificaciones y SIN meta.auth, así que nunca vuelve a frenar en el login.
     path: '/classifieds',
     name: 'Classifieds',
     component: () => import('@/views/classifieds/Classifieds.vue'),
-    meta: { auth: true },
   },
   {
     path: '/classifieds/create',

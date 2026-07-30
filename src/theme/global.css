@@ -1,7 +1,33 @@
+/*
+ * Nunito Sans en las tres variantes que están en src/assets/fonts.
+ * Antes solo se declaraba Regular: todo el `font-weight: 600/700` de la app lo
+ * resolvía el navegador engrosando el trazo artificialmente (synthetic bold),
+ * que se ve borroso y desalineado. Declarando SemiBold y Bold, cada peso usa su
+ * archivo real. `font-display: swap` evita el flash de texto invisible.
+ * Desde src/assets: Vite lo procesa y hashea (importar desde public/ no está permitido).
+ */
 @font-face {
     font-family: 'Nunito';
-    /* Desde src/assets: Vite lo procesa y hashea (importar desde public/ no está permitido) */
     src: url('../assets/fonts/NunitoSans-Regular.ttf');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nunito';
+    src: url('../assets/fonts/NunitoSans-SemiBold.ttf');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nunito';
+    src: url('../assets/fonts/NunitoSans-Bold.ttf');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
 }
 
 /*
@@ -20,9 +46,48 @@ html {
     --ion-safe-area-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
 }
 
-/* El FAB flotante vive fuera de header/footer: esquivar la barra de gestos */
+/*
+ * Piso mínimo para las safe areas EN LA APP NATIVA.
+ *
+ * El problema: cuando ni Capacitor inyecta --safe-area-inset-* ni el WebView
+ * resuelve env(safe-area-inset-*), las dos variables de arriba caen a 0px. Ahí
+ * la app dibuja edge-to-edge pegada a las barras del sistema: la toolbar tapa la
+ * hora y la batería, y el FAB queda debajo de la barra de navegación de Android.
+ *
+ * La solución NO es sumar padding en cada componente (se duplicaría en los
+ * dispositivos donde los insets sí llegan). Ionic ya consume estas variables
+ * —`ion-header ion-toolbar:first-of-type { padding-top: var(--ion-safe-area-top) }`—
+ * así que alcanza con garantizar un mínimo acá: `max()` toma el inset real
+ * cuando existe (el notch de un iPhone son ~47px) y el piso cuando es 0.
+ *
+ * Solo se aplica con `.plt-hybrid` (la clase que pone Ionic dentro de la app
+ * nativa) para no dejar una franja vacía arriba en la versión web.
+ *
+ * Pisos: 24px = alto típico de la status bar de Android; 48px = alto de la barra
+ * de navegación de 3 botones, que es la que tapaba el FAB.
+ */
+html.plt-hybrid {
+    --ion-safe-area-top: max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), 24px);
+    --ion-safe-area-bottom: max(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)), 48px);
+}
+
+/*
+ * El FAB flotante vive fuera de header/footer y hay que separarlo a mano:
+ * Ionic lo deja en `bottom: 10px` SIN contemplar el inset de abajo, y en
+ * `right: calc(10px + safe-area-right)` — 10px del borde, que es lo que se veía
+ * "pegado" en iPhone.
+ *
+ * Se ajusta con margin y no con bottom/right a propósito: son propiedades que
+ * Ionic no setea, así que no hay pelea de especificidad con su CSS scopeado.
+ */
 ion-fab[vertical="bottom"] {
-    margin-bottom: var(--ion-safe-area-bottom, 0);
+    /* +8px sobre el inset: deja aire entre el FAB y la barra del sistema en vez
+       de dejarlo apenas apoyado sobre ella. */
+    margin-bottom: calc(var(--ion-safe-area-bottom, 0px) + 8px);
+}
+
+ion-fab[horizontal="end"] {
+    margin-right: 8px;
 }
 
 /* Common */
@@ -30,7 +95,35 @@ ion-fab[vertical="bottom"] {
 
 /* Header */
 ion-header ion-toolbar ion-title {
-    font-size: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: var(--app-text-title, #17161C);
+}
+
+/*
+ * Botón "atrás": Ionic en modo iOS agrega el texto "Atrás" al lado de la flecha
+ * y lo renderiza en mayúsculas junto al título, lo que se leía como "← ATRÁS
+ * Contacto". Dejamos solo la flecha (el ícono ya es universalmente entendido) y
+ * le damos el área táctil mínima de 44px.
+ */
+ion-back-button {
+    --icon-font-size: 26px;
+    --padding-start: 6px;
+    --padding-end: 6px;
+    --min-height: var(--app-tap-target, 44px);
+    --min-width: var(--app-tap-target, 44px);
+}
+
+ion-back-button .button-text {
+    display: none;
+}
+
+/* Los botones de ícono del header también necesitan 44px reales */
+ion-header ion-buttons ion-button,
+ion-header ion-buttons ion-menu-button {
+    --min-height: var(--app-tap-target, 44px);
+    --min-width: var(--app-tap-target, 44px);
 }
 
 /* Footer */
@@ -80,10 +173,6 @@ ion-searchbar .searchbar-input.sc-ion-searchbar-ios {
     --ion-background-color: var(--app-bg, #F4F5F8);
     --ion-card-background: var(--app-surface, #fff);
     --ion-toolbar-background: #ffffff;
-}
-
-ion-card {
-    box-shadow: none;
 }
 
 ion-card.ion-card-square {
@@ -254,17 +343,48 @@ ion-select::part(icon) {
 
 /* UX/UI Enhancements */
 
-/* Cards */
+/*
+ * Cards
+ * Antes había DOS bloques `ion-card` peleándose (uno con box-shadow: none y otro
+ * con !important), y el `!important` pisaba en silencio la elevación que definía
+ * cada vista. Queda una sola definición, sin !important, para que una vista
+ * pueda subir la elevación de una card destacada cuando lo necesite.
+ */
 ion-card {
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
-    transition: all 0.2s ease;
+    border-radius: var(--app-radius-md, 16px);
+    box-shadow: var(--app-shadow-sm);
+    border: 1px solid var(--app-border, rgba(23, 22, 28, 0.08));
+    transition: box-shadow var(--app-duration, 200ms) var(--app-ease),
+                transform var(--app-duration-fast, 120ms) var(--app-ease);
 }
-ion-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+
+/*
+ * El feedback de "apretado" SOLO va en cards que realmente navegan. Antes lo
+ * tenía toda `ion-card`, así que cards decorativas se hundían al tocarlas y el
+ * usuario creía que había tocado mal (no que la card no hacía nada).
+ * `.is-tappable` / [role="button"] / [router-link] marcan las que sí responden.
+ */
+ion-card.is-tappable,
+ion-card[role="button"],
+ion-card[router-link],
+a > ion-card {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
-ion-card:active {
-    transform: scale(0.98);
+
+ion-card.is-tappable:hover,
+ion-card[role="button"]:hover,
+ion-card[router-link]:hover,
+a > ion-card:hover {
+    box-shadow: var(--app-shadow-md);
+}
+
+ion-card.is-tappable:active,
+ion-card[role="button"]:active,
+ion-card[router-link]:active,
+a > ion-card:active {
+    transform: scale(0.985);
+    box-shadow: var(--app-shadow-xs);
 }
 
 /* FAB Button */
@@ -357,7 +477,91 @@ ion-chip.active {
     to { opacity: 1; transform: translateY(0); }
 }
 ion-router-outlet > .ion-page {
-    animation: fade-up 0.22s ease both;
+    animation: fade-up 0.22s var(--app-ease) both;
+}
+
+/* ── Foco visible ────────────────────────────────────────────────────────────
+ * No había ningún estilo de foco en toda la app: navegando con teclado (o con
+ * un control externo / TalkBack en modo teclado) no se veía dónde estabas.
+ * `:focus-visible` solo aparece con teclado, así que no ensucia el tap.
+ */
+:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+ion-card.is-tappable:focus-visible,
+ion-card[role="button"]:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+}
+
+/* Ionic ya maneja su propio foco en estos; evitamos el doble anillo */
+ion-button:focus-visible,
+ion-item:focus-visible,
+ion-searchbar:focus-visible {
+    outline: none;
+}
+
+/* ── Scrollbars ──────────────────────────────────────────────────────────────
+ * Las filas horizontales de chips/filtros mostraban la barra de scroll nativa
+ * encima del contenido en web y en algunos WebView de Android.
+ */
+.scroll-x {
+    display: flex;
+    gap: var(--app-spacing-sm, 8px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Para que el primer/último chip no queden pegados al borde al scrollear */
+    scroll-padding-inline: var(--app-spacing-lg, 16px);
+}
+
+.scroll-x::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Texto seleccionable solo donde tiene sentido ───────────────────────────
+ * En un contenedor nativo, el long-press sobre labels/cards dispara la lupa de
+ * selección de texto y se siente roto. El contenido real (detalles, noticias)
+ * sigue siendo seleccionable porque solo excluimos controles.
+ */
+ion-card.is-tappable,
+ion-card[role="button"],
+ion-label,
+ion-button,
+ion-chip,
+ion-badge {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* ── prefers-reduced-motion ─────────────────────────────────────────────────
+ * Requisito de accesibilidad: si el usuario pidió menos movimiento en el SO,
+ * apagamos transiciones y animaciones (incluida la entrada de página) en vez de
+ * ignorarlo.
+ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    ion-router-outlet > .ion-page {
+        animation: none;
+    }
+
+    ion-card.is-tappable:active,
+    ion-card[role="button"]:active,
+    ion-card[router-link]:active {
+        transform: none;
+    }
 }
 
 ion-item.item-input .input-success-messsage {

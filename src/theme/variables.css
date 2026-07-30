@@ -63,6 +63,8 @@ http://ionicframework.com/docs/theming/ */
   --ion-toolbar-border-color: #EDEDED;
 
   /* ── App Design System Tokens ─────────────────── */
+  /* Escala de espaciado base 4px: usar SIEMPRE estos tokens, nunca valores
+     sueltos, para que los gutters de todas las pantallas coincidan. */
   --app-spacing-xs: 4px;
   --app-spacing-sm: 8px;
   --app-spacing-md: 12px;
@@ -75,20 +77,41 @@ http://ionicframework.com/docs/theming/ */
   --app-radius-lg: 24px;
   --app-radius-pill: 100px;
 
-  --app-shadow-sm: 0 2px 10px rgba(0,0,0,0.06);
-  --app-shadow-md: 0 4px 18px rgba(0,0,0,0.10);
-  --app-shadow-primary: 0 4px 16px rgba(171,73,204,0.22);
+  /* Elevación en dos capas (sombra de contacto + sombra difusa): da profundidad
+     sin el gris sucio de una sola sombra grande. */
+  --app-shadow-xs: 0 1px 2px rgba(16, 12, 24, 0.04);
+  --app-shadow-sm: 0 1px 2px rgba(16, 12, 24, 0.04), 0 2px 8px rgba(16, 12, 24, 0.05);
+  --app-shadow-md: 0 2px 4px rgba(16, 12, 24, 0.05), 0 8px 20px rgba(16, 12, 24, 0.08);
+  --app-shadow-lg: 0 4px 8px rgba(16, 12, 24, 0.06), 0 16px 32px rgba(16, 12, 24, 0.10);
+  --app-shadow-primary: 0 4px 16px rgba(171, 73, 204, 0.22);
 
-  --app-text-title: #1A1A2E;
-  --app-text-body: #4E5457;
-  --app-text-secondary: #8F9BB3;
+  /* Texto: los tres niveles cumplen 4.5:1 sobre --app-bg y --app-surface.
+     --app-text-secondary anterior (#8F9BB3) daba 2.6:1 y era ilegible. */
+  --app-text-title: #17161C;
+  --app-text-body: #4A4A55;
+  --app-text-secondary: #6B6B78;
 
   --app-surface: #FFFFFF;
+  --app-surface-alt: #FAFAFC;
   --app-bg: #F4F5F8;
-  --app-border: rgba(0,0,0,0.07);
+  --app-border: rgba(23, 22, 28, 0.08);
+  --app-border-strong: rgba(23, 22, 28, 0.14);
+
+  /* Tinte del primary para fondos suaves (chips, íconos, filas activas). */
+  --app-primary-soft: rgba(171, 73, 204, 0.10);
+  --app-primary-soft-strong: rgba(171, 73, 204, 0.16);
 
   --app-gradient-primary: linear-gradient(135deg, #AB49CC 0%, #7A35AB 100%);
   --app-gradient-subtle: linear-gradient(135deg, rgba(171,73,204,0.10) 0%, rgba(122,53,171,0.05) 100%);
+
+  /* Motion: una sola curva y tres duraciones para toda la app. */
+  --app-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --app-duration-fast: 120ms;
+  --app-duration: 200ms;
+  --app-duration-slow: 320ms;
+
+  /* Altura mínima de cualquier cosa tappable (guía de accesibilidad). */
+  --app-tap-target: 44px;
 }
 
 

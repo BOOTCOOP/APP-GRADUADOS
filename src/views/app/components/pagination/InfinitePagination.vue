@@ -1,10 +1,13 @@
 <template>
   <slot name="filters" :loading="loadingItems">
     <div v-if="prop.hasSearcher" class="filters">
+      <!--
+        Antes se pasaba `:disabled="loadingItems"`: el buscador se deshabilitaba
+        solo en cada fetch, comiéndose las teclas mientras el usuario escribía.
+      -->
       <FormSearchBar
         :placeholder="searchPlaceholder"
         v-on:updated="(value) => (search = value)"
-        :disabled="loadingItems"
       />
       <slot name="filter-extra" :loading="loadingItems"> </slot>
     </div>
@@ -25,11 +28,15 @@
       :has-more-pages="hasMorePages"
     ></slot>
 
-    <slot v-if="!items.length && !loadingItems" name="empty"
-      ><h3 class="ion-padding-vertical ion-text-center">
-        {{ prop.emptyResultsText }}
-      </h3></slot
-    >
+    <!--
+      Estado vacío por defecto: antes era un <h3> pelado centrado, así que casi
+      todas las listas (Cursos, Búsquedas, Bibliografía) mostraban una frase
+      suelta en medio de la pantalla. Ahora reusan el mismo EmptyState que ya
+      usaba Talleres, y cada vista puede seguir sobrescribiéndolo con #empty.
+    -->
+    <slot v-if="!items.length && !loadingItems" name="empty">
+      <EmptyState :icon="searchOutline" title="Sin resultados" :message="prop.emptyResultsText" />
+    </slot>
 
     <ion-infinite-scroll :disabled="!hasMorePages" @ionInfinite="loadMore">
       <slot name="loader">
@@ -44,20 +51,14 @@
 
 <script setup lang="ts">
 import FormSearchBar from "@/views/app/components/form/FormSearchBar.vue";
+import EmptyState from "@/components/EmptyState.vue";
 import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
   IonSpinner,
 } from "@ionic/vue";
-import {
-  computed,
-  defineExpose,
-  defineProps,
-  onMounted,
-  PropType,
-  ref,
-  watch,
-} from "vue";
+import { searchOutline } from "ionicons/icons";
+import { computed, onMounted, PropType, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { analyzeCoursesListForModality } from "@/utils/modalityDetector";
 
@@ -134,9 +135,12 @@ function filtersChanged() {
 
   page.value = 1;
 
-  fetchData();
-
+  // Vaciamos ANTES de pedir. Al revés (como estaba) una respuesta rápida se
+  // concatenaba sobre la lista vieja y recién después se limpiaba, así que por
+  // un instante se veían resultados del filtro anterior o duplicados.
   items.value = [];
+
+  fetchData();
 }
 
 function fetchData() {
@@ -194,8 +198,17 @@ defineExpose({ removeItem });
 </script>
 
 <style scoped>
+/* `gap` para que el buscador y el botón de filtros no queden pegados (se veía
+   en Búsquedas Laborales y Bibliografía). */
 .filters {
   display: flex;
   align-items: center;
+  gap: var(--app-spacing-sm);
+  margin-bottom: var(--app-spacing-md);
+}
+
+.filters > :first-child {
+  flex: 1;
+  min-width: 0;
 }
 </style>
