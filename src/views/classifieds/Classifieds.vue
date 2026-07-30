@@ -44,7 +44,7 @@
             
             <p class="youtube-url">
               <ion-icon :icon="linkOutline"></ion-icon>
-              youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy
+              youtube.com/playlist?list=PL9y1i2ILzxlA0gHxYkXcWlq31_UjsmDRj
             </p>
           </div>
         </div>
@@ -91,7 +91,7 @@ async function loadAvisos() {
 
 // Función para abrir el canal de YouTube
 function openYouTubeChannel() {
-  window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy', '_system');
+  window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlA0gHxYkXcWlq31_UjsmDRj', '_system');
 }
 
 function goToDetail(id: number) {

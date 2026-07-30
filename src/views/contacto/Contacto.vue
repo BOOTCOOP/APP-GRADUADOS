@@ -106,7 +106,7 @@ function goToWhatsapp() {
 }
 
 function goToYoutube() {
-  window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy', '_system');
+  window.open('https://www.youtube.com/@DerechoUBA', '_system');
 }
 
 // Funciones para redes sociales

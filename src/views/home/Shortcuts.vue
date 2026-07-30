@@ -42,7 +42,7 @@ const logoUrl = import.meta.env.BASE_URL + 'assets/logo/logo.png';
 
 function openYouTubeChannel() {
   window.open(
-    'https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy',
+    'https://www.youtube.com/playlist?list=PL9y1i2ILzxlA0gHxYkXcWlq31_UjsmDRj',
     '_system'
   );
 }

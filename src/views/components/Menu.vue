@@ -26,10 +26,11 @@
       <ion-list lines="none" class="menu-list">
         <ion-menu-toggle auto-hide="false" v-for="(p, i) in items" :key="i">
           <ion-item
-            :router-link="p.url"
+            :router-link="p.action ? undefined : p.url"
             detail="false"
             class="menu-item"
             :class="{ selected: active === i }"
+            @click="p.action && p.action()"
           >
             <div class="menu-icon-wrap" slot="start" :class="{ 'selected-icon': active === i }">
               <ion-icon :icon="p.icon" />
@@ -91,7 +92,7 @@ import {
   newspaperOutline,
   libraryOutline,
   giftOutline,
-  megaphoneOutline,
+  logoYoutube,
   schoolOutline,
   briefcaseOutline,
   informationCircleOutline,
@@ -127,11 +128,18 @@ const userInitials = computed(() => {
   return (first + last).toUpperCase();
 });
 
+// "Actividades Online" no es una vista de la app: abre la playlist de YouTube
+// del Centro en el navegador del sistema (mismo comportamiento que el atajo
+// de la home), por eso usa `action` en lugar de `url`.
+function openActividadesOnline() {
+  window.open("https://www.youtube.com/playlist?list=PL9y1i2ILzxlA0gHxYkXcWlq31_UjsmDRj", "_system");
+}
+
 const items = [
   { title: "Inicio",                   url: "/",                        icon: homeOutline },
   { title: "Cursos",                   url: "/cursos",                  icon: ribbonOutline },
   { title: "Talleres y Jornadas",      url: "/talleres",                icon: schoolOutline },
-  { title: "Actividades Online",       url: "/classifieds",             icon: megaphoneOutline },
+  { title: "Actividades Online",       action: openActividadesOnline,   icon: logoYoutube },
   { title: "Búsquedas Laborales",      url: "/busqueda-laboral",        icon: briefcaseOutline },
   { title: "Bibliografía",             url: "/material-bibliografico",  icon: libraryOutline },
   { title: "Noticias",                 url: "/noticias",                icon: newspaperOutline },

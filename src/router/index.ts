@@ -81,10 +81,11 @@ const routes: Array<RouteRecordRaw> = [
     meta: { auth: true },
   },  
   {
+    // Landing "Actividades Online": solo redirige a la playlist de YouTube,
+    // no expone datos de usuario → pública.
     path: '/classifieds',
     name: 'Classifieds',
     component: () => import('@/views/classifieds/Classifieds.vue'),
-    meta: { auth: true },
   },
   {
     path: '/classifieds/create',
