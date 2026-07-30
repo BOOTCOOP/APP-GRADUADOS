@@ -9,7 +9,8 @@
       <!-- Gradient header with avatar + user info -->
       <div class="menu-header">
         <div class="menu-avatar">
-          <span v-if="userInitials">{{ userInitials }}</span>
+          <img v-if="user?.thumb" :src="user.thumb" alt="" />
+          <span v-else-if="userInitials">{{ userInitials }}</span>
           <ion-icon v-else :icon="person" />
         </div>
         <div class="menu-user-info" v-if="isLoggedIn">
@@ -192,6 +193,13 @@ ion-content {
   color: #ffffff;
   flex-shrink: 0;
   letter-spacing: -0.5px;
+  overflow: hidden;
+}
+
+.menu-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .menu-avatar ion-icon {
