@@ -205,15 +205,18 @@ import {
   IonImg,
   IonSkeletonText,
   IonButton,
+  alertController,
 } from "@ionic/vue";
 import { ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import SocialShare from "@/components/SocialShare.vue";
+import { useProfile } from "@/uses/profile";
 
 const loading = ref(true);
 const route = useRoute();
 const store = useStore();
+const profile = useProfile();
 const job = ref<any>({});
 const tab = ref("information");
 
@@ -245,7 +248,7 @@ function contact() {
     contactOptions.push({
       text: `📧 Enviar email: ${job.value.email}`,
       handler: () => {
-        window.open(`mailto:${job.value.email}`, "_system");
+        applyAndOpenEmail();
       },
     });
   }
@@ -267,6 +270,89 @@ function contact() {
 
   // Si hay múltiples opciones, mostrar menú
   store.dispatch("ui/action/show", contactOptions);
+}
+
+// Contacto por email: la postulación necesita nombre y apellido en el perfil
+// (la API los toma del inscripto). Se chequea localmente ANTES de llamar: si
+// faltan, popup para completarlos; si están, registro silencioso + mail.
+async function applyAndOpenEmail() {
+  const user: any = await profile.get();
+
+  if (!user?.firstname?.trim() || !user?.lastname?.trim()) {
+    promptCompleteProfile(user);
+    return;
+  }
+
+  registerApplication();
+  openContactEmail();
+}
+
+// Registra la postulación en el sistema de graduados de forma silenciosa:
+// si falla no se bloquea ni se informa (el contacto por mail sigue igual).
+function registerApplication() {
+  store.dispatch("jobs/apply", job.value.id).catch(() => {});
+}
+
+function openContactEmail() {
+  window.open(`mailto:${job.value.email}`, "_system");
+}
+
+async function promptCompleteProfile(user: any) {
+  const alert = await alertController.create({
+    cssClass: "app-alert",
+    header: "Completá tu perfil para continuar",
+    inputs: [
+      {
+        name: "firstname",
+        type: "text",
+        placeholder: "Nombre",
+        value: user?.firstname || "",
+      },
+      {
+        name: "lastname",
+        type: "text",
+        placeholder: "Apellido",
+        value: user?.lastname || "",
+      },
+    ],
+    buttons: [
+      { text: "Cancelar", role: "cancel" },
+      {
+        text: "Guardar",
+        handler: (values: any) => {
+          const firstname = values.firstname?.trim();
+          const lastname = values.lastname?.trim();
+
+          if (!firstname || !lastname) {
+            store.dispatch("ui/toastr/create", "Completá nombre y apellido");
+            return false; // mantiene el popup abierto
+          }
+
+          saveProfileAndContact(firstname, lastname);
+          return true;
+        },
+      },
+    ],
+  });
+
+  alert.present();
+}
+
+// Actualiza el perfil (el backend lo escribe en el inscripto, así "Mi cuenta"
+// ya lo muestra actualizado), registra la postulación y abre el mail.
+function saveProfileAndContact(firstname: string, lastname: string) {
+  profile
+    .update({ firstname, lastname })
+    .then(() => {
+      registerApplication();
+      openContactEmail();
+    })
+    .catch(() =>
+      store.dispatch(
+        "ui/toastr/create",
+        "No pudimos actualizar tu perfil. Probá desde Mi cuenta."
+      )
+    );
 }
 
 function saveFavorite() {

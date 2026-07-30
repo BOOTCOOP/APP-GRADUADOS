@@ -248,9 +248,10 @@ router.beforeEach((route, from, next) => {
     return next({ name: 'login', query: { redirect: route.fullPath } })
   }
 
-  // Gate de perfil incompleto: si el usuario está logueado y profile_complete es
-  // explícitamente false, forzamos completar los datos antes de operar en la app.
-  if (ApiToken.isSet()) {
+  // Gate de perfil incompleto: solo en rutas protegidas (meta.auth). Las rutas
+  // públicas (raíz, catálogo) se navegan con perfil incompleto; los flujos que
+  // necesitan los datos (postulación, inscripción) los piden en contexto.
+  if (route.meta?.auth && ApiToken.isSet()) {
     const { profileComplete } = useCurrentUser()
     if (profileComplete.value === false && route.name !== 'complete-profile') {
       return next({ name: 'complete-profile' })

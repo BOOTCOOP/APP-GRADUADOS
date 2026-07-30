@@ -26,6 +26,17 @@ export default {
       })
     },
 
+    // Apply: registra la postulación en el sistema de graduados.
+    // Los datos salen del perfil del usuario logueado (no se envía body).
+    apply(ctx, id) {
+      return new Promise((resolve, reject) => {
+        axios
+          .post(`jobs/${id}/apply`)
+          .then((response) => resolve(response))
+          .catch(error => reject(error))
+      })
+    },
+
     // Show
     store(ctx, data) {
       return new Promise((resolve, reject) => {
