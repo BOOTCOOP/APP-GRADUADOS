@@ -355,24 +355,24 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Los `background: white` + `border-bottom: #e0e0e0` fijos hacían que estas dos
+   barras fueran las únicas partes de la app que no seguían los tokens de tema. */
 .search-container {
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 8px;
+  background: transparent;
+  margin-bottom: var(--app-spacing-sm);
 }
 
 .filters-container {
-  background: white;
-  padding: 8px 16px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 0 0 var(--app-spacing-sm);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--app-spacing-sm);
 }
 
 .filter-button {
   --border-radius: 20px;
-  height: 32px;
+  /* 32px quedaba por debajo del mínimo táctil recomendado (44px). */
+  height: var(--app-tap-target);
 }
 
 .active-filter {
@@ -395,26 +395,20 @@ onMounted(async () => {
 }
 
 .results-stats {
-  padding: 8px 16px;
-  background: #f8f9fa;
+  padding: var(--app-spacing-sm) var(--app-spacing-md);
+  background: var(--app-surface-alt);
   border-left: 4px solid var(--ion-color-primary);
-  margin: 0 16px 16px 16px;
+  /* Sin margin horizontal: el layout ya pone 16px de cada lado y sumados
+     dejaban 32px de gutter. */
+  margin: 0 0 var(--app-spacing-md);
   border-radius: 0 8px 8px 0;
 }
 
 /* Nuevos estilos para tarjetas mejoradas */
 .news-card {
-  margin: 0 16px 16px 16px;
-  --border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  margin: 0 0 var(--app-spacing-md);
   overflow: hidden;
   position: relative;
-}
-
-.news-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 .featured-card {
@@ -426,15 +420,21 @@ onMounted(async () => {
   box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.3);
 }
 
+/*
+ * Banda de imagen por relación de aspecto en vez de 200px fijos: en un celular
+ * chico esos 200px se comían casi media pantalla por card, y en uno ancho la
+ * imagen quedaba achatada. 16:9 mantiene la proporción en cualquier ancho.
+ */
 .card-header {
   position: relative;
   width: 100%;
-  height: 200px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
 }
 
 .featured-card .card-header {
-  height: 220px; /* Más altura para noticias destacadas */
+  /* La destacada un poco más panorámica para diferenciarse */
+  aspect-ratio: 3 / 2;
 }
 
 .featured-image {

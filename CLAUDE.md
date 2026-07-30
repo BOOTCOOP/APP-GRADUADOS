@@ -35,6 +35,14 @@ El mismo guard fuerza `complete-profile` si el usuario logueado tiene `profile_c
 
 ⚠️ **Pendiente**: la API de producción todavía debe abrir los 11 endpoints GET públicos (courses, workshops, feeds, interests, bibliographies, slider/home) con auth opcional. El detalle está en `BACKEND-PROMPT-endpoints-publicos.md` (borrable una vez aplicado en el backend).
 
+### Postulación a búsquedas laborales
+
+Es la única integración que **no** pasa por la API Laravel: postea directo al controller PHP del sitio web (`derecho.uba.ar`, host en `VITE_LEGACY_WEB_URL`), igual que el formulario de la web. Ese endpoint siempre responde HTTP 200 y pone el resultado en el cuerpo como texto (`success` o el error), así que la acción `apply` del store inspecciona el body y rechaza a mano; y usa **axios pelado**, no `@/libs/axios`, porque el interceptor de 401 de la instancia de la app desloguearía al usuario ante un 401 del sitio legacy. Funciona sin CORS gracias a `CapacitorHttp: { enabled: true }` (solo en la app nativa; el build web lo bloquearía). El modal es de **confirmación**, no un formulario: los datos salen de la cuenta porque el usuario ya inició sesión. Detalle completo en [docs/integracion-postulacion-busquedas.md](docs/integracion-postulacion-busquedas.md).
+
+### Enlaces externos
+
+Todo lo que sale de la app (playlist de YouTube = "Actividades Online", WhatsApp de consultas, redes) vive en [src/uses/externalLinks.ts](src/uses/externalLinks.ts) y se abre con `window.open(url, '_system')` para que el SO lo resuelva con la app nativa. Dos reglas que ya costaron bugs: **WhatsApp usa `wa.me`** (no `web.whatsapp.com`, que fuerza el cliente web en el celular) y **"Actividades Online" abre la playlist directo** tanto desde el acceso rápido del inicio como desde el menú — la ruta `/classifieds` quedó solo para deep-links viejos de notificaciones y ya no exige sesión.
+
 ### Autenticación
 
 - **Login por DNI** (no email): `POST auth/login` → `{ accessToken, user }`. Errores: 422 credenciales, 409 registro pendiente de confirmar.
@@ -51,6 +59,18 @@ Instancia única de axios en [src/libs/axios.ts](src/libs/axios.ts) con tres int
 ### Estado (Vuex, no Pinia)
 
 Vuex es el store real (Pinia está instalada pero no es el patrón dominante). Los módulos en `src/store/modules/` funcionan como **repositorios de API sin estado**: acciones namespaced que llaman axios y devuelven la promesa (ver [src/store/modules/resources/course/courses.ts](src/store/modules/resources/course/courses.ts) como ejemplo canónico). Los componentes hacen `store.dispatch('courses/fetchAll', filters)` y manejan la respuesta localmente. `ui/` tiene el toastr: `store.dispatch("ui/toastr/create", "mensaje")`.
+
+### Design system
+
+Los tokens viven en [src/theme/variables.css](src/theme/variables.css) (`--app-spacing-*`, `--app-radius-*`, `--app-shadow-*`, `--app-text-*`, `--app-ease`, `--app-tap-target`) y las reglas globales en [src/theme/global.css](src/theme/global.css). Convenciones a respetar:
+
+- **Padding de página**: lo pone el layout (`.page-body`, 16px + safe-area). Una vista NO debe agregar su propio margin/padding horizontal o quedan gutters de 32px.
+- **Cards tappables**: el `@click`/`router-link` va en la raíz de la card, más `role="button"`/`tabindex="0"` y la clase `is-tappable` (que aporta cursor, hover y el efecto de apretado). Los botones internos llevan `@click.stop`. El feedback de "apretado" está scopeado a esas cards a propósito: una card decorativa que se hunde al tocarla miente.
+- **Touch targets**: mínimo `var(--app-tap-target)` (44px) en cualquier cosa tappable.
+- **Alturas de imagen**: `aspect-ratio`, nunca píxeles fijos con media queries por breakpoint.
+- Hay `prefers-reduced-motion` global y estilos de `:focus-visible`: al agregar animaciones nuevas, respetalos.
+
+Componentes compartidos: `src/components/EmptyState.vue` (estado vacío, ya es el default de `InfinitePagination`) y `src/components/SuccessState.vue` (pantalla de éxito con animación SVG/CSS — sin Lottie a propósito, para no sumar runtime ni assets).
 
 ### Vistas y componentes compartidos
 

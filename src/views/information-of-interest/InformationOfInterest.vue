@@ -63,34 +63,47 @@
 
             <!-- Items de la categoría -->
             <div class="category-items">
-              <ion-card v-for="info in categoryItems" :key="info.id" class="interest-card">
-                <ion-card-content class="card-content">
-                  <div class="content-wrapper">
-                    <div class="header-section">
-                      <ion-badge 
-                        :color="getCategoryColor(String(categoryName))" 
-                        class="category-badge"
-                      >
-                        {{ categoryName }}
-                      </ion-badge>
-                      <ion-text color="dark" class="item-title">
-                        <h4>{{ info.title }}</h4>
-                      </ion-text>
+              <!--
+                La card ENTERA abre el enlace. Antes el único punto tappable era
+                un ícono de ~32px en la esquina: tocar el título o la descripción
+                no hacía nada. Es un <a> real (no una card con @click) para que
+                mantenga el long-press de "copiar enlace" y el foco por teclado.
+              -->
+              <a
+                v-for="info in categoryItems"
+                :key="info.id"
+                class="interest-link"
+                :href="info.url"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ion-card class="interest-card">
+                  <ion-card-content class="card-content">
+                    <div class="content-wrapper">
+                      <div class="header-section">
+                        <ion-badge
+                          :color="getCategoryColor(String(categoryName))"
+                          class="category-badge"
+                        >
+                          {{ categoryName }}
+                        </ion-badge>
+                        <ion-text color="dark" class="item-title">
+                          <h4>{{ info.title }}</h4>
+                        </ion-text>
+                      </div>
+                      <div class="description-section">
+                        <div class="info-content" v-html="getShortDescription(info.content)"></div>
+                      </div>
                     </div>
-                    <div class="description-section">
-                      <div class="info-content" v-html="getShortDescription(info.content)"></div>
+
+                    <!-- Ícono decorativo: indica "abre un sitio externo", ya no
+                         es el único blanco del tap. -->
+                    <div class="icon-wrapper">
+                      <ion-icon :icon="openOutline" color="primary" aria-hidden="true"></ion-icon>
                     </div>
-                  </div>
-                  
-                  <div class="icon-wrapper">
-                    <a :href="info.url" target="_blank" @click.stop>
-                      <ion-button fill="clear" size="small" class="action-button">
-                        <ion-icon :icon="openOutline" color="primary"></ion-icon>
-                      </ion-button>
-                    </a>
-                  </div>
-                </ion-card-content>
-              </ion-card>
+                  </ion-card-content>
+                </ion-card>
+              </a>
             </div>
           </div>
 
@@ -279,22 +292,25 @@ function getShortDescription(content: string): string {
 </script>
 
 <style scoped>
-/* Contenedor de búsqueda y filtros */
+/* Contenedor de búsqueda y filtros.
+   Sin padding horizontal propio: el layout (.page-body) ya aporta los 16px, y
+   sumar ambos dejaba 32px de gutter en un celular angosto. */
 .search-filter-container {
   display: flex;
-  gap: 8px;
-  align-items: center; /* Cambiado de flex-end a center para mejor alineación */
-  padding: 16px;
+  gap: var(--app-spacing-sm);
+  align-items: center;
+  padding: 0;
 }
 
 .search-bar {
   flex: 1;
+  min-width: 0;
   margin-bottom: 0 !important;
 }
 
 .filter-button {
   flex-shrink: 0;
-  min-height: 44px; /* Asegurar que tenga la misma altura que la barra de búsqueda */
+  min-height: var(--app-tap-target); /* misma altura que la barra de búsqueda */
 }
 
 .filter-badge {
@@ -310,44 +326,53 @@ function getShortDescription(content: string): string {
 .category-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 16px;
-  margin-bottom: 12px;
+  gap: var(--app-spacing-sm);
+  padding: 0;
+  margin-bottom: var(--app-spacing-md);
 }
 
 .category-icon {
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .category-title h3 {
   margin: 0;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
 }
 
 .category-items {
-  padding: 0 16px;
+  padding: 0;
 }
 
 /* Cards mejoradas */
-.interest-card {
-  margin-bottom: 12px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.interest-link {
+  display: block;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.interest-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+.interest-link:focus-visible {
+  outline: none;
+}
+
+.interest-link:focus-visible .interest-card {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+.interest-card {
+  margin: 0 0 var(--app-spacing-md);
+  /* Elevación y feedback de tap: los da el estilo global de `a > ion-card`. */
 }
 
 .card-content {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
+  gap: var(--app-spacing-md);
+  padding: var(--app-spacing-lg);
 }
 
 .content-wrapper {
@@ -375,39 +400,38 @@ function getShortDescription(content: string): string {
 
 .item-title h4 {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--ion-color-dark);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--app-text-title);
+  letter-spacing: -0.1px;
 }
 
 .description-section {
   margin-top: 4px;
 }
 
+/* `--ion-color-medium` (#9B9B9B) daba 2.8:1 sobre blanco y la descripción se
+   leía como texto deshabilitado. `--app-text-secondary` cumple 4.5:1. */
 .info-content {
-  color: var(--ion-color-medium);
-  font-size: 0.9rem;
-  line-height: 1.4;
+  color: var(--app-text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .icon-wrapper {
   display: flex;
-  align-items: flex-start;
-  padding-top: 4px;
-}
-
-.action-button {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  --padding-top: 8px;
-  --padding-bottom: 8px;
-  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
   border-radius: 50%;
+  background: var(--app-primary-soft);
 }
 
-.action-button:hover {
-  --background: var(--ion-color-primary-tint);
+.icon-wrapper ion-icon {
+  font-size: 16px;
 }
 
 /* Mensaje sin resultados */
@@ -421,36 +445,10 @@ function getShortDescription(content: string): string {
   font-size: 1rem;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .search-filter-container {
-    padding: 12px;
-    gap: 6px;
-  }
-  
-  .category-header {
-    padding: 0 12px;
-  }
-  
-  .category-items {
-    padding: 0 12px;
-  }
-  
-  .card-content {
-    padding: 12px;
-    gap: 12px;
-  }
-  
-  .category-title h3 {
-    font-size: 1.1rem;
-  }
-  
-  .item-title h4 {
-    font-size: 0.95rem;
-  }
-  
-  .info-content {
-    font-size: 0.85rem;
-  }
-}
+/*
+ * Se quitó la media query <=768px que volvía a bajar padding y tipografías:
+ * como casi todos los usuarios entran desde el celular, esa rama ERA el diseño
+ * por defecto y dejaba el cuerpo en ~13.6px con texto gris claro. Ahora los
+ * valores base ya son los buenos para mobile y escalan bien hacia arriba.
+ */
 </style>

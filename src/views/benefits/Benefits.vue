@@ -136,54 +136,77 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* El padding horizontal lo pone el layout (.page-body): acá solo el ancho máximo
+   para que en tablet/web no se estire a lo ancho de la pantalla. */
 .benefits-container {
-  padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .benefits-title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
-  color: #333;
-  margin-bottom: 8px;
+  color: var(--app-text-title);
+  margin-bottom: var(--app-spacing-xs);
   text-align: center;
+  letter-spacing: -0.3px;
 }
 
 .benefits-subtitle {
-  font-size: 16px;
-  color: #666;
-  margin-bottom: 30px;
+  font-size: 14px;
+  color: var(--app-text-secondary);
+  margin-bottom: var(--app-spacing-xl);
   text-align: center;
 }
 
 .benefits-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 25px;
+  /* 300px de mínimo no entra en un celular de 360px menos gutters: la card
+     desbordaba el ancho. 260px sí, y en pantallas grandes sigue armando varias
+     columnas. */
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: var(--app-spacing-lg);
 }
 
 .benefit-card {
-  background: white;
-  border-radius: 12px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--app-shadow-sm);
+  transition: box-shadow var(--app-duration) var(--app-ease),
+              transform var(--app-duration-fast) var(--app-ease);
 }
 
 .benefit-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--app-shadow-md);
+}
+
+/* Feedback de tap: el hover de -5px no existe en un celular. */
+.benefit-link:active .benefit-card {
+  transform: scale(0.99);
+  box-shadow: var(--app-shadow-xs);
 }
 
 .benefit-link {
   text-decoration: none;
   color: inherit;
   display: block;
+  -webkit-tap-highlight-color: transparent;
 }
 
+.benefit-link:focus-visible {
+  outline: none;
+}
+
+.benefit-link:focus-visible .benefit-card {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+/* Relación de aspecto en lugar de altura fija, igual que en Noticias. */
 .benefit-image {
-  height: 180px;
+  aspect-ratio: 16 / 9;
   position: relative;
   overflow: hidden;
 }
@@ -211,43 +234,50 @@ export default defineComponent({
   font-weight: 600;
 }
 
+/*
+ * Paleta alineada a la marca. Esta pantalla venía con colores sueltos que no
+ * salían de ningún token: #333/#666/#555 para el texto y, sobre todo, un CTA
+ * AZUL (#3498db) y un descuento ROJO (#e74c3c) dentro de una app violeta.
+ */
 .benefit-content {
-  padding: 20px;
+  padding: var(--app-spacing-lg);
 }
 
 .benefit-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  color: #333;
-  margin: 0 0 10px 0;
-  line-height: 1.3;
+  color: var(--app-text-title);
+  margin: 0 0 var(--app-spacing-sm) 0;
+  line-height: 1.35;
+  letter-spacing: -0.2px;
 }
 
 .benefit-discount {
   display: flex;
   align-items: baseline;
-  margin-bottom: 15px;
+  gap: 5px;
+  margin-bottom: var(--app-spacing-md);
 }
 
 .discount-value {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
-  color: #e74c3c;
-  margin-right: 5px;
+  color: var(--ion-color-primary);
 }
 
 .discount-label {
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: var(--app-text-secondary);
 }
 
 .benefit-description {
   font-size: 14px;
-  color: #555;
-  margin-bottom: 15px;
+  color: var(--app-text-body);
+  margin-bottom: var(--app-spacing-md);
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -255,15 +285,16 @@ export default defineComponent({
 .benefit-dates {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
-  padding: 10px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  margin-bottom: var(--app-spacing-md);
+  padding: var(--app-spacing-sm) var(--app-spacing-md);
+  background: var(--app-surface-alt);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
 }
 
 .date-icon {
-  font-size: 20px;
-  margin-right: 10px;
+  font-size: 18px;
+  margin-right: var(--app-spacing-sm);
 }
 
 .date-info {
@@ -271,35 +302,36 @@ export default defineComponent({
 }
 
 .date-label {
-  font-size: 12px;
-  color: #666;
+  font-size: 11px;
+  color: var(--app-text-secondary);
   margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 700;
 }
 
 .date-value {
   font-size: 13px;
-  color: #333;
-  font-weight: 500;
+  color: var(--app-text-title);
+  font-weight: 600;
 }
 
 .benefit-cta {
   text-align: center;
-  margin-top: 15px;
+  margin-top: var(--app-spacing-md);
 }
 
+/* Es un <span> decorativo dentro del <a> que envuelve la card, no un botón
+   propio: sin pointer-events para que el tap siempre lo tome el enlace. */
 .cta-button {
   display: inline-block;
-  background: #3498db;
-  color: white;
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  transition: background 0.3s ease;
-}
-
-.cta-button:hover {
-  background: #2980b9;
+  background: var(--app-primary-soft);
+  color: var(--ion-color-primary);
+  padding: 9px 20px;
+  border-radius: var(--app-radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  pointer-events: none;
 }
 
 .loading-container,
@@ -315,9 +347,9 @@ export default defineComponent({
 }
 
 .spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
+  border: 4px solid var(--app-border-strong);
   border-radius: 50%;
-  border-top: 4px solid #3498db;
+  border-top: 4px solid var(--ion-color-primary);
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;
@@ -334,43 +366,29 @@ export default defineComponent({
 }
 
 .retry-button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  background-color: #3498db;
-  color: white;
+  margin-top: var(--app-spacing-md);
+  /* Llega a los 44px de alto mínimo (antes ~38px) */
+  min-height: var(--app-tap-target);
+  padding: 0 22px;
+  background-color: var(--ion-color-primary);
+  color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--app-radius-pill);
   cursor: pointer;
-  font-weight: 600;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  transition: opacity var(--app-duration) var(--app-ease);
 }
 
-.retry-button:hover {
-  background-color: #2980b9;
+.retry-button:active {
+  opacity: 0.85;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .benefits-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
-  }
-
-  .benefits-title {
-    font-size: 24px;
-  }
-
-  .benefit-image {
-    height: 150px;
-  }
-}
-
-@media (max-width: 480px) {
-  .benefits-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .benefit-image {
-    height: 180px;
-  }
-}
+/*
+ * Se quitaron las dos media queries de alturas: se contradecían entre sí
+ * (150px a <=768px y de vuelta 180px a <=480px, o sea la pantalla MÁS chica
+ * tenía la imagen MÁS alta). Ahora `aspect-ratio` resuelve todos los anchos y
+ * `auto-fill minmax(min(260px,100%))` las columnas, sin breakpoints.
+ */
 </style>

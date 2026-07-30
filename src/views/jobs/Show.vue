@@ -137,8 +137,9 @@
               </div>
               <p class="contact-note">
                 <small
-                  >💡 También puedes usar el botón "Contactar" para comunicarte
-                  directamente.</small
+                  >Tocá el teléfono o el email para comunicarte directamente. Para
+                  quedar registrado/a en la búsqueda, usá "Postulate a esta
+                  búsqueda".</small
                 >
               </p>
             </div>
@@ -170,13 +171,16 @@
     </div>
 
     <template #footer v-if="!loading && !job.from_auth">
+      <!-- Acción principal: postularse. Antes era "Contactar", que solo abría el
+           teléfono o el mail de la búsqueda: la persona quedaba por fuera del
+           registro de postulaciones que sí lleva la web. -->
       <ion-button
         class="ion-margin-bottom"
         color="primary"
         shape="round"
         expand="full"
-        @click="contact"
-        >Contactar</ion-button
+        @click="openApply"
+        >Postulate a esta búsqueda</ion-button
       >
       <ion-button
         v-if="!job.has_user_favorite"
@@ -195,6 +199,13 @@
         >Eliminar de favoritos</ion-button
       >
     </template>
+
+    <ApplyModal
+      :open="applyOpen"
+      :job="job"
+      @close="applyOpen = false"
+      @applied="job.has_user_applied = true"
+    />
   </graduados-app>
 </template>
 
@@ -212,6 +223,7 @@ import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import SocialShare from "@/components/SocialShare.vue";
 import { useProfile } from "@/uses/profile";
+import ApplyModal from "./components/ApplyModal.vue";
 
 const loading = ref(true);
 const route = useRoute();
@@ -219,6 +231,11 @@ const store = useStore();
 const profile = useProfile();
 const job = ref<any>({});
 const tab = ref("information");
+const applyOpen = ref(false);
+
+function openApply() {
+  applyOpen.value = true;
+}
 
 onMounted(() => {
   const id = route.params.slug;
@@ -271,6 +288,11 @@ function contact() {
   // Si hay múltiples opciones, mostrar menú
   store.dispatch("ui/action/show", contactOptions);
 }
+/*
+ * Se eliminó `contact()`: abría un action sheet con "Llamar"/"Enviar email" que
+ * duplicaba los links `tel:` y `mailto:` que ya tiene la pestaña Contacto, y su
+ * botón fue reemplazado por el de postulación.
+ */
 
 // Contacto por email: la postulación necesita nombre y apellido en el perfil
 // (la API los toma del inscripto). Se chequea localmente ANTES de llamar: si

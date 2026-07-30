@@ -35,3 +35,6 @@ graduados-app.code-workspace
 android/keystore.properties
 android/*.jks
 android/*.keystore
+
+.claude
+.agents

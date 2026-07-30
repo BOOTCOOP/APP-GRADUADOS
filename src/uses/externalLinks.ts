@@ -1,0 +1,71 @@
+/**
+ * Enlaces externos del Centro de Graduados en un solo lugar.
+ *
+ * Antes cada vista repetía la URL a mano (la playlist de YouTube estaba escrita
+ * en tres archivos distintos), así que un cambio de canal obligaba a buscar y
+ * reemplazar. Acá viven las constantes y los helpers que las abren.
+ *
+ * Apertura: `window.open(url, '_system')`. En Capacitor el bridge intercepta el
+ * target `_system` y delega la URL al SO, que la resuelve con la app nativa
+ * correspondiente (WhatsApp, YouTube, Instagram…) o, si no está instalada, con
+ * el navegador. En la web es simplemente una pestaña nueva.
+ */
+
+/**
+ * Playlist "Actividades Online" del Centro.
+ *
+ * OJO: no es lo mismo que el canal de abajo. "Actividades Online" (atajo del
+ * inicio y ítem del menú) va a ESTA playlist; el "Canal de YouTube" de la
+ * pantalla de Contacto va al canal de la Facultad. Son dos destinos distintos a
+ * propósito, así que no los unifiques.
+ */
+export const YOUTUBE_PLAYLIST_URL =
+  'https://www.youtube.com/playlist?list=PL9y1i2ILzxlA0gHxYkXcWlq31_UjsmDRj'
+
+/** Canal de YouTube de la Facultad (link de la pantalla de Contacto). */
+export const YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@DerechoUBA'
+
+/**
+ * Teléfono de atención y consultas, en formato internacional sin `+` ni
+ * separadores.
+ *
+ * Ojo con el `9` después del 54: para celulares argentinos WhatsApp exige
+ * 54 + 9 + área + número. El valor que tenía la app (`541138315897`, sin el 9)
+ * no resuelve a un chat. El sitio del Centro usa `wa.me/+5491138315897`, así que
+ * ese es el número correcto.
+ */
+export const WHATSAPP_PHONE = '5491138315897'
+
+/**
+ * Link de WhatsApp. Usamos `wa.me` (el formato oficial de "click to chat") y NO
+ * `web.whatsapp.com`: `wa.me` está declarado como App Link / Universal Link por
+ * WhatsApp, así que en el celular el SO lo intercepta y abre la app nativa
+ * directamente. `web.whatsapp.com` fuerza el cliente web —que en un celular
+ * muestra el cartel de "usá WhatsApp en tu teléfono"— y era el motivo de que
+ * tocar el contacto terminara en una página en vez de en el chat.
+ */
+export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_PHONE}`
+
+export const FACEBOOK_URL = 'https://www.facebook.com/Centrodegraduadasygraduados'
+export const TWITTER_URL = 'https://x.com/graduadodchouba'
+export const INSTAGRAM_URL = 'https://www.instagram.com/centrodegraduados'
+
+/** Abre una URL fuera de la app (app nativa si existe, navegador si no). */
+export function openExternal(url: string): void {
+  window.open(url, '_system')
+}
+
+/** Actividades Online: va derecho a la playlist, sin pantalla intermedia. */
+export function openYoutubePlaylist(): void {
+  openExternal(YOUTUBE_PLAYLIST_URL)
+}
+
+/** Canal de YouTube de la Facultad (Contacto). */
+export function openYoutubeChannel(): void {
+  openExternal(YOUTUBE_CHANNEL_URL)
+}
+
+/** Atención y consultas: abre el chat en la app de WhatsApp. */
+export function openWhatsapp(): void {
+  openExternal(WHATSAPP_URL)
+}
