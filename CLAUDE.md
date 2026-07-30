@@ -37,7 +37,7 @@ El mismo guard fuerza `complete-profile` si el usuario logueado tiene `profile_c
 
 ### Postulación a búsquedas laborales
 
-Es la única integración que **no** pasa por la API Laravel: postea directo al controller PHP del sitio web (`derecho.uba.ar`, host en `VITE_LEGACY_WEB_URL`), igual que el formulario de la web. Ese endpoint siempre responde HTTP 200 y pone el resultado en el cuerpo como texto (`success` o el error), así que la acción `apply` del store inspecciona el body y rechaza a mano; y usa **axios pelado**, no `@/libs/axios`, porque el interceptor de 401 de la instancia de la app desloguearía al usuario ante un 401 del sitio legacy. Funciona sin CORS gracias a `CapacitorHttp: { enabled: true }` (solo en la app nativa; el build web lo bloquearía). El modal es de **confirmación**, no un formulario: los datos salen de la cuenta porque el usuario ya inició sesión. Detalle completo en [docs/integracion-postulacion-busquedas.md](docs/integracion-postulacion-busquedas.md).
+El botón "Contactar" del detalle ([src/views/jobs/Show.vue](src/views/jobs/Show.vue)) abre el teléfono o el mail de la búsqueda y, cuando es por mail, **registra la postulación de forma silenciosa** con `POST jobs/{id}/apply`. Ese endpoint no lleva body: el backend identifica a la persona por el Bearer token y toma los datos del perfil, por eso la acción `jobs/apply` recibe el **id pelado** (`dispatch('jobs/apply', job.id)`) y no un objeto. Como la API necesita nombre y apellido, antes de registrar se chequea el perfil y si faltan se piden con un popup (`promptCompleteProfile`) que los guarda con `PUT profile`. Si el registro falla no se interrumpe ni se avisa: el contacto por mail es lo que la persona pidió.
 
 ### Enlaces externos
 

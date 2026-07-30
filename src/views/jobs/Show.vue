@@ -137,9 +137,8 @@
               </div>
               <p class="contact-note">
                 <small
-                  >Tocá el teléfono o el email para comunicarte directamente. Para
-                  quedar registrado/a en la búsqueda, usá "Postulate a esta
-                  búsqueda".</small
+                  >Tocá el teléfono o el email para comunicarte directamente, o usá
+                  el botón "Contactar" al pie.</small
                 >
               </p>
             </div>
@@ -171,16 +170,15 @@
     </div>
 
     <template #footer v-if="!loading && !job.from_auth">
-      <!-- Acción principal: postularse. Antes era "Contactar", que solo abría el
-           teléfono o el mail de la búsqueda: la persona quedaba por fuera del
-           registro de postulaciones que sí lleva la web. -->
+      <!-- Contactar: abre teléfono o mail y, cuando es por mail, registra la
+           postulación en el sistema de graduados (ver applyAndOpenEmail). -->
       <ion-button
         class="ion-margin-bottom"
         color="primary"
         shape="round"
         expand="full"
-        @click="openApply"
-        >Postulate a esta búsqueda</ion-button
+        @click="contact"
+        >Contactar</ion-button
       >
       <ion-button
         v-if="!job.has_user_favorite"
@@ -199,13 +197,6 @@
         >Eliminar de favoritos</ion-button
       >
     </template>
-
-    <ApplyModal
-      :open="applyOpen"
-      :job="job"
-      @close="applyOpen = false"
-      @applied="job.has_user_applied = true"
-    />
   </graduados-app>
 </template>
 
@@ -223,7 +214,6 @@ import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import SocialShare from "@/components/SocialShare.vue";
 import { useProfile } from "@/uses/profile";
-import ApplyModal from "./components/ApplyModal.vue";
 
 const loading = ref(true);
 const route = useRoute();
@@ -231,11 +221,6 @@ const store = useStore();
 const profile = useProfile();
 const job = ref<any>({});
 const tab = ref("information");
-const applyOpen = ref(false);
-
-function openApply() {
-  applyOpen.value = true;
-}
 
 onMounted(() => {
   const id = route.params.slug;
@@ -288,12 +273,6 @@ function contact() {
   // Si hay múltiples opciones, mostrar menú
   store.dispatch("ui/action/show", contactOptions);
 }
-/*
- * Se eliminó `contact()`: abría un action sheet con "Llamar"/"Enviar email" que
- * duplicaba los links `tel:` y `mailto:` que ya tiene la pestaña Contacto, y su
- * botón fue reemplazado por el de postulación.
- */
-
 // Contacto por email: la postulación necesita nombre y apellido en el perfil
 // (la API los toma del inscripto). Se chequea localmente ANTES de llamar: si
 // faltan, popup para completarlos; si están, registro silencioso + mail.
@@ -311,8 +290,11 @@ async function applyAndOpenEmail() {
 
 // Registra la postulación en el sistema de graduados de forma silenciosa:
 // si falla no se bloquea ni se informa (el contacto por mail sigue igual).
+// Recibe el id pelado, que es lo que espera la acción `jobs/apply`.
 function registerApplication() {
-  store.dispatch("jobs/apply", job.value.id).catch(() => {});
+  // El catch devuelve un valor en vez de tener cuerpo vacío: un `() => {}` es
+  // error de ESLint (no-empty-function) y rompía `npm run lint`.
+  store.dispatch("jobs/apply", job.value.id).catch(() => undefined);
 }
 
 function openContactEmail() {
