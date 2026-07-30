@@ -1,5 +1,21 @@
 <template>
-    <ion-card class="course-card">
+    <!--
+      La navegación va en la RAÍZ de la card, no en bloques internos. Antes el
+      @click estaba solo en el título y en el bloque de datos, así que tocar el
+      padding, los badges o el espacio entre filas no hacía nada — y como el
+      estilo global le daba a toda ion-card el efecto de "apretado", parecía que
+      el tap había fallado. `role`/`tabindex`/`keydown` replican el
+      comportamiento de un botón para teclado y lectores de pantalla.
+    -->
+    <ion-card
+        class="course-card is-tappable"
+        role="button"
+        tabindex="0"
+        :aria-label="`Ver detalles del curso ${course.title}`"
+        @click="showDetail"
+        @keydown.enter.prevent="showDetail"
+        @keydown.space.prevent="showDetail"
+    >
         <ion-card-content>
             <!-- Estado de inscripción si está inscripto -->
             <div v-if="inscribed && hasValidInscriptionStatus" class="enrollment-status">
@@ -17,14 +33,14 @@
             </div>
 
             <!-- Título del curso -->
-            <div class="course-header" @click="showDetail">
+            <div class="course-header">
                 <ion-text class="course-title">
                     <h3>{{ course.title }}</h3>
                 </ion-text>
             </div>
 
             <!-- Información del curso -->
-            <div class="course-info ion-margin-top" @click="showDetail">
+            <div class="course-info ion-margin-top">
                 <div class="info-row">
                     <ion-icon :icon="personCircleOutline" color="primary"></ion-icon>
                     <ion-text color="medium">
@@ -47,20 +63,17 @@
                 </div>
             </div>
 
-            <!-- Botones de acción -->
-            <div class="action-buttons ion-margin-top">
-                <ion-button 
-                    fill="outline" 
-                    expand="block"
-                    @click="showDetail"
-                    class="details-button"
-                >
+            <!-- Pie de la card: refuerzo visual de que la card entera navega.
+                 Ya no es un <ion-button> con su propio handler (duplicaba el de
+                 la raíz y podía disparar dos navegaciones). -->
+            <div class="card-footer ion-margin-top">
+                <span class="details-hint">
                     Ver detalles
-                    <ion-icon :icon="chevronForwardOutline" slot="end"></ion-icon>
-                </ion-button>
-                
+                    <ion-icon :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
+                </span>
+
                 <!-- Badge de inscripción si está inscripto (lado derecho) -->
-                <ion-chip 
+                <ion-chip
                     v-if="inscribed && hasValidInscriptionStatus"
                     color="success"
                     size="small"
@@ -75,19 +88,18 @@
 </template>
 
 <script setup lang="ts">
-import { 
-    IonCard, 
-    IonCardContent, 
-    IonIcon, 
-    IonText, 
-    IonButton,
+import {
+    IonCard,
+    IonCardContent,
+    IonIcon,
+    IonText,
     IonBadge,
     IonChip,
     IonLabel,
     useIonRouter
 } from '@ionic/vue';
 
-import { defineProps, computed } from 'vue';
+import { computed } from 'vue';
 import { 
     personCircleOutline, 
     calendarOutline, 
@@ -141,16 +153,10 @@ function showDetail() {
 
 <style scoped>
 .course-card {
-    margin: 0;
-    border-radius: var(--app-radius-md, 16px);
-    box-shadow: var(--app-shadow-sm, 0 2px 10px rgba(0, 0, 0, 0.07));
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    /* La elevación, el radio y el feedback de tap los da el estilo global de
+       `ion-card.is-tappable` (theme/global.css): acá solo el layout. */
+    margin: 0 0 var(--app-spacing-md);
     overflow: hidden;
-}
-
-.course-card:active {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    transform: scale(0.98);
 }
 
 .enrollment-status {
@@ -167,25 +173,18 @@ function showDetail() {
     border: 1px solid var(--ion-color-warning);
 }
 
-.course-header {
-    cursor: pointer;
-}
-
 .course-title h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--ion-color-dark);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--app-text-title);
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.35;
+    letter-spacing: -0.2px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-}
-
-.course-info {
-    cursor: pointer;
 }
 
 .info-row {
@@ -205,23 +204,26 @@ function showDetail() {
     line-height: 1.5;
 }
 
-.action-buttons {
+.card-footer {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-spacing-sm);
     padding-top: 14px;
-    border-top: 1px solid var(--app-border, rgba(0,0,0,0.07));
+    border-top: 1px solid var(--app-border);
 }
 
-.details-button {
-    --color: var(--ion-color-primary);
-    --border-color: var(--ion-color-primary);
-    --border-radius: var(--app-radius-md, 16px);
-    height: 44px;
-    font-weight: 600;
+.details-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 0.875rem;
-    flex-grow: 1;
-    justify-content: space-between;
+    font-weight: 700;
+    color: var(--ion-color-primary);
+}
+
+.details-hint ion-icon {
+    font-size: 15px;
 }
 
 .status-chip {
@@ -230,46 +232,9 @@ function showDetail() {
     border: 1px solid var(--ion-color-success);
     font-size: 0.75rem;
     height: 28px;
-}
-
-/* Responsive design */
-@media (max-width: 480px) {
-    .course-title h3 {
-        font-size: 1.125rem;
-    }
-    
-    .action-buttons {
-        flex-direction: column;
-        gap: 12px;
-    }
-    
-    .enroll-button,
-    .enrolled-button {
-        width: 100%;
-    }
-}
-
-/* Animations */
-.course-card ion-badge {
-    animation: fadeIn 0.3s ease;
-}
-
-.action-buttons ion-button {
-    transition: all 0.2s ease;
-}
-
-.action-buttons ion-button:hover {
-    transform: scale(1.05);
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    margin: 0;
+    /* Es una etiqueta de estado, no un control: no debe capturar el tap de la
+       card ni mostrar cursor de click. */
+    pointer-events: none;
 }
 </style>

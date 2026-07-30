@@ -1,8 +1,21 @@
 <template>
-  <ion-card class="job-card">
+  <!--
+    Navegación en la raíz de la card. Antes solo el título (un <ion-text>, ni
+    enfocable ni alcanzable por teclado) y un botón "Ver más" de 32px llevaban al
+    detalle: empresa, ubicación, modalidad y fecha eran zonas muertas.
+  -->
+  <ion-card
+    class="job-card is-tappable"
+    role="button"
+    tabindex="0"
+    :aria-label="`Ver detalle de la búsqueda ${job.title}`"
+    @click="showDetail"
+    @keydown.enter.prevent="showDetail"
+    @keydown.space.prevent="showDetail"
+  >
     <ion-card-content class="job-card-content">
       <!-- Título del puesto (destacado) -->
-      <ion-text color="dark" class="job-title" @click="showDetail">
+      <ion-text color="dark" class="job-title">
         <h3>{{ job.title }}</h3>
       </ion-text>
 
@@ -68,25 +81,17 @@
 
       <!-- Fecha de publicación -->
       <div class="job-footer">
-        <ion-text color="medium" class="job-date">
-          <small>📅 Publicado: {{ job.created_at }}</small>
-        </ion-text>
+        <span class="job-date">
+          <!-- Ícono SVG en vez del emoji 📅: el emoji se renderiza distinto en
+               cada plataforma y desalinea la línea de texto. -->
+          <ion-icon :icon="calendarOutline" aria-hidden="true"></ion-icon>
+          Publicado: {{ job.created_at }}
+        </span>
 
-        <!-- Botón de acción -->
-        <ion-button
-          size="small"
-          fill="outline"
-          color="primary"
-          @click="showDetail"
-          class="job-action-btn"
-        >
+        <span class="job-action-hint">
           Ver más
-          <ion-icon
-            :md="arrowForwardOutline"
-            :ios="arrowForwardOutline"
-            slot="end"
-          ></ion-icon>
-        </ion-button>
+          <ion-icon :icon="arrowForwardOutline" aria-hidden="true"></ion-icon>
+        </span>
       </div>
 
       <!-- Slot para contenido adicional -->
@@ -102,17 +107,16 @@ import {
   IonCardContent,
   IonIcon,
   IonText,
-  IonButton,
   useIonRouter,
 } from "@ionic/vue";
 
-import { defineProps } from "vue";
 import {
   locationOutline,
   businessOutline,
   desktopOutline,
   homeOutline,
   arrowForwardOutline,
+  calendarOutline,
 } from "ionicons/icons";
 
 const prop = defineProps<{
@@ -129,31 +133,27 @@ function showDetail() {
 <style scoped>
 .job-card {
   position: relative;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Radio, sombra y feedback de tap vienen del estilo global de
+     `ion-card.is-tappable` (theme/global.css). */
+  margin: 0 0 var(--app-spacing-md);
 }
 
 .job-card-content {
-  padding: 16px;
+  padding: var(--app-spacing-lg);
 }
 
 .job-title {
-  cursor: pointer;
-  margin-bottom: 8px;
+  display: block;
+  margin-bottom: var(--app-spacing-sm);
 }
 
 .job-title h3 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--ion-color-dark);
-  line-height: 1.3;
-}
-
-.job-title:hover h3 {
-  color: var(--ion-color-primary);
-  text-decoration: underline;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--app-text-title);
+  line-height: 1.35;
+  letter-spacing: -0.2px;
 }
 
 .job-company {
@@ -186,29 +186,37 @@ function showDetail() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #e0e0e0;
+  gap: var(--app-spacing-sm);
+  margin-top: var(--app-spacing-lg);
+  padding-top: var(--app-spacing-md);
+  border-top: 1px solid var(--app-border);
 }
 
 .job-date {
-  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  min-width: 0;
 }
 
-.job-action-btn {
-  --border-radius: 20px;
-  height: 32px;
+.job-date ion-icon {
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-  .job-footer {
-    flex-direction: column;
-    gap: 8px;
-    align-items: stretch;
-  }
+.job-action-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+}
 
-  .job-action-btn {
-    width: 100%;
-  }
+.job-action-hint ion-icon {
+  font-size: 14px;
 }
 </style>
