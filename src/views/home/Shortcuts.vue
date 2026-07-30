@@ -52,7 +52,7 @@ const shortcuts = [
   { label: 'Talleres y Jornadas',      icon: schoolOutline,             route: '/talleres',                 color: '#2563EB' },
   { label: 'Actividades Online',       icon: logoYoutube,               action: openYouTubeChannel,         color: '#DC2626' },
   { label: 'Búsqueda Laboral',         icon: briefcaseOutline,          route: '/busqueda-laboral',         color: '#D97706' },
-  { label: 'Biblioteca',               icon: libraryOutline,            route: '/material-bibliografico',   color: '#059669' },
+  { label: 'Bibliografía',               icon: libraryOutline,            route: '/material-bibliografico',   color: '#059669' },
   { label: 'Noticias',                 icon: newspaperOutline,          route: '/noticias',                 color: '#0891B2' },
   { label: 'Información de Interés',   icon: informationCircleOutline,  route: '/informacion-de-interes',   color: '#4338CA' },
   { label: 'Beneficios',               icon: giftOutline,               route: '/beneficios',               color: '#B45309' },
