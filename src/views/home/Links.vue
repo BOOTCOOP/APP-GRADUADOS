@@ -29,12 +29,20 @@
         IonIcon, IonText
     } from '@ionic/vue';
 
+    import { openWhatsapp, openYoutubePlaylist } from '@/uses/externalLinks';
+
+    /*
+     * Este componente está desactivado hoy (Home.vue lo tiene comentado), pero
+     * arrastraba las dos URLs viejas: `web.whatsapp.com` (que en el celular abre
+     * el cliente web) y la playlist anterior de YouTube. Si alguien lo vuelve a
+     * activar, con los helpers centralizados no revive ninguno de los dos bugs.
+     */
     function goToWhatsapp(){
-        window.open('https://web.whatsapp.com/send?phone=541138315897', '_system');
+        openWhatsapp();
     }
 
     function goToYoutube(){
-        window.open('https://www.youtube.com/playlist?list=PL9y1i2ILzxlDxl8KFJHJrG294F2ert4Qy', '_system');
+        openYoutubePlaylist();
     }
 </script>
 
