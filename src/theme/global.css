@@ -79,14 +79,20 @@ html.plt-hybrid {
  *
  * Se ajusta con margin y no con bottom/right a propósito: son propiedades que
  * Ionic no setea, así que no hay pelea de especificidad con su CSS scopeado.
+ *
+ * OJO: hay que apuntar a las clases .fab-vertical-bottom y .fab-horizontal-end (las que
+ * Ionic pone en el host), NO a [vertical="bottom"]: @ionic/vue pasa esos props
+ * como propiedad DOM y Stencil no los refleja como atributo, así que un selector
+ * de atributo no matchea nunca (el FAB quedaba detrás de la barra de navegación
+ * de Android aunque esta regla existiera).
  */
-ion-fab[vertical="bottom"] {
+ion-fab.fab-vertical-bottom {
     /* +8px sobre el inset: deja aire entre el FAB y la barra del sistema en vez
        de dejarlo apenas apoyado sobre ella. */
     margin-bottom: calc(var(--ion-safe-area-bottom, 0px) + 8px);
 }
 
-ion-fab[horizontal="end"] {
+ion-fab.fab-horizontal-end {
     margin-right: 8px;
 }
 
