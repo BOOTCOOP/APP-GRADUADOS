@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2026-08-02
+
+### Fixed
+- El FAB de inicio quedaba detrás de la barra de navegación de Android (edge-to-edge): la regla de `global.css` que lo separaba usaba selectores de atributo (`ion-fab[vertical="bottom"]`) que nunca matchean porque `@ionic/vue` pasa esos props como propiedad DOM y Stencil no los refleja como atributo. Ahora apunta a las clases `.fab-vertical-bottom`/`.fab-horizontal-end` que Ionic pone en el host
+- Se backfillea el DNI en el perfil al refrescar el usuario
+
 ## [1.3.1] - 2026-08-02
 
 ### Fixed
