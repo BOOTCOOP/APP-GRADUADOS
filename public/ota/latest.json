@@ -1,6 +1,6 @@
 {
-  "version": "1.3.0",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.3.0.zip",
+  "version": "1.3.1",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.3.1.zip",
   "min_native_version": "1.2.0",
-  "notes": "Rediseño UX/UI general, avatar en navbar, registro de postulaciones y accesos directos a YouTube"
+  "notes": "Fix: el registro de postulación a búsquedas laborales quedó roto en 1.3.0; vuelve el botón Contactar"
 }

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-08-02
+
+### Fixed
+- La postulación a búsquedas laborales salió rota en la 1.3.0: el merge del rediseño dejó dos acciones `jobs/apply` cruzadas y se registraba `id_busqueda=undefined` con datos vacíos, en silencio. Se unifica en el flujo del botón "Contactar" con registro silencioso contra la API
+- Vuelve el botón "Contactar" en el detalle de búsqueda (el rediseño lo había reemplazado por un flujo que quedó inalcanzable)
+
+### Removed
+- `ApplyModal` y el enfoque descartado de postular contra el PHP del sitio web viejo (incluida `VITE_LEGACY_WEB_URL`)
+
 ## [1.3.0] - 2026-07-30
 
 ### Added
