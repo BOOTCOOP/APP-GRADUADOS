@@ -201,7 +201,11 @@ const showValidateLink = computed(
 
 onMounted(() => {
   // Refresca estado de validación (reactivo via badge) desde el backend.
-  refreshUser();
+  // Además backfillea el DNI: el user guardado por sesiones previas a que la
+  // API lo exponga no lo tiene, así que lo completamos cuando llega el fresco.
+  refreshUser().then((fresh) => {
+    if (fresh?.dni) profile.value.dni = fresh.dni;
+  });
   useProfile()
     .get()
     .then((p) => {
