@@ -60,7 +60,7 @@
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/eslint-config-typescript": "^11.0.2",
     "@vue/test-utils": "^2.0.0-rc.16",
-    "adm-zip": "^0.5.18",
+    "adm-zip": "^0.6.0",
     "autoprefixer": "^10.5.2",
     "cross-env": "^10.1.0",
     "eslint": "^8.4.1",
