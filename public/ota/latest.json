@@ -1,6 +1,6 @@
 {
-  "version": "1.3.2",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.3.2.zip",
+  "version": "1.3.3",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.3.3.zip",
   "min_native_version": "1.2.0",
-  "notes": "Fix: el botón flotante de inicio quedaba detrás de la barra de navegación de Android; backfill de DNI en el perfil"
+  "notes": "Aviso de actualización disponible (toast + campanita) y botón Buscar actualizaciones en el menú, con aplicación inmediata"
 }

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3] - 2026-08-03
+
+### Added
+- Aviso de actualización OTA disponible por dos vías que conviven en evaluación: toast accionable "Versión X disponible → Actualizar" (universal, con o sin sesión) y notificación local en la campanita (persistente, solo con sesión). Ambas aplican el bundle al instante recargando la app
+- Botón "Buscar actualizaciones" en el footer del menú lateral: chequea el manifiesto, descarga si hace falta y aplica al momento, sin esperar un arranque en frío — pensado para iOS, donde no hay "forzar cierre" accesible y el proceso puede vivir días
+- La capa de notificaciones soporta ítems locales generados por la app (separados de los del servidor: sobreviven al fetch, sus ids no viajan a la API y persisten tras el logout)
+
 ## [1.3.2] - 2026-08-02
 
 ### Fixed
