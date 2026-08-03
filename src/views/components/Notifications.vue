@@ -146,6 +146,7 @@ import {
   schoolOutline,
   informationCircleOutline,
   alertCircleOutline,
+  refreshOutline,
 } from "ionicons/icons";
 import { useNotifications, type AppNotification } from "@/uses/notifications";
 
@@ -193,11 +194,14 @@ function close() {
 }
 
 // ── Presentación por tipo ───────────────────────────────────────────────────
-type NotificationType = "news" | "workshop" | "classified" | "course" | "general";
+// "update" es local (la actualización OTA pendiente), no viene de la API.
+type NotificationType = "news" | "workshop" | "classified" | "course" | "update" | "general";
 
 function getType(notification?: AppNotification): NotificationType {
   const type = (notification?.type || "general") as NotificationType;
-  return ["news", "workshop", "classified", "course"].includes(type) ? type : "general";
+  return ["news", "workshop", "classified", "course", "update"].includes(type)
+    ? type
+    : "general";
 }
 
 const TYPE_META: Record<NotificationType, { label: string; color: string; icon: string }> = {
@@ -205,6 +209,7 @@ const TYPE_META: Record<NotificationType, { label: string; color: string; icon: 
   workshop: { label: "Taller", color: "#2563EB", icon: calendarOutline },
   classified: { label: "Aviso", color: "#D97706", icon: megaphoneOutline },
   course: { label: "Curso", color: "#7A35AB", icon: schoolOutline },
+  update: { label: "Actualización", color: "#16A34A", icon: refreshOutline },
   general: { label: "General", color: "#6B6B78", icon: informationCircleOutline },
 };
 
@@ -257,6 +262,7 @@ const ROUTE_BY_TYPE: Record<NotificationType, string> = {
   workshop: "/talleres",
   classified: "/classifieds",
   course: "/cursos",
+  update: "/", // no se usa: las de tipo update siempre traen `action`
   general: "/",
 };
 
@@ -268,6 +274,13 @@ async function handleNotificationClick(notification?: AppNotification) {
   }
 
   await menuController.close("notification-content");
+
+  // Las notificaciones locales traen su propia acción (ej. aplicar la
+  // actualización OTA) en lugar de navegar a una sección.
+  if (notification.action) {
+    notification.action();
+    return;
+  }
 
   const link = notification.link;
   const target =

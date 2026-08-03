@@ -88,6 +88,9 @@ Flujo en la app (al montar):
 1. `notifyAppReady()` — **primero que todo**. Si un bundle nuevo crashea antes de llegar a esta llamada, el plugin hace **rollback automático** al bundle anterior en el próximo arranque. Es la red de seguridad contra bundles rotos.
 2. Chequea el manifiesto (throttle de 60 min; también se chequea en `resume`).
 3. Si hay versión nueva: `download()` descarga el zip y `next()` lo deja programado — se aplica en el **próximo arranque en frío** (no en caliente).
+4. Con el bundle ya programado, la app avisa "Versión X disponible" por **dos vías a la vez** (redundancia deliberada, en evaluación — quedarán una o ambas según cómo se vean en uso real): un **toast accionable** (universal: cualquier pantalla, con o sin sesión; botón "Actualizar", la X pospone) y una **notificación local en la campanita** (persistente hasta actualizar, pero solo existe con sesión y su botón está en el header del inicio). En ambos casos tocar "actualizar" aplica al instante con `set()` (`applyPendingOtaUpdate()`). Cubre el caso iOS de un bundle descargado que nunca llega a aplicarse porque el proceso no muere.
+
+Además del flujo automático, el menú lateral tiene un botón **"Buscar actualizaciones"** (solo en nativo, `applyOtaUpdateNow()` en `src/uses/otaUpdate.ts`): chequea el manifiesto, descarga si hace falta (o reusa un bundle ya descargado por el chequeo automático) y lo aplica con `set()` — **recarga la WebView al instante**, sin esperar un arranque en frío. Acá la interrupción es aceptable porque la pidió el usuario. Es la vía de escape para iOS (ver abajo) y sirve de diagnóstico: si dice "última versión" pero la versión del footer es vieja, el problema es la comparación de versiones; si tira error, es red/descarga.
 
 Campo `min_native_version` del manifiesto: los shells nativos con versión menor a ese valor **ignoran el bundle**. Protege el caso "el bundle JS nuevo requiere un plugin nativo que las instalaciones viejas no tienen": esos usuarios se quedan en su bundle actual hasta que actualicen por tienda.
 
@@ -116,6 +119,8 @@ Para publicar cambios de solo código web (ej. de `1.1.0` a `1.1.1`):
 **Probar antes de publicar**: en un device, apuntar `VITE_OTA_MANIFEST_URL` a un server local que sirva un `latest.json` de prueba, y verificar el ciclo completo (descarga → arranque en frío → `notifyAppReady()` → la app funciona).
 
 **"Arranque en frío" en Android**: deslizar la app de las apps recientes NO siempre mata el proceso (depende del fabricante) — para forzar la aplicación de un bundle pendiente durante una prueba, usar **Ajustes → Apps → Forzar cierre**. Para usuarios reales no hace falta nada: el bundle se aplica solo en su próximo arranque natural (Android mata los procesos en background con el tiempo).
+
+**"Arranque en frío" en iOS**: no existe "Forzar cierre" en Ajustes; la única forma manual es el app switcher (deslizar hacia arriba desde abajo y soltar → deslizar la tarjeta de la app hacia arriba). iOS puede mantener el proceso vivo durante días, y hay una trampa de timing que hace parecer que el OTA "no funciona": si el bundle nuevo se descargó en ESTA sesión (por ej. la primera apertura después de reiniciar el teléfono), `next()` recién lo aplica en el arranque en frío SIGUIENTE — siempre se está "un reinicio atrás". Para probar o destrabar un update en iOS, usar el botón **"Buscar actualizaciones"** del menú, que aplica al instante.
 
 Actualizar también `CHANGELOG.md` con la entrada de la versión.
 

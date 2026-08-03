@@ -90,6 +90,21 @@
           </ion-menu-toggle>
         </ion-list>
         <div class="menu-version">v{{ appVersion }}</div>
+        <!--
+          Búsqueda manual de OTA: en iOS no hay "forzar cierre" a mano y el
+          proceso puede vivir días, así que un bundle marcado con next() tarda
+          en aplicarse. Este botón descarga y aplica con set() al instante.
+          Solo en nativo: en web Pages ya sirve siempre la última versión.
+        -->
+        <button
+          v-if="isNative"
+          class="menu-update-check"
+          :disabled="checkingUpdate"
+          @click="checkForUpdates"
+        >
+          <ion-icon :icon="refreshOutline" aria-hidden="true" />
+          {{ checkingUpdate ? "Buscando…" : "Buscar actualizaciones" }}
+        </button>
       </div>
     </ion-content>
   </ion-menu>
@@ -107,6 +122,7 @@ import {
   useIonRouter,
 } from "@ionic/vue";
 import { ref, computed, watch } from "vue";
+import { Capacitor } from "@capacitor/core";
 
 import {
   newspaperOutline,
@@ -123,15 +139,19 @@ import {
   ribbonOutline,
   callOutline,
   logoYoutube,
+  refreshOutline,
 } from "ionicons/icons";
 import { useRoute } from "vue-router";
+import { useStore } from "vuex";
 import { useAuth } from "@/uses/auth";
 import { useCurrentUser } from "@/uses/currentUser";
 import { openYoutubePlaylist } from "@/uses/externalLinks";
 import { useNotifications } from "@/uses/notifications";
+import { applyOtaUpdateNow } from "@/uses/otaUpdate";
 
 const route = useRoute();
 const router = useIonRouter();
+const store = useStore();
 const active = ref(null);
 
 // Versión del bundle JS (package.json, inyectada por vite.config.ts). Cambia
@@ -182,6 +202,39 @@ function logout() {
       useNotifications().reset();
       router.push("/");
     });
+}
+
+// Búsqueda manual de actualizaciones OTA (solo nativo).
+const isNative = Capacitor.isNativePlatform();
+const checkingUpdate = ref(false);
+
+async function checkForUpdates() {
+  if (checkingUpdate.value) return;
+  checkingUpdate.value = true;
+
+  try {
+    const result = await applyOtaUpdateNow((version) => {
+      store.dispatch("ui/toastr/create", {
+        message: `Descargando la versión ${version}…`,
+        duration: 4000,
+      });
+    });
+
+    if (result.status === "up-to-date") {
+      store.dispatch("ui/toastr/success", "Ya estás usando la última versión.");
+    } else if (result.status === "native-outdated") {
+      store.dispatch("ui/toastr/create", {
+        message: "Esta actualización requiere instalar la nueva versión desde la tienda.",
+        duration: 4000,
+      });
+    }
+    // "applying": la app se recarga sola con el bundle nuevo, no hay nada que avisar.
+  } catch (e) {
+    console.warn("[ota] búsqueda manual de actualización falló:", e);
+    store.dispatch("ui/toastr/danger", "No pudimos buscar actualizaciones. Intentá más tarde.");
+  } finally {
+    checkingUpdate.value = false;
+  }
 }
 </script>
 
@@ -342,5 +395,30 @@ ion-item.menu-item ion-label {
   color: #9a9aa8;
   margin-top: 10px;
   letter-spacing: 0.3px;
+}
+
+/* ── Buscar actualizaciones ─────────────────────── */
+.menu-update-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: var(--app-tap-target);
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+  cursor: pointer;
+}
+
+.menu-update-check ion-icon {
+  font-size: 14px;
+}
+
+.menu-update-check:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 </style>

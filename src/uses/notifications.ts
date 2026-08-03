@@ -24,9 +24,23 @@ export interface AppNotification {
   read?: boolean
   created_at?: string
   date?: string
+  /** Solo ítems locales: al tocarla se ejecuta esto en vez de navegar. */
+  action?: () => void
 }
 
-const items = ref<AppNotification[]>([])
+const serverItems = ref<AppNotification[]>([])
+/**
+ * Ítems generados por la propia app, no por la API (hoy: la actualización OTA
+ * pendiente). Viven en una lista aparte por dos razones: fetchAll() pisa la
+ * lista del servidor entera, y sus ids no existen en el backend, así que no
+ * deben viajar en `notifications/markAsRead`.
+ */
+const localItems = ref<AppNotification[]>([])
+
+/** Lista que consume la UI: las locales primero (una actualización pendiente
+ *  importa más que cualquier novedad de contenido). */
+const items = computed(() => [...localItems.value, ...serverItems.value])
+
 const loading = ref(false)
 /** `true` una vez que terminó el primer fetch: distingue "vacío" de "cargando". */
 const loaded = ref(false)
@@ -52,10 +66,10 @@ export function useNotifications(store?: Store<any>) {
     return store
       .dispatch('notifications/fetchAll')
       .then((response: any) => {
-        items.value = extractList(response)
+        serverItems.value = extractList(response)
       })
       .catch(() => {
-        items.value = []
+        serverItems.value = []
       })
       .finally(() => {
         loading.value = false
@@ -71,9 +85,12 @@ export function useNotifications(store?: Store<any>) {
       if (n?.id !== undefined && ids.includes(n.id)) n.read = true
     })
 
-    if (!store) return Promise.resolve()
+    // Al backend solo van los ids que él conoce: los locales no existen allá.
+    const serverIds = ids.filter((id) => serverItems.value.some((n) => n?.id === id))
 
-    return store.dispatch('notifications/markAsRead', { ids }).catch(() => {
+    if (!store || !serverIds.length) return Promise.resolve()
+
+    return store.dispatch('notifications/markAsRead', { ids: serverIds }).catch(() => {
       /* si falla, el próximo fetch vuelve a traer el estado real del servidor */
     })
   }
@@ -86,11 +103,41 @@ export function useNotifications(store?: Store<any>) {
     return markAsRead(ids)
   }
 
-  /** Se llama al cerrar sesión para no dejar notificaciones de otro usuario. */
+  /**
+   * Publica (o reemplaza, por id) una notificación local. `action` define qué
+   * pasa al tocarla en el panel, en lugar de la navegación por tipo/link.
+   */
+  function setLocalNotification(notification: AppNotification & { id: string }) {
+    localItems.value = [
+      notification,
+      ...localItems.value.filter((n) => n.id !== notification.id),
+    ]
+  }
+
+  function removeLocalNotification(id: string) {
+    localItems.value = localItems.value.filter((n) => n.id !== id)
+  }
+
+  /**
+   * Se llama al cerrar sesión para no dejar notificaciones de otro usuario.
+   * Las locales sobreviven a propósito: no son datos del usuario (ej. la
+   * actualización OTA pendiente sigue pendiente para quien entre después).
+   */
   function reset() {
-    items.value = []
+    serverItems.value = []
     loaded.value = false
   }
 
-  return { items, loading, loaded, unreadCount, fetchAll, markAsRead, markAllAsRead, reset }
+  return {
+    items,
+    loading,
+    loaded,
+    unreadCount,
+    fetchAll,
+    markAsRead,
+    markAllAsRead,
+    setLocalNotification,
+    removeLocalNotification,
+    reset,
+  }
 }
