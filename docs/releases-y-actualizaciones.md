@@ -142,11 +142,13 @@ Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Las fichas de
 3. **Android** — dos caminos:
    - **GitHub Actions (recomendado, no requiere Android Studio)**: pestaña Actions → workflow **"Build AAB (release, para Play Store)"** → Run workflow → descargar el artifact `app-release-aab` → subir el `.aab` a **Play Console**. Requiere los secrets del repo `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` (ver comentario del workflow). El keystore es la **upload key** (Play App Signing custodia la clave final); backup del `.jks` fuera del repo — jamás commitearlo (`.gitignore` ya lo cubre).
    - **Local**: `npx cap open android` y en Android Studio: Build → Generate Signed Bundle (usa `android/keystore.properties`) → subir a Play Console.
-4. **iOS** (requiere Mac con **Xcode 26+**, exigido por Capacitor 8):
-   ```bash
-   npx cap open ios
-   ```
-   En Xcode: Product → **Archive** → subir a **App Store Connect**.
+4. **iOS** — dos caminos:
+   - **GitHub Actions (recomendado, no requiere Mac)**: pestaña Actions → workflow **"Build iOS (release, para App Store)"** → Run workflow → el build se sube solo a App Store Connect y queda en **TestFlight**; desde ahí se crea la versión nueva en la ficha y se manda a revisión. Requiere los secrets `ASC_API_KEY_P8`, `ASC_API_KEY_ID`, `ASC_API_ISSUER_ID` (una API key de App Store Connect con rol App Manager — ver comentario del workflow). La firma es cloud signing con el team del proyecto: no hay keystore ni `.p12` que custodiar, y la API key se puede revocar/regenerar desde la consola de Apple.
+   - **Local** (requiere Mac con **Xcode 26+**, exigido por Capacitor 8):
+     ```bash
+     npx cap open ios
+     ```
+     En Xcode: Product → **Archive** → subir a **App Store Connect**.
 5. **Tag y changelog**: tag de release con la versión nativa, entrada en `CHANGELOG.md`.
 6. **Revisión de tiendas**: horas (Google) / 1-2 días (Apple).
 

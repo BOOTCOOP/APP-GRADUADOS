@@ -1,0 +1,97 @@
+name: Build iOS (release, para App Store)
+
+# Se dispara manualmente desde la pestaña Actions de GitHub.
+# Archiva la app con Xcode en un runner de macOS y la sube a App Store
+# Connect: el build queda en TestFlight, y desde ahí se asocia a una
+# versión nueva de la ficha y se manda a revisión de Apple.
+#
+# Requiere estos secrets del repo (Settings → Secrets → Actions):
+#   ASC_API_KEY_P8    — contenido COMPLETO del archivo AuthKey_XXXXXX.p8
+#                       (App Store Connect → Usuarios y acceso → Integraciones
+#                       → Claves de la API → Generar, con rol App Manager.
+#                       El .p8 se puede descargar UNA sola vez: guardarlo).
+#   ASC_API_KEY_ID    — el "ID de clave" de esa clave (ej. A1B2C3D4E5)
+#   ASC_API_ISSUER_ID — el "ID de emisor" del equipo (UUID, figura arriba
+#                       de la lista de claves en la misma página)
+#
+# La firma es cloud signing: xcodebuild usa la API key para crear/renovar
+# el certificado de distribución y el provisioning profile solo, sin .p12
+# manual. El team (7RARYSNZU9, firma automática) ya está en el proyecto.
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Capacitor 8 exige Xcode 26+; el runner trae varias versiones instaladas.
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web (base nativa)
+        run: npm run build:native
+
+      # En macOS, cap sync también corre pod install.
+      - name: Capacitor sync
+        run: npx cap sync ios
+
+      - name: Restore App Store Connect API key
+        run: |
+          if [ -z "${{ secrets.ASC_API_KEY_P8 }}" ]; then
+            echo "::error::Falta el secret ASC_API_KEY_P8 (ver comentario al tope de este workflow)"; exit 1
+          fi
+          if [ -z "${{ secrets.ASC_API_KEY_ID }}" ] || [ -z "${{ secrets.ASC_API_ISSUER_ID }}" ]; then
+            echo "::error::Faltan ASC_API_KEY_ID y/o ASC_API_ISSUER_ID (ver comentario al tope de este workflow)"; exit 1
+          fi
+          mkdir -p ~/private_keys
+          printf '%s' "${{ secrets.ASC_API_KEY_P8 }}" > ~/private_keys/AuthKey_${{ secrets.ASC_API_KEY_ID }}.p8
+
+      - name: Archive
+        run: |
+          xcodebuild archive \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/App.xcarchive \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.ASC_API_KEY_ID }}.p8 \
+            -authenticationKeyID "${{ secrets.ASC_API_KEY_ID }}" \
+            -authenticationKeyIssuerID "${{ secrets.ASC_API_ISSUER_ID }}"
+
+      # method app-store-connect + destination upload: exporta y sube en un
+      # solo paso; el build aparece en TestFlight al terminar de procesarse.
+      - name: Export y subida a App Store Connect
+        run: |
+          cat > ExportOptions.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.ASC_API_KEY_ID }}.p8 \
+            -authenticationKeyID "${{ secrets.ASC_API_KEY_ID }}" \
+            -authenticationKeyIssuerID "${{ secrets.ASC_API_ISSUER_ID }}"

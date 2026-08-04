@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Release de tienda Android: `versionName` 1.3.3 / `versionCode` 22 — primer AAB con **targetSdk 36** que llega a Play (requisito del 31/8/2026; producción estaba en 21/1.1.6 con targetSdk 35, las OTA no actualizan la tienda)
+- Release de tienda iOS: `MARKETING_VERSION` 1.3.3 / build 5, y workflow nuevo **"Build iOS (release, para App Store)"** que archiva y sube a App Store Connect desde CI (runner macOS + cloud signing con API key de ASC) — ya no hace falta una Mac para publicar
 
 ### Added
 - Aviso de actualización OTA disponible por dos vías que conviven en evaluación: toast accionable "Versión X disponible → Actualizar" (universal, con o sin sesión) y notificación local en la campanita (persistente, solo con sesión). Ambas aplican el bundle al instante recargando la app
