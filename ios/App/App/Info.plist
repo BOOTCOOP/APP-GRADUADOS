@@ -67,5 +67,11 @@
 	<string
     >La aplicación requiere permiso para guardar archivos e imágenes en el dispositivo.</string>
 
+	<!-- Solo HTTPS estándar, sin cifrado propio: exime de la declaración de
+	     export compliance y evita que App Store Connect frene cada build de
+	     TestFlight preguntando por regulaciones de criptografía. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false />
+
 </dict>
 </plist>
