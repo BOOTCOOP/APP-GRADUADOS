@@ -42,6 +42,31 @@ export function showForceUpdateAlert(config: ForceUpdateConfig = {}): void {
   });
 }
 
+// Chequea si la tienda tiene una versión NATIVA más nueva que la instalada
+// (compara contra latest_version de GET app/config). Devuelve null si no hay
+// novedad o si el backend no informa latest_version. A diferencia del force
+// update, acá no se bloquea nada: lo usa el botón "Buscar actualizaciones"
+// para OFRECER ir a la tienda. Los errores de red se propagan al caller.
+export async function checkStoreUpdate(): Promise<{
+  version: string;
+  url?: string;
+} | null> {
+  if (!Capacitor.isNativePlatform()) return null;
+
+  const response = await store.dispatch("appVersion/fetch");
+  const config = response?.data || {};
+  if (!config.latest_version) return null;
+
+  const { version } = await App.getInfo();
+  if (compareVersions(version, config.latest_version) >= 0) return null;
+
+  const urls = config.store_urls || {};
+  return {
+    version: config.latest_version,
+    url: Capacitor.getPlatform() === "ios" ? urls.ios : urls.android,
+  };
+}
+
 export function checkMinVersion(force = false): Promise<void> {
   // Solo aplica a builds nativas: en web no hay tienda que forzar.
   if (!Capacitor.isNativePlatform()) return Promise.resolve();

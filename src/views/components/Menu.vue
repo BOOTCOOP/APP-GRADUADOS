@@ -148,6 +148,7 @@ import { useCurrentUser } from "@/uses/currentUser";
 import { openYoutubePlaylist } from "@/uses/externalLinks";
 import { useNotifications } from "@/uses/notifications";
 import { applyOtaUpdateNow } from "@/uses/otaUpdate";
+import { checkStoreUpdate } from "@/uses/appUpdate";
 
 const route = useRoute();
 const router = useIonRouter();
@@ -220,15 +221,41 @@ async function checkForUpdates() {
       });
     });
 
-    if (result.status === "up-to-date") {
-      store.dispatch("ui/toastr/success", "Ya estás usando la última versión.");
+    // "applying": la app se recarga sola con el bundle nuevo, no hay nada que avisar.
+    if (result.status === "applying") return;
+
+    // Sin OTA para aplicar: vemos si la TIENDA tiene un shell nativo más nuevo
+    // (latest_version de app/config). Si este chequeo falla no ensuciamos el
+    // resultado del OTA: se degrada a los mensajes de siempre.
+    const storeUpdate = await checkStoreUpdate().catch(() => null);
+
+    if (storeUpdate?.url) {
+      const storeUrl = storeUpdate.url;
+      store.dispatch("ui/alert/confirm", {
+        header: "Nueva versión disponible",
+        subHeader: `Hay una versión nueva de la app (${storeUpdate.version}) para instalar desde la tienda.`,
+        buttons: {
+          confirm: { text: "Ir a la tienda" },
+          cancel: { text: "Ahora no" },
+        },
+        handler: () => window.open(storeUrl, "_system"),
+      });
+    } else if (storeUpdate) {
+      // El backend informa versión nueva pero no la URL de esta plataforma.
+      store.dispatch("ui/toastr/create", {
+        message: `Hay una versión nueva de la app (${storeUpdate.version}) en la tienda.`,
+        duration: 4000,
+      });
     } else if (result.status === "native-outdated") {
+      // El manifiesto OTA exige un shell más nuevo pero el backend todavía no
+      // publica latest_version: aviso informativo como fallback.
       store.dispatch("ui/toastr/create", {
         message: "Esta actualización requiere instalar la nueva versión desde la tienda.",
         duration: 4000,
       });
+    } else {
+      store.dispatch("ui/toastr/success", "Ya estás usando la última versión.");
     }
-    // "applying": la app se recarga sola con el bundle nuevo, no hay nada que avisar.
   } catch (e) {
     console.warn("[ota] búsqueda manual de actualización falló:", e);
     store.dispatch("ui/toastr/danger", "No pudimos buscar actualizaciones. Intentá más tarde.");
