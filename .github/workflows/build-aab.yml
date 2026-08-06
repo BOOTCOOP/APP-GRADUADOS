@@ -54,6 +54,18 @@ jobs:
           keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
 
+      # Deja la versión a la vista: aparece en el log y en el nombre del
+      # artifact (ej. app-release-aab-1.3.3-vc22), para confirmar qué se
+      # compiló antes de subirlo a Play.
+      - name: Leer versión nativa
+        id: version
+        run: |
+          VC=$(grep -oP 'versionCode \K\d+' android/app/build.gradle)
+          VN=$(grep -oP 'versionName "\K[^"]+' android/app/build.gradle)
+          echo "AAB a compilar: versionName=$VN, versionCode=$VC"
+          echo "code=$VC" >> "$GITHUB_OUTPUT"
+          echo "name=$VN" >> "$GITHUB_OUTPUT"
+
       - name: Build release AAB
         run: ./gradlew bundleRelease
         working-directory: android
@@ -61,6 +73,6 @@ jobs:
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-aab
+          name: app-release-aab-${{ steps.version.outputs.name }}-vc${{ steps.version.outputs.code }}
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
