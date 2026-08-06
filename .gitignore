@@ -32,9 +32,12 @@ npm-debug.log*
 /www
 
 graduados-app.code-workspace
-android/keystore.properties
-android/*.jks
-android/*.keystore
+
+# Firma Android: keystores y credenciales JAMÁS entran al repo,
+# en ninguna ubicación (raíz, android/, android/app/...).
+keystore.properties
+*.jks
+*.keystore
 
 .claude
 .agents
