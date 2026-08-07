@@ -1,6 +1,6 @@
 {
-  "version": "1.3.3",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.3.3.zip",
+  "version": "1.3.4",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.3.4.zip",
   "min_native_version": "1.2.0",
-  "notes": "Aviso de actualización disponible (toast + campanita) y botón Buscar actualizaciones en el menú, con aplicación inmediata"
+  "notes": "Buscar actualizaciones ahora también avisa cuando hay una versión nueva de la app en la tienda"
 }
