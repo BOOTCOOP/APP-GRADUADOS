@@ -23,7 +23,9 @@ name: Build iOS (release, para App Store)
 #   ASC_API_ISSUER_ID  — "ID de emisor" del equipo
 #
 # Cuando el certificado venza (1 año) hay que regenerarlo y actualizar
-# IOS_P12_BASE64 / IOS_P12_PASSWORD / IOS_PROFILE_BASE64.
+# IOS_P12_BASE64 / IOS_P12_PASSWORD / IOS_PROFILE_BASE64. Si además cambia
+# el NOMBRE del profile, actualizar PROFILE_NAME acá y
+# PROVISIONING_PROFILE_SPECIFIER en el target App del pbxproj (Release).
 on:
   workflow_dispatch:
 
@@ -100,6 +102,12 @@ jobs:
           echo "Identidades de firma disponibles:"
           security find-identity -v -p codesigning "$KEYCHAIN"
 
+      # OJO: la firma NO se pasa por línea de comandos. xcodebuild aplica los
+      # build settings del comando a TODOS los targets, y los Pods (Alamofire,
+      # Capacitor, etc.) son librerías que no admiten provisioning profile:
+      # falla con "<Pod> does not support provisioning profiles". La config de
+      # firma vive en el target App del pbxproj (Release: CODE_SIGN_STYLE
+      # Manual + PROVISIONING_PROFILE_SPECIFIER github-actions).
       - name: Archive
         run: |
           xcodebuild archive \
@@ -107,11 +115,7 @@ jobs:
             -scheme App \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -archivePath build/App.xcarchive \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM="$TEAM_ID" \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME"
+            -archivePath build/App.xcarchive
 
       # method app-store-connect + destination upload: exporta y sube en un
       # solo paso; el build aparece en TestFlight al terminar de procesarse.
