@@ -69,13 +69,10 @@
         >
           La empresa
         </div>
-        <div
-          class="tab"
-          :class="{ selected: tab == 'contact' }"
-          @click="tab = 'contact'"
-        >
-          Contacto
-        </div>
+        <!-- No hay solapa "Contacto" a propósito: el teléfono y el mail solo se
+             alcanzan por el botón "Contactar" del pie, que es el que registra la
+             postulación (ver applyAndOpenEmail). Mostrarlos como links acá
+             dejaba escribir el mail sin pasar por ese registro. -->
       </div>
 
       <div class="ion-padding-top ion-margin-top content">
@@ -113,41 +110,6 @@
             <p><strong>Jerarquía: </strong> {{ job.position }}</p>
             <p><strong>Modalidad: </strong> {{ job.modality }}</p>
             <p><strong>Cant. vacantes: </strong> {{ job.vacancies_amount }}</p>
-          </ion-text>
-        </template>
-        <template v-if="tab == 'contact'">
-          <ion-text>
-            <div v-if="job.phone || job.email" class="contact-info">
-              <h4>📞 Información de contacto</h4>
-              <div v-if="job.phone" class="contact-item">
-                <p>
-                  <strong>Teléfono: </strong>
-                  <a :href="`tel:${job.phone}`" class="contact-link">{{
-                    job.phone
-                  }}</a>
-                </p>
-              </div>
-              <div v-if="job.email" class="contact-item">
-                <p>
-                  <strong>Email: </strong>
-                  <a :href="`mailto:${job.email}`" class="contact-link">{{
-                    job.email
-                  }}</a>
-                </p>
-              </div>
-              <p class="contact-note">
-                <small
-                  >Tocá el teléfono o el email para comunicarte directamente, o usá
-                  el botón "Contactar" al pie.</small
-                >
-              </p>
-            </div>
-            <div v-else class="no-contact">
-              <p>
-                ℹ️ No hay información de contacto disponible para esta
-                publicación.
-              </p>
-            </div>
           </ion-text>
         </template>
       </div>
@@ -462,45 +424,5 @@ ion-thumbnail {
 .content {
   font-size: 14px;
   color: var(--ion-color-step-550);
-}
-
-.contact-info {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 8px;
-}
-
-.contact-info h4 {
-  margin: 0 0 12px 0;
-  color: var(--ion-color-primary);
-  font-size: 16px;
-}
-
-.contact-item {
-  margin-bottom: 8px;
-}
-
-.contact-link {
-  color: var(--ion-color-primary);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.contact-link:hover {
-  text-decoration: underline;
-}
-
-.contact-note {
-  margin-top: 12px;
-  padding-top: 8px;
-  border-top: 1px solid #e0e0e0;
-  color: var(--ion-color-medium);
-}
-
-.no-contact {
-  text-align: center;
-  padding: 20px;
-  color: var(--ion-color-medium);
 }
 </style>
