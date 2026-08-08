@@ -8,8 +8,11 @@ name: Build iOS (release, para App Store)
 # Requiere estos secrets del repo (Settings → Secrets → Actions):
 #   ASC_API_KEY_P8    — contenido COMPLETO del archivo AuthKey_XXXXXX.p8
 #                       (App Store Connect → Usuarios y acceso → Integraciones
-#                       → Claves de la API → Generar, con rol App Manager.
-#                       El .p8 se puede descargar UNA sola vez: guardarlo).
+#                       → Claves de la API → Generar, con rol ADMIN — App
+#                       Manager no alcanza: el cloud signing necesita poder
+#                       CREAR el certificado de distribución y el profile, y
+#                       con menos rol falla con "Cloud signing permission
+#                       error". El .p8 se descarga UNA sola vez: guardarlo).
 #   ASC_API_KEY_ID    — el "ID de clave" de esa clave (ej. A1B2C3D4E5)
 #   ASC_API_ISSUER_ID — el "ID de emisor" del equipo (UUID, figura arriba
 #                       de la lista de claves en la misma página)
