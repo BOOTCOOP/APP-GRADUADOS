@@ -60,8 +60,9 @@ jobs:
       - name: Leer versión nativa
         id: version
         run: |
-          VC=$(grep -oP 'versionCode \K\d+' android/app/build.gradle)
-          VN=$(grep -oP 'versionName "\K[^"]+' android/app/build.gradle)
+          # Extract first match only and strip CRLF, to avoid malformed $GITHUB_OUTPUT entries
+          VC=$(grep -oP 'versionCode \K\d+' android/app/build.gradle | head -n1 | tr -d '\r\n')
+          VN=$(grep -oP 'versionName "\K[^"]+' android/app/build.gradle | head -n1 | tr -d '\r\n')
           echo "AAB a compilar: versionName=$VN, versionCode=$VC"
           echo "code=$VC" >> "$GITHUB_OUTPUT"
           echo "name=$VN" >> "$GITHUB_OUTPUT"

@@ -1,0 +1,21 @@
+AndroidManifest extract summary (from app-release.aab)
+
+File inspected: D:\Downloads\app-release-aab\app-release.aab
+Inspection date: 2026-08-07T20:59:33 -03:00 (local run)
+
+Detected values (binary AndroidManifest inside the bundle):
+- package: ar.uba.derecho.graduados
+- versionCode: 22
+- versionName: 1.3.3
+- minSdkVersion: 24
+- compileSdkVersion / platformBuildVersionCode: 36
+- targetSdkVersion: 36
+
+Snippet (partial readable UTF-8 decode around relevant tags):
+  versionCode 22
+  versionName "1.3.3"
+  compileSdkVersion 36 (platformBuildVersionCode 36)
+  minSdkVersion 24
+  targetSdkVersion 36
+
+Note: the manifest inside the AAB is binary XML; the above was extracted by inspecting the bundle entries. The raw binary manifest is available in the bundle and can be provided as base64 if required for Play support evidence.

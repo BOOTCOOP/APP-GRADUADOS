@@ -1,0 +1,25 @@
+Asunto: Solicitud de revisión - cumplimiento Target API level 36
+
+Hola equipo de Google Play,
+
+Subimos una nueva versión de la aplicación "APP-GRADUADOS" que cumple con el requisito de Target API Level 36 (Android 16). Adjuntamos evidencia técnica: el AndroidManifest extraído del App Bundle y los metadatos de la subida.
+
+Detalles de la versión subida:
+- package: ar.uba.derecho.graduados
+- versionName: 1.3.3
+- versionCode: 22
+- Fecha de subida: 6 ago 2026
+- Target API / SDK objetivo: 36
+
+Resumen técnico:
+- El AndroidManifest dentro del AAB muestra targetSdkVersion="36" y compileSdkVersion/platformBuildVersionCode = 36.
+- minSdkVersion = 24.
+
+Solicitamos que se actualice el estado de la app en su sistema de políticas, ya que la versión actualmente publicada cumple con la exigencia técnica de target API level 36.
+
+Adjunto: manifest_info.txt (resumen) y, si lo requieren, puedo adjuntar el AndroidManifest.bin codificado en base64 o el AAB completo.
+
+Gracias y quedamos atentos a cualquier aclaración.
+
+Saludos,
+El equipo de desarrollo
