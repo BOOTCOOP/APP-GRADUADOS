@@ -1,6 +1,6 @@
 {
-  "version": "1.3.4",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.3.4.zip",
+  "version": "1.3.5",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.3.5.zip",
   "min_native_version": "1.2.0",
-  "notes": "Buscar actualizaciones ahora también avisa cuando hay una versión nueva de la app en la tienda"
+  "notes": "El contacto de una búsqueda laboral se hace solo por el botón \"Contactar\""
 }
