@@ -39,5 +39,10 @@ keystore.properties
 *.jks
 *.keystore
 
+# Artefactos de build nativo: los AAB/APK que se bajan de Actions para
+# subir a las tiendas pesan decenas de MB y no van al historial.
+*.aab
+*.apk
+
 .claude
 .agents
