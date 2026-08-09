@@ -1,1 +1,0 @@
-function e(e){if(!e)return null;let t=e.split(/[/-]/),n;return n=t.length===3?t[0].length===4?new Date(parseInt(t[0]),parseInt(t[1])-1,parseInt(t[2])):new Date(parseInt(t[2]),parseInt(t[1])-1,parseInt(t[0])):new Date(e),isNaN(n.getTime())?null:n}export{e as t};
