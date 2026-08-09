@@ -85,6 +85,7 @@ import { useCurrentUser } from "@/uses/currentUser";
 import { useStore } from "vuex";
 import { filterOutline, schoolOutline } from "ionicons/icons";
 import { parseApiDate } from "@/libs/dates";
+import { modalityKind } from "@/utils/modality";
 
 import MyActivities from "./components/MyActivities.vue";
 import Activity from "./components/Activity.vue";
@@ -465,31 +466,12 @@ function categorizeActivity(activity: any): string {
   return "profesional";
 }
 
-// Función para extraer modalidad
+// El listado ahora devuelve `modality` desde el backend; el texto del taller
+// queda solo como fallback para los que no tienen modalidad cargada.
 function extractModality(activity: any): string {
-  const content = activity.content?.toLowerCase() || "";
-  const title = activity.title?.toLowerCase() || "";
-  const fullText = `${title} ${content}`;
+  if (activity.modality) return modalityKind(activity.modality);
 
-  if (
-    fullText.includes("virtual") ||
-    fullText.includes("online") ||
-    fullText.includes("distancia")
-  ) {
-    return "virtual";
-  }
-  if (fullText.includes("presencial") || fullText.includes("aula")) {
-    return "presencial";
-  }
-  if (
-    fullText.includes("híbrida") ||
-    fullText.includes("mixta") ||
-    fullText.includes("combinada")
-  ) {
-    return "hibrida";
-  }
-
-  return "presencial"; // por defecto
+  return modalityKind(`${activity.title ?? ""} ${activity.content ?? ""}`);
 }
 
 // Función para extraer mes

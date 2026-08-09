@@ -34,7 +34,6 @@
     <div v-if="workshop && loaded" class="workshop-detail">
       <header class="workshop-header">
         <div class="workshop-tags">
-          <!-- El listado todavía no devuelve modality, solo el detalle. -->
           <span
             v-if="workshop.modality"
             class="tag tag--modality"
@@ -238,15 +237,16 @@ import {
   schoolOutline,
   exitOutline,
   checkmarkCircleOutline,
-  laptopOutline,
-  locationOutline,
-  swapHorizontalOutline,
 } from 'ionicons/icons'
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import BibliographyItem from '../bibliography/components/BibliographyItem.vue'
 import { parseApiDate } from '@/libs/dates'
+import {
+  modalityKind as resolveModalityKind,
+  modalityIcon as resolveModalityIcon,
+} from '@/utils/modality'
 import SocialShare from '@/components/SocialShare.vue'
 import { useCurrentUser } from '@/uses/currentUser'
 import { useRequireAuth } from '@/uses/requireAuth'
@@ -273,32 +273,8 @@ const workshopAvailable = computed(
     !workshop.value?.registration_closed
 )
 
-// El backend manda la modalidad como texto libre ("Virtual", "Presencial",
-// "Híbrida"...), así que se normaliza por coincidencia y cae en presencial.
-const modalityKind = computed(() => {
-  const modality = (workshop.value?.modality ?? '').toLowerCase()
-  if (
-    modality.includes('virtual') ||
-    modality.includes('online') ||
-    modality.includes('distancia')
-  ) {
-    return 'virtual'
-  }
-  if (
-    modality.includes('brid') ||
-    modality.includes('mixta') ||
-    modality.includes('combinada')
-  ) {
-    return 'hibrida'
-  }
-  return 'presencial'
-})
-
-const modalityIcon = computed(() => {
-  if (modalityKind.value === 'virtual') return laptopOutline
-  if (modalityKind.value === 'hibrida') return swapHorizontalOutline
-  return locationOutline
-})
+const modalityKind = computed(() => resolveModalityKind(workshop.value?.modality))
+const modalityIcon = computed(() => resolveModalityIcon(modalityKind.value))
 
 // El detalle devuelve la fecha ISO (2026-08-20); el listado ya la muestra legible.
 const startLabel = computed(() => {
