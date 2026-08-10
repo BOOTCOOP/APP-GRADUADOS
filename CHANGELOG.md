@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.6] - 2026-08-10
+
+### Added
+- Rediseño del detalle de taller: la información (fechas, modalidad, quiénes exponen, inscripción) se ordena en bloques legibles en vez de un bloque de texto corrido
+- La modalidad (virtual / presencial / híbrida) se muestra en el listado de talleres, con ícono propio. Se normaliza el texto libre que manda el backend ("Virtual", "A distancia", "Mixta"...) en `src/utils/modality.ts`
+- Al recuperar la contraseña se muestra el mail **enmascarado** al que se envió el link (`masked_email` de la API), y un contacto a `graduados@derecho.uba.ar` por si no llega
+
+### Changed
+- Compartir un curso o taller ahora manda título, fecha, modalidad y expositores más el **link público** al ítem; antes cerraba con una referencia inútil ("Taller #2062"). El mensaje se arma en `src/utils/shareMessage.ts` y el link sale de `PUBLIC_WEB_URL` + la ruta, nunca de `window.location.href` (en el shell nativo eso da `capacitor://localhost/...`)
+- Las actividades se ordenan **cronológicamente** por fecha de inicio en vez de por orden de publicación del backend; las que no tienen fecha válida van al final
+- La leyenda de quienes dictan una actividad concuerda en número ("Expone" / "Exponen"), usando `teachers_count` de la API
+
+### Fixed
+- Compartir por WhatsApp desde la web usa `wa.me/?text=`: con `api.whatsapp.com/send` el mensaje llegaba completo en escritorio pero en el celular WhatsApp entregaba **solo el link**, perdiendo título y datos
+
 ## [1.3.5] - 2026-08-08
 
 ### Removed
