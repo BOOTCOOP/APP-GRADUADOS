@@ -86,6 +86,7 @@ import { useStore } from "vuex";
 import { filterOutline, schoolOutline } from "ionicons/icons";
 import { parseApiDate } from "@/libs/dates";
 import { modalityKind } from "@/utils/modality";
+import { sortByStartDate } from "@/utils/activities";
 
 import MyActivities from "./components/MyActivities.vue";
 import Activity from "./components/Activity.vue";
@@ -325,7 +326,8 @@ function clearAllFilters() {
   selectedMonth.value = "all";
 }
 
-// Función de filtrado por búsqueda
+// Función de filtrado por búsqueda. Devuelve siempre la lista ordenada
+// cronológicamente por fecha de inicio (ver sortByStartDate).
 function filteredActivities(items: any[]) {
   let filteredItems = items;
 
@@ -366,7 +368,7 @@ function filteredActivities(items: any[]) {
     });
   }
 
-  return filteredItems;
+  return sortByStartDate(filteredItems);
 }
 
 // Función para categorizar talleres automáticamente

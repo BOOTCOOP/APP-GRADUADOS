@@ -20,7 +20,7 @@
         <ion-list class="ion-margin-top">
           <Activity
             :activity="activity"
-            v-for="activity in items"
+            v-for="activity in sortByStartDate(items, 'desc')"
             :key="activity.id"
           ></Activity>
         </ion-list>
@@ -37,6 +37,9 @@ import { arrowBackOutline } from 'ionicons/icons'
 import Activity from './components/Activity.vue'
 import Skeleton from './Skeleton.vue'
 import InfinitePagination from '../app/components/pagination/InfinitePagination.vue'
+// Historial: mismo orden cronológico que el listado, pero invertido (lo más
+// reciente arriba), que es lo que se espera de un histórico.
+import { sortByStartDate } from '@/utils/activities'
 
 // Filtros para paginación (si son necesarios)
 const filters = ref({})
