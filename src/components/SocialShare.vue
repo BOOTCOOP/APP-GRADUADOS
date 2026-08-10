@@ -42,72 +42,36 @@ import {
 } from "@ionic/vue";
 import { logoWhatsapp, mailOutline, copyOutline } from "ionicons/icons";
 import { Share } from "@capacitor/share";
-
-interface ShareData {
-  title: string;
-  text?: string;
-  url?: string;
-  id?: string | number;
-  type?: "noticia" | "taller" | "curso" | "empleo" | "actividad";
-}
+import { useRoute } from "vue-router";
+import {
+  buildShareEmailBody,
+  buildShareMessage,
+  buildShareUrl,
+  type ShareData,
+} from "@/utils/shareMessage";
 
 const props = defineProps<{
   shareData: ShareData;
 }>();
 
-const generateShareText = (): string => {
-  const { title, text, type, id } = props.shareData;
-  const typeText = type ? getTypeText(type) : "";
-  let baseText = `${typeText}${title}`;
+const route = useRoute();
 
-  if (text) {
-    // Limitar texto a 100 caracteres para WhatsApp
-    const shortText = text.length > 100 ? text.substring(0, 97) + "..." : text;
-    baseText = `${baseText}\n\n${shortText}`;
-  }
-
-  // Agregar referencia al ID en lugar de URL
-  if (id) {
-    const typeLabel = getTypeLabelForId(type);
-    baseText = `${baseText}\n\n${typeLabel} #${id}`;
-  }
-
-  return baseText;
-};
-
-const getTypeLabelForId = (type: string | undefined): string => {
-  const typeMap: Record<string, string> = {
-    noticia: "Noticia",
-    taller: "Taller",
-    curso: "Curso",
-    empleo: "Oferta laboral",
-    actividad: "Actividad",
-  };
-  return typeMap[type || ""] || "Contenido";
-};
-
-const getTypeText = (type: string): string => {
-  const typeMap: Record<string, string> = {
-    noticia: "📰 Noticia: ",
-    taller: "🎓 Taller: ",
-    curso: "📚 Curso: ",
-    empleo: "💼 Empleo: ",
-    actividad: "🎯 Actividad: ",
-  };
-  return typeMap[type] || "📱 ";
-};
-
-const getCurrentUrl = (): string => {
-  return props.shareData.url || window.location.href;
-};
+/**
+ * Link público del contenido. Si la vista no pasa `url` ni `path` alcanza con la
+ * ruta actual del router (`/taller/2062`), que es la misma en la web y en el
+ * shell nativo.
+ */
+const getShareUrl = (): string => buildShareUrl(props.shareData, route.path);
 
 const shareWhatsApp = async () => {
-  const text = generateShareText();
+  const url = getShareUrl();
+  const text = buildShareMessage(props.shareData, url);
 
   // Verificar si estamos en dispositivo móvil con Capacitor
   if (isPlatform("capacitor")) {
     try {
-      // Usar API nativa de Capacitor Share
+      // Usar API nativa de Capacitor Share. El link ya viene dentro de `text`:
+      // pasarlo también en `url` lo duplicaría (Android concatena texto + url).
       await Share.share({
         title: props.shareData.title,
         text: text,
@@ -147,12 +111,11 @@ const fallbackWhatsAppShare = (text: string) => {
 };
 
 const shareEmail = () => {
-  const { title, text } = props.shareData;
-  const subject = encodeURIComponent(`Facultad de Derecho - ${title}`);
+  const subject = encodeURIComponent(
+    `Facultad de Derecho - ${props.shareData.title}`
+  );
   const body = encodeURIComponent(
-    `Hola,\n\nTe comparto esta información de la Facultad de Derecho:\n\n${title}\n\n${
-      text || ""
-    }\n\nVer más: ${getCurrentUrl()}\n\n--\nCentro de Graduados - Facultad de Derecho UBA`
+    buildShareEmailBody(props.shareData, getShareUrl())
   );
 
   const mailtoUrl = `mailto:?subject=${subject}&body=${body}`;
@@ -161,11 +124,11 @@ const shareEmail = () => {
 
 const copyLink = async () => {
   try {
-    const textToCopy = generateShareText();
+    const textToCopy = buildShareMessage(props.shareData, getShareUrl());
     await navigator.clipboard.writeText(textToCopy);
 
     const toast = await toastController.create({
-      message: "¡Texto copiado al portapapeles!",
+      message: "¡Texto y enlace copiados al portapapeles!",
       duration: 2000,
       position: "bottom",
       color: "success",

@@ -49,6 +49,28 @@ export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_PHONE}`
 /** Casilla de consultas del Centro (soporte de cuentas, mails que no llegan). */
 export const GRADUADOS_EMAIL = 'graduados@derecho.uba.ar'
 
+/**
+ * Base de la app web pública (GitHub Pages, la misma base `/APP-GRADUADOS/` que
+ * arma `vite.config.ts` para el build web).
+ *
+ * Es el origen de TODO link que se comparte hacia afuera. `window.location.href`
+ * no sirve para eso: en el shell nativo la app se sirve desde el WebView, así que
+ * la URL es `capacitor://localhost/taller/2062` (iOS) o `http://localhost/...`
+ * (Android) y no abre nada en el teléfono de quien recibe el mensaje. La web
+ * pública, en cambio, resuelve para cualquiera, tenga o no la app instalada.
+ */
+export const PUBLIC_WEB_URL = 'https://bootcoop.github.io/APP-GRADUADOS'
+
+/**
+ * Convierte una ruta interna del router (`/taller/2062`) en un link público
+ * compartible. Las rutas que llegan acá son las de `src/router/index.ts`: el
+ * router ya descuenta la base, así que solo hay que prefijarla de nuevo.
+ */
+export function publicUrl(path = '/'): string {
+  const withSlash = path.startsWith('/') ? path : `/${path}`
+  return `${PUBLIC_WEB_URL}${withSlash === '/' ? '' : withSlash}`
+}
+
 export const FACEBOOK_URL = 'https://www.facebook.com/Centrodegraduadasygraduados'
 export const TWITTER_URL = 'https://x.com/graduadodchouba'
 export const INSTAGRAM_URL = 'https://www.instagram.com/centrodegraduados'
