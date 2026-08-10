@@ -52,7 +52,7 @@
         <h1 class="workshop-title">{{ workshop.title }}</h1>
         <p class="workshop-teachers" v-if="workshop.teachers">
           <ion-icon :icon="personCircleOutline" aria-hidden="true"></ion-icon>
-          {{ workshop.teachers }}
+          <span><strong>{{ teachersLabelText }}:</strong> {{ workshop.teachers }}</span>
         </p>
       </header>
 
@@ -211,7 +211,7 @@
       v-if="workshop && loaded"
       :share-data="{
         title: workshop.title,
-        text: `${workshop.teachers ? 'Docentes: ' + workshop.teachers + ' - ' : ''}${workshop.start ? 'Inicio: ' + workshop.start : ''}`,
+        text: `${workshop.teachers ? teachersLabelText + ': ' + workshop.teachers + ' - ' : ''}${workshop.start ? 'Inicio: ' + workshop.start : ''}`,
         type: 'taller'
       }"
     />
@@ -247,6 +247,7 @@ import {
   modalityKind as resolveModalityKind,
   modalityIcon as resolveModalityIcon,
 } from '@/utils/modality'
+import { teachersLabel } from '@/utils/teachers'
 import SocialShare from '@/components/SocialShare.vue'
 import { useCurrentUser } from '@/uses/currentUser'
 import { useRequireAuth } from '@/uses/requireAuth'
@@ -275,6 +276,11 @@ const workshopAvailable = computed(
 
 const modalityKind = computed(() => resolveModalityKind(workshop.value?.modality))
 const modalityIcon = computed(() => resolveModalityIcon(modalityKind.value))
+
+// "Expone" / "Exponen" según cuántos sean (antes: "Docente" / "Docentes").
+const teachersLabelText = computed(() =>
+  teachersLabel(workshop.value?.teachers_count, workshop.value?.teachers)
+)
 
 // El detalle devuelve la fecha ISO (2026-08-20); el listado ya la muestra legible.
 const startLabel = computed(() => {

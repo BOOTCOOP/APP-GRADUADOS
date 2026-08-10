@@ -40,12 +40,12 @@ describe('buildShareMessage', () => {
 
   it('cierra con la invitación y el link en su propia línea', () => {
     const mensaje = buildShareMessage(
-      { title: 'Mala Praxis', text: 'Docentes: Teresa Salvatierra', type: 'taller' },
+      { title: 'Mala Praxis', text: 'Expone: Teresa Salvatierra', type: 'taller' },
       url
     )
 
     expect(mensaje).toContain('🎓 Taller: Mala Praxis')
-    expect(mensaje).toContain('Docentes: Teresa Salvatierra')
+    expect(mensaje).toContain('Expone: Teresa Salvatierra')
     expect(mensaje.endsWith(`Mirá el detalle e inscribite acá:\n${url}`)).toBe(true)
   })
 

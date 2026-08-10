@@ -6,7 +6,7 @@
         tabindex="0"
         @keydown.enter="showDetail"
         @keydown.space="showDetail"
-        :aria-label="`Taller: ${activity.title}. ${activity.modality ? 'Modalidad: ' + activity.modality + '. ' : ''}Docentes: ${activity.teachers || 'Por confirmar'}. Inicio: ${formatDate(activity.start)}`"
+        :aria-label="`Taller: ${activity.title}. ${activity.modality ? 'Modalidad: ' + activity.modality + '. ' : ''}${teachersText}. Inicio: ${formatDate(activity.start)}`"
     >
         <ion-card-content>
             <!-- Etiquetas: modalidad, estado de inscripción y disponibilidad -->
@@ -62,7 +62,7 @@
             <ul class="activity-meta" aria-label="Detalles del taller">
                 <li>
                     <ion-icon :icon="personCircleOutline" aria-hidden="true"></ion-icon>
-                    <span>{{ activity.teachers || 'Docentes por confirmar' }}</span>
+                    <span>{{ teachersText }}</span>
                 </li>
                 <li>
                     <ion-icon :icon="calendarOutline" aria-hidden="true"></ion-icon>
@@ -105,11 +105,13 @@ import {
     modalityKind as resolveModalityKind,
     modalityIcon as resolveModalityIcon,
 } from '@/utils/modality';
+import { teachersLabel } from '@/utils/teachers';
 
 interface ActivityItem {
     id: string | number;
     title?: string;
     teachers?: string;
+    teachers_count?: number;
     start?: string;
     beginning?: string;
     modality?: string;
@@ -144,6 +146,13 @@ const inscriptionStatus = computed(() => props.inscribed?.inscriptions?.[0]?.sta
 
 const modalityKind = computed(() => resolveModalityKind(props.activity.modality));
 const modalityIcon = computed(() => resolveModalityIcon(modalityKind.value));
+
+// "Expone: Juan Pérez" / "Exponen: Juan Pérez, María Gómez" (antes: "Docentes").
+const teachersText = computed(() => {
+    const label = teachersLabel(props.activity.teachers_count, props.activity.teachers);
+
+    return `${label}: ${props.activity.teachers || 'a confirmar'}`;
+});
 
 // Motivo por el que ya no se puede inscribir (null = disponible). Si el usuario
 // está inscripto, el estado de inscripción manda y no mostramos este badge.
