@@ -46,6 +46,9 @@ export const WHATSAPP_PHONE = '5491138315897'
  */
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_PHONE}`
 
+/** Casilla de consultas del Centro (soporte de cuentas, mails que no llegan). */
+export const GRADUADOS_EMAIL = 'graduados@derecho.uba.ar'
+
 export const FACEBOOK_URL = 'https://www.facebook.com/Centrodegraduadasygraduados'
 export const TWITTER_URL = 'https://x.com/graduadodchouba'
 export const INSTAGRAM_URL = 'https://www.instagram.com/centrodegraduados'
@@ -68,4 +71,10 @@ export function openYoutubeChannel(): void {
 /** Atención y consultas: abre el chat en la app de WhatsApp. */
 export function openWhatsapp(): void {
   openExternal(WHATSAPP_URL)
+}
+
+/** Consultas por mail: abre el cliente de correo con la casilla del Centro. */
+export function openGraduadosMail(subject?: string): void {
+  const query = subject ? `?subject=${encodeURIComponent(subject)}` : ''
+  openExternal(`mailto:${GRADUADOS_EMAIL}${query}`)
 }

@@ -44,9 +44,20 @@
             message="Te enviamos un email con un enlace para crear una nueva contraseña. Puede tardar unos minutos en llegar."
         >
             <template #details>
+                <!-- El mail va enmascarado: alcanza para saber a qué casilla mirar
+                     sin mostrar la dirección completa en pantalla. -->
+                <div v-if="maskedEmail" class="sent-to">
+                    <ion-icon :icon="mailOutline" aria-hidden="true"></ion-icon>
+                    <span>Enviado a <strong>{{ maskedEmail }}</strong></span>
+                </div>
+
                 <div class="spam-note">
                     <ion-icon :icon="informationCircleOutline" aria-hidden="true"></ion-icon>
-                    <span>Si no lo encontrás, revisá la carpeta de spam o correo no deseado.</span>
+                    <span>
+                        Si no lo encontrás, revisá la carpeta de spam o correo no deseado.
+                        Si aun así no te llega, escribinos a
+                        <a href="#" @click.prevent="openSupportMail">{{ GRADUADOS_EMAIL }}</a>.
+                    </span>
                 </div>
             </template>
         </SuccessState>
@@ -73,13 +84,14 @@
 
 <script setup lang="ts">
     import { IonButton, IonInput, IonItem, IonLabel, IonIcon, IonSpinner } from '@ionic/vue';
-    import { lockClosedOutline, alertCircleOutline, informationCircleOutline } from 'ionicons/icons';
+    import { lockClosedOutline, alertCircleOutline, informationCircleOutline, mailOutline } from 'ionicons/icons';
     import{ ref } from 'vue';
     import { useIonRouter } from '@ionic/vue';
     import { useRoute } from 'vue-router';
     import { useAuth } from '@/uses/auth';
     import { Form, Field, ErrorMessage } from "vee-validate";
     import SuccessState from '@/components/SuccessState.vue';
+    import { GRADUADOS_EMAIL, openGraduadosMail } from '@/uses/externalLinks';
 
     const ionRouter = useIonRouter();
     const route = useRoute();
@@ -88,8 +100,13 @@
         ionRouter.navigate({ name: 'login', query: { redirect: route.query.redirect } }, 'forward', 'replace');
     }
 
+    function openSupportMail(){
+        openGraduadosMail('No recibí el mail para recuperar mi contraseña');
+    }
+
     const dni = ref('')
     const sent = ref(false)
+    const maskedEmail = ref('')
     const form = ref<any>(null);
     const sending = ref(false)
 
@@ -99,8 +116,10 @@
         form.value.validate().then( v => {
             if(v.valid){
                 sending.value = true;
-                // forgot-password devuelve 200 siempre (no revela si el DNI existe).
-                useAuth().forgotPassword(dni.value).then(() => {
+                // forgot-password devuelve 200 siempre (no revela si el DNI existe);
+                // masked_email viene null cuando no hay a quién mandarle el link.
+                useAuth().forgotPassword(dni.value).then((res: any) => {
+                    maskedEmail.value = res?.masked_email || '';
                     sent.value = true;
                 }).catch(() => {
                     form.value.setErrors({dni: "Hubo un error"});
@@ -164,6 +183,31 @@
         color: var(--app-text-secondary);
     }
 
+    .sent-to {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--app-spacing-sm);
+        margin-bottom: var(--app-spacing-sm);
+        padding: var(--app-spacing-sm) var(--app-spacing-md);
+        border-radius: var(--app-radius-sm);
+        background: var(--app-primary-soft);
+        font-size: 14px;
+        color: var(--app-text-body);
+        /* El mail enmascarado puede ser largo: que corte en vez de desbordar. */
+        overflow-wrap: anywhere;
+    }
+
+    .sent-to ion-icon {
+        font-size: 18px;
+        color: var(--ion-color-primary);
+        flex-shrink: 0;
+    }
+
+    .sent-to strong {
+        color: var(--app-text-title);
+    }
+
     .spam-note {
         display: flex;
         align-items: flex-start;
@@ -183,6 +227,14 @@
         color: var(--ion-color-primary);
         flex-shrink: 0;
         margin-top: 1px;
+    }
+
+    .spam-note a {
+        color: var(--ion-color-primary);
+        font-weight: 600;
+        text-decoration: none;
+        /* El mail no debe partirse a la mitad del dominio. */
+        white-space: nowrap;
     }
 
     .btn-spinner {

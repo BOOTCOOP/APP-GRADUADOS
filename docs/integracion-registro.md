@@ -100,7 +100,7 @@ El token se usa igual que hoy: header `Authorization: Bearer {accessToken}`.
 ### 6. `POST /api/auth/forgot-password` y `POST /api/auth/reset-password`
 Reset **por DNI** (el link se manda al mail del legacy).
 
-- `forgot-password` → **Request:** `{ "dni": "30111222" }` — **Response 200** siempre (no revela si el DNI existe).
+- `forgot-password` → **Request:** `{ "dni": "30111222" }` — **Response 200** siempre (no distingue error de éxito), con `{ "masked_email": "l****@g***.com" }` para mostrar a qué casilla se mandó el link, o `{ "masked_email": null }` si el DNI no existe o no tiene mail.
 - `reset-password` → **Request:** `{ "dni": "...", "token": "...", "password": "...", "password_confirmation": "..." }` — **200** ok / **422** token inválido o validación.
 
 ### 7. Perfil (post-login)
