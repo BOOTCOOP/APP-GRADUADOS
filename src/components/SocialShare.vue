@@ -43,6 +43,7 @@ import {
 import { logoWhatsapp, mailOutline, copyOutline } from "ionicons/icons";
 import { Share } from "@capacitor/share";
 import { useRoute } from "vue-router";
+import { whatsappShareUrl } from "@/uses/externalLinks";
 import {
   buildShareEmailBody,
   buildShareMessage,
@@ -83,11 +84,9 @@ const shareWhatsApp = async () => {
       fallbackWhatsAppShare(text);
     }
   } else {
-    // Web: usar WhatsApp Web
-    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
-      text
-    )}`;
-    window.open(whatsappWebUrl, "_blank");
+    // Web (incluye el navegador del celular): wa.me abre la app con el mensaje
+    // cargado. Ver whatsappShareUrl(): api.whatsapp.com entregaba solo el link.
+    window.open(whatsappShareUrl(text), "_blank");
   }
 };
 
@@ -105,8 +104,7 @@ const fallbackWhatsAppShare = (text: string) => {
     window.location.href = whatsappUrl;
   } else {
     // Web fallback
-    const whatsappWebUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
-    window.open(whatsappWebUrl, "_blank");
+    window.open(whatsappShareUrl(text), "_blank");
   }
 };
 

@@ -46,6 +46,21 @@ export const WHATSAPP_PHONE = '5491138315897'
  */
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_PHONE}`
 
+/**
+ * Link para compartir un texto por WhatsApp, sin destinatario fijo (lo elige la
+ * persona en la app).
+ *
+ * Misma regla que arriba, y por el mismo motivo: `wa.me` es App Link / Universal
+ * Link, así que en el celular el SO abre WhatsApp con el mensaje ya cargado.
+ * `api.whatsapp.com/send` —que era lo que usaba el botón de compartir— mete una
+ * página intermedia ("Continuar al chat") que en Android rearma el mensaje y en
+ * la práctica entregaba SOLO el link del final, perdiendo título y datos. En
+ * escritorio los dos funcionan, así que el bug solo se veía en el teléfono.
+ */
+export function whatsappShareUrl(text: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(text)}`
+}
+
 /** Casilla de consultas del Centro (soporte de cuentas, mails que no llegan). */
 export const GRADUADOS_EMAIL = 'graduados@derecho.uba.ar'
 

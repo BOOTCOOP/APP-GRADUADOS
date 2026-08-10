@@ -3,7 +3,7 @@ import {
   buildShareMessage,
   buildShareUrl,
 } from '@/utils/shareMessage'
-import { PUBLIC_WEB_URL } from '@/uses/externalLinks'
+import { PUBLIC_WEB_URL, whatsappShareUrl } from '@/uses/externalLinks'
 
 describe('buildShareUrl', () => {
   it('usa la ruta actual del router y la vuelve pública', () => {
@@ -61,6 +61,21 @@ describe('buildShareMessage', () => {
 
     expect(mensaje).toContain(`${'a'.repeat(97)}...`)
     expect(mensaje).not.toContain('a'.repeat(101))
+  })
+})
+
+describe('whatsappShareUrl', () => {
+  // El botón de WhatsApp tiene que salir por wa.me: api.whatsapp.com mete una
+  // página intermedia que en Android entregaba solo el link del mensaje.
+  it('usa wa.me y conserva los saltos de línea del mensaje', () => {
+    const link = whatsappShareUrl('🎓 Taller: Mala Praxis\n\nVer: https://x.test/a')
+
+    expect(link.startsWith('https://wa.me/?text=')).toBe(true)
+    expect(link).not.toContain('api.whatsapp.com')
+    expect(link).toContain('%0A%0A')
+    expect(decodeURIComponent(link.replace('https://wa.me/?text=', ''))).toBe(
+      '🎓 Taller: Mala Praxis\n\nVer: https://x.test/a'
+    )
   })
 })
 
