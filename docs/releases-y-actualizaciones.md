@@ -62,11 +62,13 @@ Ejemplo, que es exactamente cómo se encadena: tienda `1.3.5` → OTA `1.3.6` �
 
 Estado actual (2026-08-11):
 
-- `package.json`: `1.3.7` — realineado con la nativa para el release de tienda
+- `package.json`: `2.0.1` — realineado con las nativas para el release de tienda
 - `public/ota/latest.json`: `1.3.6` — último OTA publicado
-- Android: `versionName "1.3.7"` / `versionCode 24`, hoy en **Prueba interna**; producción sigue en `1.3.3` / `23` hasta que se promueva
-- iOS: `MARKETING_VERSION 1.3.7` / `CURRENT_PROJECT_VERSION 6`. El build 1.3.3 (5) quedó en TestFlight sin enviarse nunca a revisión, así que 1.3.7 lo supera y no hay nada que hacer con él
-- El release de tienda tomó `1.3.7` y no `1.3.6` porque `1.3.6` ya se había consumido como OTA. El **próximo OTA arranca en `1.3.8`**.
+- Android: `versionName "2.0.1"` / `versionCode 25`. En Play, producción está en `1.3.3` / `23` y Prueba interna en `1.3.7` / `24` (ese AAB queda descartado por el renumerado)
+- iOS: `MARKETING_VERSION 2.0.1` / `CURRENT_PROJECT_VERSION 7`
+- El **próximo OTA arranca en `2.0.2`**.
+
+⚠️ **Por qué el salto de 1.3.x a 2.0.1.** El App Store tiene publicada una versión **2.0** creada el 18/7/2026 que **no salió de este repo** (el repo nunca pasó de 1.3.x; se descubrió el 11/8/2026 con el diagnóstico del workflow "Publicar versión pendiente"). Como la línea de versiones es única y compartida entre OTA, Android e iOS, y tiene que crecer siempre por encima de lo publicado, la única salida coherente era subir las tres por encima de 2.0. Lección: **una publicación hecha fuera del repo desincroniza el versionado de todo el proyecto**, y no se detecta hasta que una tienda rechaza algo. Ya había pasado en Android con el `versionCode` (Play en 21 mientras el repo decía 15).
 
 Reglas:
 
