@@ -60,12 +60,13 @@ Ejemplo, que es exactamente cómo se encadena: tienda `1.3.5` → OTA `1.3.6` �
 
 ⚠️ Corolario, y es la trampa fácil: **`package.json` y la versión nativa tienen que salir iguales del mismo build de tienda.** Alimentan comparaciones distintas — `package.json` es la versión del bundle (comparación OTA) y `versionName`/`MARKETING_VERSION` es la que devuelve `App.getInfo()` (comparación de `min_native_version` y de `latest_version` del backend). Si el build de tienda va con la nativa atrasada respecto de `package.json`, `checkStoreUpdate()` compara la nativa vieja contra `latest_version` y le ofrece "ir a la tienda" a alguien que **ya tiene lo último instalado**, sin salida posible.
 
-Estado actual (2026-08-10):
+Estado actual (2026-08-11):
 
-- `package.json`: `1.3.5` — último OTA publicado (`public/ota/latest.json`)
-- Android: `versionName "1.3.3"` / `versionCode 23`
+- `package.json`: `1.3.7` — realineado con la nativa para el release de tienda
+- `public/ota/latest.json`: `1.3.6` — último OTA publicado
+- Android: `versionName "1.3.7"` / `versionCode 24`, hoy en **Prueba interna**; producción sigue en `1.3.3` / `23` hasta que se promueva
 - iOS: `MARKETING_VERSION 1.3.3` / `CURRENT_PROJECT_VERSION 5`
-- Las nativas quedaron en `1.3.3` porque `1.3.4` y `1.3.5` salieron solo por OTA. El **próximo release de tienda arranca en `1.3.6`** (o más), no en `1.3.5`.
+- El release de tienda tomó `1.3.7` y no `1.3.6` porque `1.3.6` ya se había consumido como OTA. El **próximo OTA arranca en `1.3.8`**.
 
 Reglas:
 
@@ -163,7 +164,7 @@ Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Las fichas de
    npm run build:native
    npx cap sync
    ```
-3. **Android** — dos caminos:
+3. **Android** — dos caminos (el paso a paso de lo que hace el humano en cada pantalla está en [Android: del workflow a producción](#android-del-workflow-a-producción-lo-que-hace-el-humano)):
    - **GitHub Actions (recomendado, no requiere Android Studio)**: pestaña Actions → workflow **"Build AAB (release, para Play Store)"** → Run workflow → elegir la **pista** (por defecto `internal`) → el AAB se compila y se **sube solo a Play Console**; el artifact `app-release-aab` queda igual como respaldo. Es el equivalente Android de lo que el workflow de iOS ya hace con TestFlight. Requiere los secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` y, para la subida, `PLAY_SERVICE_ACCOUNT_JSON` (ver comentario del workflow). El keystore es la **upload key** (Play App Signing custodia la clave final); backup del `.jks` fuera del repo — jamás commitearlo (`.gitignore` ya lo cubre).
    - **Local**: `npx cap open android` y en Android Studio: Build → Generate Signed Bundle (usa `android/keystore.properties`) → subir a Play Console.
 
@@ -181,6 +182,30 @@ Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Las fichas de
      En Xcode: Product → **Archive** → subir a **App Store Connect**.
 5. **Tag y changelog**: tag de release con la versión nativa, entrada en `CHANGELOG.md`.
 6. **Revisión de tiendas**: horas (Google) / 1-2 días (Apple).
+
+---
+
+## Android: del workflow a producción (lo que hace el humano)
+
+El workflow deja el AAB en **Prueba interna** y ahí termina la automatización: de la pista interna a producción todo pasa por la consola. Siete pasos, ninguno opcional.
+
+1. **Correr el workflow**: Actions → **"Build AAB (release, para Play Store)"** → *Run workflow* → branch **master**, pista **`internal`**.
+2. **Confirmar la versión en el log**: el paso *"Leer versión nativa"* imprime `AAB a compilar: versionName=X, versionCode=N`. Si no es la versión que se bumpeó, cortar ahí — no seguir con un número equivocado, porque el `versionCode` se consume aunque el release después se descarte.
+3. **Verificar la pista interna**: Probar y publicar → Pruebas → **Prueba interna**. El resumen del canal tiene que decir *Activo · Última versión: X*, y la versión, *"Disponible para testers internos"*.
+4. **Instalarla como tester interno** (pestaña *Testers* → link de descarga). No es opcional cuando el release consolida JS que hasta entonces solo viajó por OTA: es la primera vez que ese JS corre compilado dentro del shell nativo, y un OTA no puede rescatar un shell que no arranca.
+5. **Promover a producción**: en la versión de la pista interna → **"Promocionar versión" → Producción** → escribir las notas ("Novedades de esta versión") → elegir el porcentaje de lanzamiento → revisar y publicar. La promoción reusa el mismo bundle: no hay build nuevo ni `versionCode` nuevo.
+6. **Promover también a Prueba cerrada** si esa pista se usa; es el mismo botón. Si no se usa, dejarla **vacía** es mejor que dejarla con un bundle viejo (ver la advertencia del paso 3 del proceso de release). Que la interna quede sin versión activa después de promover no es problema: una pista sin versiones no incumple nada.
+7. **Confirmar la publicación**: la revisión de Google tarda horas → *"Disponible en Google Play"*. En **Últimas versiones y app bundles** el bundle nuevo tiene que quedar **Activo** y el anterior **Inactivo**.
+
+### Cuando algo sale mal
+
+| Síntoma | Causa y salida |
+|---|---|
+| `Version code N has already been used` | El `versionCode` tiene que superar el más alto que exista en Play **contando las pistas de prueba**, no solo producción. Mirar *Últimas versiones y app bundles* y volver a bumpear. |
+| 403 al subir, con los permisos ya dados en la consola | Los permisos de la cuenta de servicio tardan en propagar. Esperar y reintentar la misma corrida, sin cambiar nada. |
+| Se quiere el mismo bundle en otra pista | **No** volver a correr el workflow apuntando a esa pista: Play rechaza el `versionCode` repetido y el build falla recién al final. Se usa **"Promocionar versión"**. |
+| Una pista de prueba quedó con un bundle viejo | **"Pausar canal" NO desactiva el bundle** — verificado en agosto de 2026: más de una hora después de pausar, el explorador seguía marcando los bundles 15 y 16 como Activo. Lo único que saca un bundle de una pista es que una versión nueva lo supere ahí: promover el actual, o crear una versión con **"Agregar desde la biblioteca"** eligiendo un bundle ya subido. |
+| El aviso de nivel de API objetivo sigue visible | Google re-evalúa con lag: puede tardar horas o días desde que la última pista quedó al día. Si pasa una semana, ticket a soporte de Play. |
 
 ---
 
@@ -237,3 +262,4 @@ Antes de dar por publicado un release (tienda u OTA):
 - [ ] **`latest.json` consistente**: `version` = la del zip, `url` apunta al asset del release `bundle-x.y.z` (o al zip en `public/ota/`), `min_native_version` correcto.
 - [ ] **Tag creado**: `bundle-x.y.z` para OTA, versión nativa para tienda.
 - [ ] **Retrocompatibilidad con la API** pensada (o `min_version` del backend actualizado si se rompe).
+- [ ] **Ninguna pista de prueba con un bundle viejo** (solo Android): en *Últimas versiones y app bundles* el único **Activo** debe ser el release actual. Play cuenta las pistas de prueba para el requisito de nivel de API objetivo, así que una pista congelada marca la app como incumplidora aunque producción esté al día.
