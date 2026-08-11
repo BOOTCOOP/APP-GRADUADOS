@@ -1,0 +1,163 @@
+name: Enviar iOS a revisión (App Store)
+
+# Toma un build YA subido a App Store Connect (lo sube el workflow "Build iOS"),
+# lo adjunta a una versión nueva de la ficha, le carga las novedades y la manda
+# a revisión. Con "Publicar al aprobarse" sale a la tienda sola cuando Apple la
+# aprueba, sin volver a entrar a la consola.
+#
+# La revisión de Apple (1-2 días) es obligatoria: no existe publicar sin ella.
+#
+# Se usa de dos formas:
+#   - Encadenado: el workflow "Build iOS" lo llama al terminar si se tildó
+#     "Además de subir, mandar a revisión" (un solo click de punta a punta).
+#   - Suelto: Actions → este workflow → Run workflow. Sirve para mandar a
+#     revisión un build que ya está en TestFlight, o para reenviar después de
+#     un rechazo, sin recompilar nada.
+#
+# Corre en Linux (no hace falta macOS: no compila, solo habla con la API).
+#
+# Las novedades salen de fastlane/release-notes.txt salvo que se pasen por
+# input — ese archivo es lo que van a LEER los usuarios en la tienda, así que
+# se actualiza junto con el bump de versión.
+#
+# Requiere los mismos secrets ASC_* que el workflow de build:
+#   ASC_API_KEY_P8 / ASC_API_KEY_ID / ASC_API_ISSUER_ID
+# El rol App Manager alcanza: puede editar la ficha y enviar a revisión.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versión (vacío = MARKETING_VERSION del proyecto iOS)'
+        type: string
+        required: false
+      build_number:
+        description: 'Build (vacío = CURRENT_PROJECT_VERSION del proyecto iOS)'
+        type: string
+        required: false
+      release_notes:
+        description: 'Novedades (vacío = fastlane/release-notes.txt)'
+        type: string
+        required: false
+      auto_release:
+        description: 'Publicar automáticamente al aprobarse'
+        type: boolean
+        default: true
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: false
+      build_number:
+        type: string
+        required: false
+      release_notes:
+        type: string
+        required: false
+      auto_release:
+        type: boolean
+        default: true
+    secrets:
+      ASC_API_KEY_P8:
+        required: true
+      ASC_API_KEY_ID:
+        required: true
+      ASC_API_ISSUER_ID:
+        required: true
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # La versión y el build se leen del proyecto iOS para que sean
+      # exactamente los del archive hecho desde este mismo commit.
+      - name: Resolver versión, build y novedades
+        id: datos
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_BUILD_NUMBER: ${{ inputs.build_number }}
+          INPUT_RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          PBXPROJ=ios/App/App.xcodeproj/project.pbxproj
+
+          version="$INPUT_VERSION"
+          if [ -z "$version" ]; then
+            version=$(grep -m1 'MARKETING_VERSION' "$PBXPROJ" | sed 's/.*= *//; s/;//' | tr -d ' ')
+          fi
+
+          build="$INPUT_BUILD_NUMBER"
+          if [ -z "$build" ]; then
+            build=$(grep -m1 'CURRENT_PROJECT_VERSION' "$PBXPROJ" | sed 's/.*= *//; s/;//' | tr -d ' ')
+          fi
+
+          notas="$INPUT_RELEASE_NOTES"
+          if [ -z "$notas" ]; then
+            if [ ! -f fastlane/release-notes.txt ]; then
+              echo "::error::No hay novedades: pasá el input release_notes o creá fastlane/release-notes.txt"; exit 1
+            fi
+            notas=$(cat fastlane/release-notes.txt)
+          fi
+          if [ -z "$(echo "$notas" | tr -d '[:space:]')" ]; then
+            echo "::error::Las novedades están vacías. Apple rechaza el envío sin el texto de \"Novedades de esta versión\""; exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+          {
+            echo 'APP_RELEASE_NOTES<<FIN_DE_LAS_NOVEDADES'
+            echo "$notas"
+            echo 'FIN_DE_LAS_NOVEDADES'
+          } >> "$GITHUB_ENV"
+
+          # El proceso de release pide realinear package.json con la versión
+          # nativa. Si están desfasadas, la de la tienda es la del proyecto iOS.
+          pkg=$(node -p "require('./package.json').version")
+          if [ "$pkg" != "$version" ]; then
+            echo "::warning::package.json está en $pkg y el proyecto iOS en $version — se envía $version"
+          fi
+
+          {
+            echo "### Envío a revisión"
+            echo "- Versión: **$version** (build $build)"
+            echo "- Publicar al aprobarse: **${{ inputs.auto_release }}**"
+            echo ""
+            echo "Novedades:"
+            echo '```'
+            echo "$notas"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      # Sin pin de versión a propósito: fastlane sigue la API de App Store
+      # Connect, que Apple cambia sin avisar, y una versión vieja pinneada
+      # falla justo cuando hay que publicar.
+      - name: Instalar fastlane
+        run: gem install fastlane --no-document
+
+      - name: Enviar a revisión
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+          APP_VERSION: ${{ steps.datos.outputs.version }}
+          APP_BUILD_NUMBER: ${{ steps.datos.outputs.build }}
+          APP_AUTO_RELEASE: ${{ inputs.auto_release }}
+          FASTLANE_SKIP_UPDATE_CHECK: 'true'
+          FASTLANE_HIDE_CHANGELOG: 'true'
+        run: |
+          if [ -z "$ASC_API_KEY_P8" ] || [ -z "$ASC_API_KEY_ID" ] || [ -z "$ASC_API_ISSUER_ID" ]; then
+            echo "::error::Faltan los secrets ASC_API_KEY_P8 / ASC_API_KEY_ID / ASC_API_ISSUER_ID"; exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/private_keys"
+          export ASC_API_KEY_PATH="$RUNNER_TEMP/private_keys/AuthKey_$ASC_API_KEY_ID.p8"
+          printf '%s' "$ASC_API_KEY_P8" > "$ASC_API_KEY_PATH"
+
+          fastlane ios submit

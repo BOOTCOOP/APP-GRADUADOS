@@ -30,6 +30,48 @@ if (!version || typeof version !== "string") {
   abort("package.json no tiene un campo \"version\" válido.");
 }
 
+// --- Validación de la versión contra el último OTA publicado -----------------
+// OTA y tienda comparten una única línea de versiones siempre creciente: la app
+// compara la versión del manifiesto contra la del bundle que corre
+// (evaluateManifest() en src/uses/otaUpdate.ts), así que un bundle con versión
+// igual o menor que la publicada se ve como "up-to-date" y NUNCA se aplica, en
+// silencio. Mismo criterio que src/utils/semver.ts.
+function compararVersiones(a, b) {
+  const partesA = String(a || "").split(".");
+  const partesB = String(b || "").split(".");
+  for (let i = 0; i < 3; i++) {
+    const numA = parseInt(partesA[i], 10) || 0;
+    const numB = parseInt(partesB[i], 10) || 0;
+    if (numA !== numB) return numA < numB ? -1 : 1;
+  }
+  return 0;
+}
+
+const manifestPath = path.join(ROOT, "public", "ota", "latest.json");
+if (!fs.existsSync(manifestPath)) {
+  console.warn(
+    "\n[make-bundle] AVISO: no encontré public/ota/latest.json, no puedo verificar que la versión suba.\n"
+  );
+} else {
+  let publicada;
+  try {
+    publicada = JSON.parse(fs.readFileSync(manifestPath, "utf8")).version;
+  } catch (e) {
+    abort(`public/ota/latest.json no es JSON válido: ${e.message}`);
+  }
+
+  if (compararVersiones(version, publicada) <= 0 && !process.env.OTA_ALLOW_SAME_VERSION) {
+    abort(
+      `La versión de package.json (${version}) no supera la del último OTA publicado (${publicada}).\n` +
+        "  Un bundle con versión igual o menor nunca se aplica: la app lo ve como \"up-to-date\".\n" +
+        "  Bumpeá package.json a un número mayor.\n" +
+        "  Si editaste public/ota/latest.json antes de generar el zip, volvé a dejarle la versión\n" +
+        "  anterior: el manifiesto se actualiza DESPUÉS (paso 4 del proceso OTA).\n" +
+        "  Para reempaquetar a propósito una versión ya publicada: OTA_ALLOW_SAME_VERSION=1 npm run ota:build"
+    );
+  }
+}
+
 // --- Validación del dist ----------------------------------------------------
 const distDir = path.join(ROOT, "dist");
 const indexPath = path.join(distDir, "index.html");

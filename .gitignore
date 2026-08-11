@@ -44,5 +44,18 @@ keystore.properties
 *.aab
 *.apk
 
+# Zips OTA recién generados por make-bundle.js: quedan en la raíz y son
+# transitorios (van a un GitHub Release). Anclado a la raíz a propósito: por la
+# vía alternativa de Pages, los bundles de public/ota/ SÍ se commitean.
+/bundle-*.zip
+
+# fastlane: solo se versionan el Fastfile y las notas de la tienda; el resto
+# son artefactos de cada corrida.
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/README.md
+fastlane/screenshots
+fastlane/test_output
+
 .claude
 .agents
