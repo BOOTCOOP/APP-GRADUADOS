@@ -13,10 +13,13 @@ android {
         applicationId "ar.uba.derecho.graduados"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // OJO: Play Console quedó en versionCode 21 (subidas viejas bumpeadas
-        // fuera del repo) — cada AAB nuevo necesita un código MAYOR al de Play.
-        versionCode 23
-        versionName "1.3.3"
+        // OJO: cada AAB nuevo necesita un versionCode MAYOR al más alto que ya
+        // haya en Play, incluso el de pistas de prueba (el 23 es producción).
+        // versionName tiene que coincidir con la "version" de package.json:
+        // si difieren, checkStoreUpdate() manda a la tienda a gente que ya
+        // tiene lo último (ver docs/releases-y-actualizaciones.md).
+        versionCode 24
+        versionName "1.3.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
