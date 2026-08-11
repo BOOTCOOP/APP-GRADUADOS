@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.7] - 2026-08-11
 
 ### Changed
-- Release de tienda (`versionCode` 24): consolida en el bundle nativo el JS que 1.3.4, 1.3.5 y 1.3.6 habían distribuido por OTA. No trae cambios funcionales propios
+- Release de tienda Android (`versionCode` 24) y iOS (`MARKETING_VERSION` 1.3.7 / build 6): consolidan en el bundle nativo el JS que 1.3.4, 1.3.5 y 1.3.6 habían distribuido por OTA. No traen cambios funcionales propios. En iOS el build 1.3.3 (5) había quedado en TestFlight sin enviarse a revisión, así que 1.3.7 lo supera
 - El workflow `build-aab.yml` sube el AAB solo a Play Console, con la pista `internal` por defecto. A producción se llega **promoviendo** desde una pista de prueba: subir directo dejaba las pistas de prueba congeladas en un bundle viejo, y Play las cuenta para el requisito de nivel de API objetivo (en agosto de 2026 los bundles 15 y 16, en targetSdk 35, marcaban la app como incumplidora aunque producción ya estuviera en 36)
 
 ## [1.3.6] - 2026-08-10

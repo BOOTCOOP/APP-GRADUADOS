@@ -65,7 +65,7 @@ Estado actual (2026-08-11):
 - `package.json`: `1.3.7` — realineado con la nativa para el release de tienda
 - `public/ota/latest.json`: `1.3.6` — último OTA publicado
 - Android: `versionName "1.3.7"` / `versionCode 24`, hoy en **Prueba interna**; producción sigue en `1.3.3` / `23` hasta que se promueva
-- iOS: `MARKETING_VERSION 1.3.3` / `CURRENT_PROJECT_VERSION 5`
+- iOS: `MARKETING_VERSION 1.3.7` / `CURRENT_PROJECT_VERSION 6`. El build 1.3.3 (5) quedó en TestFlight sin enviarse nunca a revisión, así que 1.3.7 lo supera y no hay nada que hacer con él
 - El release de tienda tomó `1.3.7` y no `1.3.6` porque `1.3.6` ya se había consumido como OTA. El **próximo OTA arranca en `1.3.8`**.
 
 Reglas:

@@ -1,4 +1,8 @@
-• Ahora la app avisa cuando hay una versión nueva y se actualiza al instante, sin salir ni reinstalar
-• Nuevo botón "Buscar actualizaciones" en el menú
+• Rediseño general de la app: pantallas más claras y navegación más simple
+• Detalle de talleres renovado: fechas, modalidad (virtual, presencial o híbrida) y quiénes exponen, todo a la vista
+• La modalidad aparece en el listado de actividades, y las actividades se ordenan por fecha
+• Al compartir un curso o taller se envía el título, la fecha y el enlace para abrirlo
+• Al recuperar la contraseña se muestra a qué correo se envió el enlace
+• Ahora la app avisa cuando hay una versión nueva y se actualiza al instante, sin salir ni reinstalar, con un botón "Buscar actualizaciones" en el menú
 • El contacto con una búsqueda laboral se hace desde el botón "Contactar" del detalle
 • Mejoras de estabilidad y correcciones menores
