@@ -111,7 +111,15 @@ platform :ios do
     UI.user_error!("La ficha no tiene ninguna versión de iOS todavía") if versiones.empty?
 
     UI.important("Versiones de iOS en la ficha:")
-    versiones.each { |v| UI.important("  #{v.version_string.to_s.ljust(10)} #{estado_de(v)}") }
+    versiones.each do |v|
+      UI.important("  #{v.version_string.to_s.ljust(10)} #{estado_de(v).ljust(28)} creada: #{v.created_date}")
+    end
+
+    # Cuál está realmente en la tienda. Varias versiones viejas conservan el
+    # estado READY_FOR_SALE en el historial, así que el estado NO alcanza para
+    # saber qué versión ve un usuario hoy.
+    live = version_live(app)
+    UI.important("Publicada en la tienda ahora: #{live.nil? ? 'ninguna' : live.version_string}")
 
     # Se pregunta con el método hecho para esto en vez de comparar el estado a
     # mano: Apple renombró el campo (appStoreState → appVersionState) y algunos
@@ -127,6 +135,17 @@ platform :ios do
     end
 
     UI.important("Pendiente de publicación: #{pendiente.version_string}")
+
+    # Barrera: publicar una versión MENOR que la que está en la tienda haría
+    # retroceder el número de versión de la ficha. Si aparece este caso, hay
+    # algo que no cierra (por ejemplo una versión publicada fuera del repo) y
+    # se decide a mano, no en una corrida de CI.
+    if retrocede?(pendiente, live)
+      UI.user_error!(
+        "La versión pendiente (#{pendiente.version_string}) es MENOR que la publicada (#{live.version_string}). " \
+        "Publicarla haría retroceder el número de versión de la ficha, así que no se publica sola: revisar por qué pasó antes de forzar nada."
+      )
+    end
 
     if solo_diagnostico
       UI.important("Modo diagnóstico: no se publicó nada. Para publicarla, correr el workflow destildando \"Solo diagnosticar\".")
@@ -199,6 +218,26 @@ def versiones_ios(app)
   )
 rescue StandardError => e
   UI.user_error!("No se pudieron leer las versiones de la ficha: #{e.message}")
+end
+
+# La versión que un usuario ve hoy en la tienda, o nil si nunca se publicó una.
+def version_live(app)
+  app.get_live_app_store_version(platform: Spaceship::ConnectAPI::Platform::IOS)
+rescue StandardError => e
+  UI.important("No se pudo leer la versión publicada (#{e.message}).")
+  nil
+end
+
+# ¿Publicar `pendiente` haría bajar el número de versión de la ficha? Ante
+# cualquier duda (falta un dato, el número no es parseable) devuelve false: la
+# barrera existe para el caso claro, no para trabar un release por un formato
+# raro.
+def retrocede?(pendiente, live)
+  return false if pendiente.nil? || live.nil?
+
+  Gem::Version.new(pendiente.version_string.to_s) < Gem::Version.new(live.version_string.to_s)
+rescue ArgumentError
+  false
 end
 
 # La versión aprobada que quedó esperando publicación manual, si hay alguna.
