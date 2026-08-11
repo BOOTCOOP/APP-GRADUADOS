@@ -1,22 +1,59 @@
 name: Build AAB (release, para Play Store)
 
 # Se dispara manualmente desde la pestaña Actions de GitHub.
-# Compila el Android App Bundle firmado con el keystore de release,
-# listo para subir a Play Console.
+# Compila el Android App Bundle firmado con el keystore de release y, salvo
+# que elijas la pista "ninguna", lo sube solo a Play Console.
 #
 # Requiere estos secrets del repo (Settings → Secrets → Actions):
 #   KEYSTORE_BASE64    — el .jks codificado en base64
 #   KEYSTORE_PASSWORD  — contraseña del keystore
 #   KEY_ALIAS          — alias de la clave (ej. "graduados")
 #   KEY_PASSWORD       — contraseña de la clave
+#   PLAY_SERVICE_ACCOUNT_JSON — JSON completo de la cuenta de servicio de Play.
+#     Se crea en Google Cloud Console (IAM → Cuentas de servicio → Crear →
+#     Claves → clave JSON) y se habilita ahí la "Google Play Android Developer
+#     API". Después, en Play Console → Usuarios y permisos → Invitar a nuevos
+#     usuarios, se invita el mail ...@....iam.gserviceaccount.com y se le dan
+#     permisos SOBRE ESTA app. Recomendado: concederle solo "Ver información
+#     de la app" + "Publicar versiones en pistas de prueba", así el CI no puede
+#     publicar en producción ni por error. Solo hace falta si se sube a Play.
+#     NO hay que pasar por "Acceso a API" ni vincular un proyecto de Cloud:
+#     Google eliminó ese requisito y la página ya no aparece en las cuentas
+#     nuevas.
+#
+# La pista por defecto es "internal" a propósito: a producción se llega
+# PROMOVIENDO desde una pista de prueba en la consola, nunca subiendo directo.
+# Con esa regla la pista interna nunca queda más vieja que producción — que es
+# justo lo que disparó el aviso de nivel de API objetivo en agosto de 2026,
+# con los bundles 15 y 16 congelados en targetSdk 35.
 on:
   workflow_dispatch:
+    inputs:
+      track:
+        description: 'Pista de Play a la que subir el AAB'
+        type: choice
+        default: internal
+        options:
+          - internal      # Prueba interna
+          - alpha         # Prueba cerrada (la pista "Alpha")
+          - beta          # Prueba abierta
+          - production    # Producción: entra como BORRADOR, se publica a mano
+          - ninguna       # solo compila y deja el artifact, sin tocar Play
 
 jobs:
   build-aab:
     runs-on: ubuntu-latest
 
     steps:
+      # Primero de todo: si falta la credencial de Play, mejor fallar acá que
+      # después de cinco minutos de build.
+      - name: Verificar credencial de Play
+        if: inputs.track != 'ninguna'
+        run: |
+          if [ -z "${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}" ]; then
+            echo "::error::Falta el secret PLAY_SERVICE_ACCOUNT_JSON (ver comentario al tope de este workflow). Si solo querés el .aab, corré el workflow con la pista \"ninguna\"."; exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -77,3 +114,20 @@ jobs:
           name: app-release-aab-${{ steps.version.outputs.name }}-vc${{ steps.version.outputs.code }}
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
+
+      # El artifact de arriba queda igual (sirve de respaldo y de evidencia de
+      # qué se compiló); esto es lo que además lo publica en la consola.
+      # OJO: Play rechaza un versionCode ya usado — si falla acá con "Version
+      # code N has already been used", el bump de android/app/build.gradle
+      # quedó atrás respecto de lo que ya hay subido en Play.
+      - name: Subir a Play Console (pista ${{ inputs.track }})
+        if: inputs.track != 'ninguna'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ar.uba.derecho.graduados
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: ${{ inputs.track }}
+          # Producción entra como borrador para que publicar siga siendo una
+          # decisión humana (y se pueda elegir el % de lanzamiento gradual).
+          status: ${{ inputs.track == 'production' && 'draft' || 'completed' }}
