@@ -113,7 +113,12 @@ platform :ios do
     UI.important("Versiones de iOS en la ficha:")
     versiones.each { |v| UI.important("  #{v.version_string.to_s.ljust(10)} #{estado_de(v)}") }
 
-    pendiente = versiones.find { |v| estado_de(v) == "PENDING_DEVELOPER_RELEASE" }
+    # Se pregunta con el método hecho para esto en vez de comparar el estado a
+    # mano: Apple renombró el campo (appStoreState → appVersionState) y algunos
+    # de sus valores, y spaceship absorbe esa diferencia. El scan por nombre
+    # queda solo como respaldo.
+    pendiente = pendiente_de_publicacion(app)
+    pendiente ||= versiones.find { |v| estado_de(v).include?("PENDING_DEVELOPER_RELEASE") }
 
     if pendiente.nil?
       UI.important("Ninguna versión está esperando publicación manual.")
@@ -188,13 +193,21 @@ end
 # bloquean la creación de una versión nueva (en revisión, esperando publicación)
 # justamente NO son editables, así que get_edit_app_store_version los esconde.
 def versiones_ios(app)
-  Spaceship::ConnectAPI::AppStoreVersion.all(
-    app_id: app.id,
+  app.get_app_store_versions(
     filter: { platform: Spaceship::ConnectAPI::Platform::IOS },
     limit: 20
   )
 rescue StandardError => e
   UI.user_error!("No se pudieron leer las versiones de la ficha: #{e.message}")
+end
+
+# La versión aprobada que quedó esperando publicación manual, si hay alguna.
+# Devuelve nil en vez de explotar: la que decide qué hacer es el lane.
+def pendiente_de_publicacion(app)
+  app.get_pending_release_app_store_version(platform: Spaceship::ConnectAPI::Platform::IOS)
+rescue StandardError => e
+  UI.important("No se pudo consultar la versión pendiente de publicación (#{e.message}); se sigue por el estado de la lista.")
+  nil
 end
 
 # Apple renombró el campo de estado entre revisiones de la API; se prueban los
