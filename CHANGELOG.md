@@ -5,11 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.6] - 2026-08-11
+## [1.3.7] - 2026-08-11
 
 ### Changed
-- Release de tienda: consolida en el bundle nativo el JS que 1.3.4 y 1.3.5 habían distribuido por OTA. No trae cambios funcionales propios
-- El workflow `build-aab.yml` sube el AAB solo a Play Console, con la pista `internal` por defecto. A producción se llega **promoviendo** desde una pista de prueba: subir directo dejaba las pistas congeladas en un bundle viejo, y Play las cuenta para el requisito de nivel de API objetivo
+- Release de tienda (`versionCode` 24): consolida en el bundle nativo el JS que 1.3.4, 1.3.5 y 1.3.6 habían distribuido por OTA. No trae cambios funcionales propios
+- El workflow `build-aab.yml` sube el AAB solo a Play Console, con la pista `internal` por defecto. A producción se llega **promoviendo** desde una pista de prueba: subir directo dejaba las pistas de prueba congeladas en un bundle viejo, y Play las cuenta para el requisito de nivel de API objetivo (en agosto de 2026 los bundles 15 y 16, en targetSdk 35, marcaban la app como incumplidora aunque producción ya estuviera en 36)
+
+## [1.3.6] - 2026-08-10
+
+### Added
+- Rediseño del detalle de taller: la información (fechas, modalidad, quiénes exponen, inscripción) se ordena en bloques legibles en vez de un bloque de texto corrido
+- La modalidad (virtual / presencial / híbrida) se muestra en el listado de talleres, con ícono propio. Se normaliza el texto libre que manda el backend ("Virtual", "A distancia", "Mixta"...) en `src/utils/modality.ts`
+- Al recuperar la contraseña se muestra el mail **enmascarado** al que se envió el link (`masked_email` de la API), y un contacto a `graduados@derecho.uba.ar` por si no llega
+
+### Changed
+- Compartir un curso o taller ahora manda título, fecha, modalidad y expositores más el **link público** al ítem; antes cerraba con una referencia inútil ("Taller #2062"). El mensaje se arma en `src/utils/shareMessage.ts` y el link sale de `PUBLIC_WEB_URL` + la ruta, nunca de `window.location.href` (en el shell nativo eso da `capacitor://localhost/...`)
+- Las actividades se ordenan **cronológicamente** por fecha de inicio en vez de por orden de publicación del backend; las que no tienen fecha válida van al final
+- La leyenda de quienes dictan una actividad concuerda en número ("Expone" / "Exponen"), usando `teachers_count` de la API
+
+### Fixed
+- Compartir por WhatsApp desde la web usa `wa.me/?text=`: con `api.whatsapp.com/send` el mensaje llegaba completo en escritorio pero en el celular WhatsApp entregaba **solo el link**, perdiendo título y datos
 
 ## [1.3.5] - 2026-08-08
 

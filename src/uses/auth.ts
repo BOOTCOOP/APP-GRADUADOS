@@ -78,10 +78,11 @@ export const useAuth = () => {
     }
 
     // Reset por DNI: el link se manda al mail del legacy y se completa en la web del backend.
+    // Response: 200 siempre, con { masked_email } (null si el DNI no tiene mail o no existe).
     const forgotPassword = (dni) => {
         return new Promise((resolve, reject) => {
             axios.post("auth/forgot-password", { dni }).then((response) => {
-                resolve(response)
+                resolve(response.data)
             }).catch(error => {
                 reject(error)
             })

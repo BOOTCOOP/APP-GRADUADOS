@@ -131,7 +131,7 @@ Auth (`/api/auth`, público salvo aclaración):
 - `POST auth/register/resend` `{dni, email?}` → `{status:"sent", masked_email}` | `{status:"not_found"}`
 - `POST auth/register/dispute` `{dni, contacto}` → `{status:"received"}`
 - `POST auth/login` `{dni, password}` → `200 {accessToken, token_type, user}` | `422 {dni:"..."}` | `409 {pending:true, dni:"..."}`
-- `POST auth/forgot-password` `{dni}` → `200` siempre. (Reset se completa en web del backend.)
+- `POST auth/forgot-password` `{dni}` → `200 {masked_email}` siempre (`masked_email` null si no hay a quién mandarle). (Reset se completa en web del backend.)
 
 Perfil (`/api`, autenticado):
 - `GET profile` → `UserResource` (refresh del usuario; usado por `refreshUser()`).

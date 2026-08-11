@@ -5,7 +5,7 @@
         :class="['items-' + perView]"
         :slides-per-view="perView"
     >
-        <swiper-slide v-for="activity in items" :key="activity.id">
+        <swiper-slide v-for="activity in sortedItems" :key="activity.id">
             <ion-card @click="() => showDetail(activity.id)" color="primary">
                 <p>
                     <ion-text>{{ activity.title }}</ion-text>
@@ -24,6 +24,8 @@ import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { IonCard, IonText, IonIcon, useIonRouter } from "@ionic/vue";
 import { timeOutline } from 'ionicons/icons';
+import { computed } from "vue";
+import { sortByStartDate } from "@/utils/activities";
 
 
 import "@ionic/vue/css/ionic-swiper.css";
@@ -36,6 +38,9 @@ const prop = defineProps({
         required: true
     },
 });
+
+// Mismo criterio que el listado: primero lo que arranca antes.
+const sortedItems = computed(() => sortByStartDate(prop.items as any[]));
 
 const router = useIonRouter();
 

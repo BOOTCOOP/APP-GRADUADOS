@@ -46,6 +46,46 @@ export const WHATSAPP_PHONE = '5491138315897'
  */
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_PHONE}`
 
+/**
+ * Link para compartir un texto por WhatsApp, sin destinatario fijo (lo elige la
+ * persona en la app).
+ *
+ * Misma regla que arriba, y por el mismo motivo: `wa.me` es App Link / Universal
+ * Link, así que en el celular el SO abre WhatsApp con el mensaje ya cargado.
+ * `api.whatsapp.com/send` —que era lo que usaba el botón de compartir— mete una
+ * página intermedia ("Continuar al chat") que en Android rearma el mensaje y en
+ * la práctica entregaba SOLO el link del final, perdiendo título y datos. En
+ * escritorio los dos funcionan, así que el bug solo se veía en el teléfono.
+ */
+export function whatsappShareUrl(text: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(text)}`
+}
+
+/** Casilla de consultas del Centro (soporte de cuentas, mails que no llegan). */
+export const GRADUADOS_EMAIL = 'graduados@derecho.uba.ar'
+
+/**
+ * Base de la app web pública (GitHub Pages, la misma base `/APP-GRADUADOS/` que
+ * arma `vite.config.ts` para el build web).
+ *
+ * Es el origen de TODO link que se comparte hacia afuera. `window.location.href`
+ * no sirve para eso: en el shell nativo la app se sirve desde el WebView, así que
+ * la URL es `capacitor://localhost/taller/2062` (iOS) o `http://localhost/...`
+ * (Android) y no abre nada en el teléfono de quien recibe el mensaje. La web
+ * pública, en cambio, resuelve para cualquiera, tenga o no la app instalada.
+ */
+export const PUBLIC_WEB_URL = 'https://bootcoop.github.io/APP-GRADUADOS'
+
+/**
+ * Convierte una ruta interna del router (`/taller/2062`) en un link público
+ * compartible. Las rutas que llegan acá son las de `src/router/index.ts`: el
+ * router ya descuenta la base, así que solo hay que prefijarla de nuevo.
+ */
+export function publicUrl(path = '/'): string {
+  const withSlash = path.startsWith('/') ? path : `/${path}`
+  return `${PUBLIC_WEB_URL}${withSlash === '/' ? '' : withSlash}`
+}
+
 export const FACEBOOK_URL = 'https://www.facebook.com/Centrodegraduadasygraduados'
 export const TWITTER_URL = 'https://x.com/graduadodchouba'
 export const INSTAGRAM_URL = 'https://www.instagram.com/centrodegraduados'
@@ -68,4 +108,10 @@ export function openYoutubeChannel(): void {
 /** Atención y consultas: abre el chat en la app de WhatsApp. */
 export function openWhatsapp(): void {
   openExternal(WHATSAPP_URL)
+}
+
+/** Consultas por mail: abre el cliente de correo con la casilla del Centro. */
+export function openGraduadosMail(subject?: string): void {
+  const query = subject ? `?subject=${encodeURIComponent(subject)}` : ''
+  openExternal(`mailto:${GRADUADOS_EMAIL}${query}`)
 }

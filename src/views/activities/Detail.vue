@@ -31,78 +31,111 @@
         style="width: 20%"
       ></ion-skeleton-text>
     </div>
-    <div v-if="workshop && loaded">
-      <ion-text color="medium"
-        ><small>{{ workshop.date }}</small></ion-text
-      >
-      <h4 class="ion-no-margin">{{ workshop.title }}</h4>
-      <div class="ion-margin-top">
-        <ion-icon
-          :md="personCircleOutline"
-          :ios="personCircleOutline"
-          color="primary"
-        ></ion-icon>
-        <ion-text color="medium"
-          ><strong>Docentes:</strong> {{ workshop.teachers }}</ion-text
-        >
-      </div>
-      <div class="ion-margin-top">
-        <ion-icon
-          :md="calendarOutline"
-          :ios="calendarOutline"
-          color="primary"
-        ></ion-icon>
-        <ion-text color="medium"
-          ><strong>Inicio:</strong> {{ workshop.start }}</ion-text
-        >
-      </div>
-      <div class="ion-margin-top">
-        <ion-icon
-          :md="timeOutline"
-          :ios="timeOutline"
-          color="primary"
-        ></ion-icon>
-        <ion-text color="medium"
-          ><strong>Horario:</strong> {{ workshop.days_and_hours }}</ion-text
-        >
-      </div>
-      <div class="ion-margin-top">
-        <ion-icon
-          :md="hourglassOutline"
-          :ios="hourglassOutline"
-          color="primary"
-        ></ion-icon>
-        <ion-text color="medium"
-          ><strong>Duración:</strong>
-          {{ workshop.classes_count }} clases</ion-text
-        >
-      </div>
-      <div class="ion-margin-top" v-if="workshop.can_enroll">
-        <ion-icon
-          :md="journalOutline"
-          :ios="journalOutline"
-          color="primary"
-        ></ion-icon>
-        <!-- price puede venir null (talleres sin valor cargado = gratuitos) -->
-        <ion-text color="medium" v-if="workshop.price && workshop.price.raw > 0"
-          ><strong>Costo:</strong> {{ workshop.price.value }}</ion-text
-        >
-        <ion-text color="medium" v-else
-          ><strong>Costo:</strong> Gratuito</ion-text
-        >
-      </div>
-      <div class="content ion-margin-top" v-html="workshop.content"></div>
-      <ion-list
-        class="ion-margin-top"
+    <div v-if="workshop && loaded" class="workshop-detail">
+      <header class="workshop-header">
+        <div class="workshop-tags">
+          <span
+            v-if="workshop.modality"
+            class="tag tag--modality"
+            :class="`tag--${modalityKind}`"
+          >
+            <ion-icon :icon="modalityIcon" aria-hidden="true"></ion-icon>
+            {{ workshop.modality }}
+          </span>
+          <span v-if="unavailableLabel" class="tag tag--muted">
+            {{ unavailableLabel }}
+          </span>
+          <span v-if="workshop.period?.value" class="tag tag--muted">
+            {{ workshop.period.value }}
+          </span>
+        </div>
+        <h1 class="workshop-title">{{ workshop.title }}</h1>
+        <p class="workshop-teachers" v-if="workshop.teachers">
+          <ion-icon :icon="personCircleOutline" aria-hidden="true"></ion-icon>
+          <span><strong>{{ teachersLabelText }}:</strong> {{ workshop.teachers }}</span>
+        </p>
+      </header>
+
+      <section class="info-card" aria-label="Datos del taller">
+        <div class="info-row">
+          <span class="info-icon" aria-hidden="true">
+            <ion-icon :icon="calendarOutline"></ion-icon>
+          </span>
+          <div class="info-text">
+            <span class="info-label">Inicio</span>
+            <span class="info-value">{{ startLabel }}</span>
+          </div>
+        </div>
+
+        <div class="info-row" v-if="workshop.days_and_hours">
+          <span class="info-icon" aria-hidden="true">
+            <ion-icon :icon="timeOutline"></ion-icon>
+          </span>
+          <div class="info-text">
+            <span class="info-label">Horario</span>
+            <span class="info-value">{{ workshop.days_and_hours }}</span>
+          </div>
+        </div>
+
+        <div class="info-row" v-if="workshop.modality">
+          <span class="info-icon" aria-hidden="true">
+            <ion-icon :icon="modalityIcon"></ion-icon>
+          </span>
+          <div class="info-text">
+            <span class="info-label">Modalidad</span>
+            <span class="info-value">{{ workshop.modality }}</span>
+          </div>
+        </div>
+
+        <div class="info-row" v-if="workshop.classes_count">
+          <span class="info-icon" aria-hidden="true">
+            <ion-icon :icon="hourglassOutline"></ion-icon>
+          </span>
+          <div class="info-text">
+            <span class="info-label">Duración</span>
+            <span class="info-value">{{ classesLabel }}</span>
+          </div>
+        </div>
+
+        <div class="info-row" v-if="workshop.can_enroll">
+          <span class="info-icon" aria-hidden="true">
+            <ion-icon :icon="journalOutline"></ion-icon>
+          </span>
+          <div class="info-text">
+            <span class="info-label">Costo</span>
+            <!-- price puede venir null (talleres sin valor cargado = gratuitos) -->
+            <span
+              class="info-value"
+              :class="{ 'is-free': !(workshop.price && workshop.price.raw > 0) }"
+            >
+              {{
+                workshop.price && workshop.price.raw > 0
+                  ? workshop.price.value
+                  : 'Gratuito'
+              }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="workshop-section" v-if="hasContent">
+        <h2 class="section-title">Temario</h2>
+        <div class="content" v-html="workshop.content"></div>
+      </section>
+
+      <section
+        class="workshop-section"
         v-if="workshop.files && workshop.files.length && workshop.is_enrolled"
       >
-        <h6 class="ion-margin-start ion-no-margin">Bibliografía</h6>
-        <BibliographyItem
-          v-for="file in workshop.files"
-          :file="file"
-          :key="file.id"
-        ></BibliographyItem>
-      </ion-list>
+        <h2 class="section-title">Bibliografía</h2>
+        <ion-list class="bibliography-list">
+          <BibliographyItem
+            v-for="file in workshop.files"
+            :file="file"
+            :key="file.id"
+          ></BibliographyItem>
+        </ion-list>
+      </section>
     </div>
     <template v-if="workshop && loaded" #footer>
       <!-- Anónimo con taller disponible: login (con retorno a este detalle).
@@ -178,7 +211,7 @@
       v-if="workshop && loaded"
       :share-data="{
         title: workshop.title,
-        text: `${workshop.teachers ? 'Docentes: ' + workshop.teachers + ' - ' : ''}${workshop.start ? 'Inicio: ' + workshop.start : ''}`,
+        text: `${workshop.teachers ? teachersLabelText + ': ' + workshop.teachers + ' - ' : ''}${workshop.start ? 'Inicio: ' + workshop.start : ''}`,
         type: 'taller'
       }"
     />
@@ -209,6 +242,12 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import BibliographyItem from '../bibliography/components/BibliographyItem.vue'
+import { parseApiDate } from '@/libs/dates'
+import {
+  modalityKind as resolveModalityKind,
+  modalityIcon as resolveModalityIcon,
+} from '@/utils/modality'
+import { teachersLabel } from '@/utils/teachers'
 import SocialShare from '@/components/SocialShare.vue'
 import { useCurrentUser } from '@/uses/currentUser'
 import { useRequireAuth } from '@/uses/requireAuth'
@@ -234,6 +273,43 @@ const workshopAvailable = computed(
     !workshop.value?.is_full &&
     !workshop.value?.registration_closed
 )
+
+const modalityKind = computed(() => resolveModalityKind(workshop.value?.modality))
+const modalityIcon = computed(() => resolveModalityIcon(modalityKind.value))
+
+// "Expone" / "Exponen" según cuántos sean (antes: "Docente" / "Docentes").
+const teachersLabelText = computed(() =>
+  teachersLabel(workshop.value?.teachers_count, workshop.value?.teachers)
+)
+
+// El detalle devuelve la fecha ISO (2026-08-20); el listado ya la muestra legible.
+const startLabel = computed(() => {
+  const date = parseApiDate(workshop.value?.start)
+  if (!date) return 'Por confirmar'
+  return date.toLocaleDateString('es-AR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+})
+
+const classesLabel = computed(() => {
+  const count = workshop.value?.classes_count ?? 0
+  return `${count} ${count === 1 ? 'clase' : 'clases'}`
+})
+
+// content puede venir como "" o con HTML vacío; así no dibujamos la sección.
+const hasContent = computed(() =>
+  Boolean(workshop.value?.content?.replace(/<[^>]*>/g, '').trim())
+)
+
+// Motivo por el que el taller no está disponible (null = disponible).
+const unavailableLabel = computed(() => {
+  if (workshop.value?.is_ended) return 'Finalizado'
+  if (workshop.value?.is_full) return 'Sin cupos'
+  if (workshop.value?.registration_closed) return 'Inscripciones cerradas'
+  return null
+})
 
 // Mensaje para estados de inscripción
 const enrollmentMessage = computed(() => {
@@ -362,9 +438,185 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.content {
-  color: var(--ion-color-step-500);
+/* El padding horizontal lo pone el layout (.page-body): acá solo ritmo vertical. */
+.workshop-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-xl);
+  padding-bottom: var(--app-spacing-lg);
+}
+
+.workshop-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-sm);
+}
+
+.workshop-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-spacing-sm);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-spacing-xs);
+  padding: 5px 10px;
+  border-radius: var(--app-radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.tag ion-icon {
   font-size: 14px;
+}
+
+.tag--modality {
+  background: var(--app-primary-soft);
+  color: var(--ion-color-primary-shade);
+}
+
+.tag--presencial {
+  background: rgba(45, 211, 111, 0.14);
+  color: var(--ion-color-success-shade);
+}
+
+.tag--hibrida {
+  background: rgba(255, 196, 9, 0.18);
+  color: #8a6100;
+}
+
+.tag--muted {
+  background: var(--app-bg);
+  color: var(--app-text-secondary);
+}
+
+.workshop-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--app-text-title);
+}
+
+.workshop-teachers {
+  display: flex;
+  align-items: center;
+  gap: var(--app-spacing-xs);
+  margin: 0;
+  font-size: 14px;
+  color: var(--app-text-secondary);
+}
+
+.workshop-teachers ion-icon {
+  font-size: 16px;
+  color: var(--ion-color-primary);
+  flex-shrink: 0;
+}
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-lg);
+  padding: var(--app-spacing-lg);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow-sm);
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--app-spacing-md);
+}
+
+.info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-primary-soft);
+}
+
+.info-icon ion-icon {
+  font-size: 18px;
+  color: var(--ion-color-primary);
+}
+
+.info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.info-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--app-text-secondary);
+}
+
+.info-value {
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--app-text-body);
+}
+
+.info-value.is-free {
+  color: var(--ion-color-success-shade);
+  font-weight: 600;
+}
+
+.workshop-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-sm);
+}
+
+.section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--app-text-title);
+}
+
+.bibliography-list {
+  padding: 0;
+  background: transparent;
+}
+
+.content {
+  color: var(--app-text-body);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.content :deep(p) {
+  margin: 0 0 var(--app-spacing-sm);
+}
+
+.content :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.content :deep(ul),
+.content :deep(ol) {
+  margin: 0 0 var(--app-spacing-sm);
+  padding-left: var(--app-spacing-lg);
+}
+
+.content :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--app-radius-sm);
 }
 
 /* Estilos para los botones de inscripción */
@@ -378,9 +630,12 @@ ion-button[expand="full"] {
 /* Mensaje de estado de inscripción */
 .ion-text-center small {
   display: block;
-  padding: 8px;
-  background-color: var(--ion-color-light);
-  border-radius: 8px;
+  padding: var(--app-spacing-md);
+  margin-bottom: var(--app-spacing-xs);
+  background-color: var(--app-surface-alt);
+  border-radius: var(--app-radius-sm);
   border-left: 3px solid var(--ion-color-medium);
+  line-height: 1.4;
+  text-align: left;
 }
 </style>

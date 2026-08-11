@@ -1,163 +1,120 @@
 <template>
-    <ion-card 
-        class="activity-card" 
+    <ion-card
+        class="activity-card is-tappable"
         @click="showDetail"
         role="button"
         tabindex="0"
         @keydown.enter="showDetail"
         @keydown.space="showDetail"
-        :aria-label="`Taller: ${activity.title}. Docentes: ${activity.teachers || 'Por confirmar'}. Inicio: ${formatDate(activity.start)}`"
+        :aria-label="`Taller: ${activity.title}. ${activity.modality ? 'Modalidad: ' + activity.modality + '. ' : ''}${teachersText}. Inicio: ${formatDate(activity.start)}`"
     >
         <ion-card-content>
-            <!-- Estado de inscripción -->
-            <div v-if="inscriptionStatus" class="enrollment-status" aria-label="Estado de inscripción">
-                <ion-badge
-                    :color="inscriptionStatus.class"
+            <!-- Etiquetas: modalidad, estado de inscripción y disponibilidad -->
+            <div class="activity-tags" role="group" aria-label="Información del taller">
+                <span
+                    v-if="activity.modality"
+                    class="tag"
+                    :class="`tag--${modalityKind}`"
+                    :aria-label="`Modalidad: ${activity.modality}`"
+                >
+                    <ion-icon :icon="modalityIcon" aria-hidden="true"></ion-icon>
+                    {{ activity.modality }}
+                </span>
+
+                <span
+                    v-if="inscriptionStatus"
+                    class="tag tag--enrolled"
                     :aria-label="`Estado: ${inscriptionStatus.value}`"
                 >
+                    <ion-icon :icon="checkmarkCircleOutline" aria-hidden="true"></ion-icon>
                     {{ inscriptionStatus.value }}
-                </ion-badge>
-            </div>
-            
-            <!-- Badges de información -->
-            <div class="badges-container" role="group" aria-label="Información del taller">
-                <ion-badge 
-                    v-if="activity.is_only_for_graduado_uba" 
-                    class="uba-badge" 
-                    color="primary"
-                    aria-label="Exclusivo para graduados UBA"
-                >
-                    <ion-icon :icon="starOutline" slot="start" aria-hidden="true"></ion-icon>
-                    Exclusivo UBA
-                </ion-badge>
-                
-                <ion-badge 
-                    v-else
-                    class="open-badge" 
-                    color="success"
-                    fill="outline"
-                    aria-label="Abierto para todos"
-                >
-                    <ion-icon :icon="globeOutline" slot="start" aria-hidden="true"></ion-icon>
-                    Abierto
-                </ion-badge>
-                
-                <ion-badge
-                    v-if="isStartingSoon(activity) && !unavailableLabel"
-                    class="urgent-badge"
-                    color="warning"
-                    aria-label="Taller próximo a iniciar"
-                >
-                    ¡Próximo a iniciar!
-                </ion-badge>
+                </span>
 
-                <ion-badge
+                <span
                     v-if="unavailableLabel"
-                    class="unavailable-badge"
-                    color="medium"
+                    class="tag tag--muted"
                     :aria-label="`Taller no disponible: ${unavailableLabel}`"
                 >
                     {{ unavailableLabel }}
-                </ion-badge>
-            </div>
+                </span>
 
-            <!-- Título y descripción -->
-            <div class="content-section">
-                <h3 class="activity-title">{{ activity.title }}</h3>
-                <p class="activity-description" v-if="activity.content">
-                    {{ getShortDescription(activity.content) }}
-                </p>
-            </div>
-
-            <!-- Información del taller -->
-            <div class="info-grid" role="list" aria-label="Detalles del taller">
-                <div class="info-item" role="listitem">
-                    <ion-icon :icon="personCircleOutline" color="primary" aria-hidden="true"></ion-icon>
-                    <div class="info-content">
-                        <span class="info-label">Docentes:</span>
-                        <span class="info-value">{{ activity.teachers || 'Por confirmar' }}</span>
-                    </div>
-                </div>
-
-                <div class="info-item" role="listitem">
-                    <ion-icon :icon="calendarOutline" color="primary" aria-hidden="true"></ion-icon>
-                    <div class="info-content">
-                        <span class="info-label">Inicio:</span>
-                        <span class="info-value">{{ formatDate(activity.start) }}</span>
-                    </div>
-                </div>
-
-                <div class="info-item" v-if="activity.days_and_hours" role="listitem">
-                    <ion-icon :icon="timeOutline" color="primary" aria-hidden="true"></ion-icon>
-                    <div class="info-content">
-                        <span class="info-label">Horario:</span>
-                        <span class="info-value">{{ activity.days_and_hours }}</span>
-                    </div>
-                </div>
-
-                <div class="info-item" v-if="activity.classes_count" role="listitem">
-                    <ion-icon :icon="hourglassOutline" color="primary" aria-hidden="true"></ion-icon>
-                    <div class="info-content">
-                        <span class="info-label">Duración:</span>
-                        <span class="info-value">{{ activity.classes_count }} clases</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Precio y botón de acción -->
-            <div class="footer-section">
-                <div class="price-section" v-if="activity.price">
-                    <span class="price-label">Costo:</span>
-                    <span class="price-value" :class="{ 'free-price': activity.price === 0 }">
-                        {{ activity.price === 0 ? 'Gratuito' : `$${activity.price}` }}
-                    </span>
-                </div>
-                
-                <ion-button 
-                    class="enroll-button" 
-                    expand="block" 
-                    :color="getEnrollButtonColor(activity)"
-                    :fill="getEnrollButtonFill()"
-                    @click.stop="handleEnrollClick"
-                    :aria-label="`${getEnrollButtonText(activity)} para el taller ${activity.title}`"
+                <span
+                    v-else-if="isStartingSoon"
+                    class="tag tag--soon"
+                    aria-label="Taller próximo a iniciar"
                 >
-                    <ion-icon :icon="schoolOutline" slot="start" aria-hidden="true"></ion-icon>
-                    {{ getEnrollButtonText(activity) }}
-                </ion-button>
+                    <ion-icon :icon="flashOutline" aria-hidden="true"></ion-icon>
+                    ¡Próximo a iniciar!
+                </span>
+
+                <span
+                    v-if="activity.is_only_for_graduado_uba"
+                    class="tag tag--uba"
+                    aria-label="Exclusivo para graduados UBA"
+                >
+                    <ion-icon :icon="starOutline" aria-hidden="true"></ion-icon>
+                    Exclusivo UBA
+                </span>
             </div>
 
-            <!-- Indicador especial para graduados UBA -->
-            <div v-if="activity.is_only_for_graduado_uba" class="uba-exclusive" role="note" aria-label="Este taller es exclusivo para graduados de la Universidad de Buenos Aires">
-                <ion-icon :icon="starOutline" color="primary" aria-hidden="true"></ion-icon>
-                <span>Exclusivo para graduados UBA</span>
-            </div>
+            <h3 class="activity-title">{{ activity.title }}</h3>
+
+            <ul class="activity-meta" aria-label="Detalles del taller">
+                <li>
+                    <ion-icon :icon="personCircleOutline" aria-hidden="true"></ion-icon>
+                    <span>{{ teachersText }}</span>
+                </li>
+                <li>
+                    <ion-icon :icon="calendarOutline" aria-hidden="true"></ion-icon>
+                    <span>
+                        {{ formatDate(activity.start) }}
+                        <em v-if="activity.beginning && !activity.is_ended">· {{ activity.beginning }}</em>
+                    </span>
+                </li>
+            </ul>
+
+            <ion-button
+                class="enroll-button"
+                expand="block"
+                shape="round"
+                :color="buttonColor"
+                :fill="buttonFill"
+                @click.stop="showDetail"
+                :aria-label="`${buttonText} para el taller ${activity.title}`"
+            >
+                <ion-icon :icon="schoolOutline" slot="start" aria-hidden="true"></ion-icon>
+                {{ buttonText }}
+            </ion-button>
         </ion-card-content>
     </ion-card>
 </template>
 
 <script setup lang="ts">
-import { IonCard, IonCardContent, IonIcon, IonButton, IonBadge, useIonRouter } from '@ionic/vue';
+import { IonCard, IonCardContent, IonIcon, IonButton, useIonRouter } from '@ionic/vue';
 import { computed, defineProps } from 'vue';
 import {
     personCircleOutline,
     calendarOutline,
     starOutline,
-    timeOutline,
-    hourglassOutline,
     schoolOutline,
-    globeOutline
+    flashOutline,
+    checkmarkCircleOutline,
 } from 'ionicons/icons';
 import { parseApiDate } from '@/libs/dates';
+import {
+    modalityKind as resolveModalityKind,
+    modalityIcon as resolveModalityIcon,
+} from '@/utils/modality';
+import { teachersLabel } from '@/utils/teachers';
 
 interface ActivityItem {
     id: string | number;
     title?: string;
-    content?: string;
     teachers?: string;
+    teachers_count?: number;
     start?: string;
-    days_and_hours?: string;
-    classes_count?: number;
-    price?: number;
+    beginning?: string;
+    modality?: string;
     is_only_for_graduado_uba?: boolean;
     // Flags de disponibilidad (mismos que el detalle, ahora también en el listado)
     is_enrolled?: boolean;
@@ -187,6 +144,16 @@ const router = useIonRouter();
 // el badge solo se muestra si el estado realmente vino.
 const inscriptionStatus = computed(() => props.inscribed?.inscriptions?.[0]?.status ?? null);
 
+const modalityKind = computed(() => resolveModalityKind(props.activity.modality));
+const modalityIcon = computed(() => resolveModalityIcon(modalityKind.value));
+
+// "Expone: Juan Pérez" / "Exponen: Juan Pérez, María Gómez" (antes: "Docentes").
+const teachersText = computed(() => {
+    const label = teachersLabel(props.activity.teachers_count, props.activity.teachers);
+
+    return `${label}: ${props.activity.teachers || 'a confirmar'}`;
+});
+
 // Motivo por el que ya no se puede inscribir (null = disponible). Si el usuario
 // está inscripto, el estado de inscripción manda y no mostramos este badge.
 const unavailableLabel = computed(() => {
@@ -197,28 +164,34 @@ const unavailableLabel = computed(() => {
     return null;
 });
 
+const isStartingSoon = computed(() => {
+    const startDate = parseApiDate(props.activity.start);
+    if (!startDate) return false;
+
+    const diffDays = Math.ceil((startDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    return diffDays <= 7 && diffDays >= 0;
+});
+
+const isClosed = computed(() => Boolean(props.inscribed || unavailableLabel.value));
+
+const buttonColor = computed(() => {
+    if (isClosed.value) return 'medium';
+    return isStartingSoon.value ? 'warning' : 'primary';
+});
+
+const buttonFill = computed<'outline' | 'solid'>(() => (isClosed.value ? 'outline' : 'solid'));
+
+const buttonText = computed(() => {
+    if (isClosed.value) return 'Ver detalles';
+    return isStartingSoon.value ? '¡Inscribirse ahora!' : 'Inscribirse';
+});
+
 function showDetail() {
     router.push({ name: 'activities.show', params: { slug: props.activity.id } });
 }
 
-function isStartingSoon(activity: any): boolean {
-    const startDate = parseApiDate(activity.start);
-    if (!startDate) return false;
-
-    const today = new Date();
-    const diffTime = startDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 7 && diffDays >= 0;
-}
-
-function getShortDescription(content: string): string {
-    if (!content) return '';
-    const plainText = content.replace(/<[^>]*>/g, '').trim();
-    return plainText.length > 120 ? plainText.substring(0, 120) + '...' : plainText;
-}
-
 function formatDate(dateString?: string): string {
-    if (!dateString) return 'Por confirmar';
+    if (!dateString) return 'Fecha por confirmar';
 
     const date = parseApiDate(dateString);
     if (!date) return 'Fecha por confirmar';
@@ -229,217 +202,114 @@ function formatDate(dateString?: string): string {
         day: 'numeric'
     });
 }
-
-function getEnrollButtonColor(activity: any): string {
-    if (props.inscribed || unavailableLabel.value) return 'medium';
-    return isStartingSoon(activity) ? 'warning' : 'primary';
-}
-
-function getEnrollButtonFill(): 'outline' | 'solid' | 'default' | 'clear' {
-    return (props.inscribed || unavailableLabel.value) ? 'outline' : 'solid';
-}
-
-function getEnrollButtonText(activity: any): string {
-    if (props.inscribed || unavailableLabel.value) return 'Ver detalles';
-    return isStartingSoon(activity) ? '¡Inscribirse ahora!' : 'Inscribirse';
-}
-
-function handleEnrollClick(event: Event) {
-    event.stopPropagation();
-    showDetail();
-}
 </script>
 
 <style scoped>
+/* El hover/apretado de la card lo aporta `.is-tappable` en global.css */
 .activity-card {
-    margin-bottom: 16px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
+    margin: 0 0 var(--app-spacing-md);
 }
 
-.activity-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+.activity-card ion-card-content {
+    padding: var(--app-spacing-lg);
 }
 
-.enrollment-status {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 2;
-}
-
-.badges-container {
+.activity-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 16px;
+    gap: var(--app-spacing-sm);
+    margin-bottom: var(--app-spacing-md);
 }
 
-.modality-badge {
-    font-size: 11px;
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
+    padding: 5px 10px;
+    border-radius: var(--app-radius-pill);
+    font-size: 12px;
     font-weight: 600;
+    line-height: 1.2;
+    /* Default = virtual: mismo tratamiento que el detalle */
+    background: var(--app-primary-soft);
+    color: var(--ion-color-primary-shade);
 }
 
-.category-badge {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.tag ion-icon {
+    font-size: 14px;
 }
 
-.urgent-badge {
-    font-size: 10px;
-    font-weight: 700;
-    animation: pulse 2s infinite;
+.tag--presencial {
+    background: rgba(45, 211, 111, 0.14);
+    color: var(--ion-color-success-shade);
 }
 
-.unavailable-badge {
-    font-size: 11px;
-    font-weight: 600;
+.tag--hibrida {
+    background: rgba(255, 196, 9, 0.18);
+    color: #8a6100;
 }
 
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+.tag--enrolled {
+    background: rgba(45, 211, 111, 0.16);
+    color: var(--ion-color-success-shade);
 }
 
-.content-section {
-    margin-bottom: 16px;
+.tag--soon {
+    background: rgba(255, 196, 9, 0.2);
+    color: #8a6100;
+}
+
+.tag--uba {
+    background: var(--app-primary-soft-strong);
+    color: var(--ion-color-primary-shade);
+}
+
+.tag--muted {
+    background: var(--app-bg);
+    color: var(--app-text-secondary);
 }
 
 .activity-title {
-    font-size: 18px;
+    margin: 0 0 var(--app-spacing-md);
+    font-size: 17px;
     font-weight: 700;
-    color: var(--ion-color-dark);
-    margin: 0 0 8px 0;
     line-height: 1.3;
+    color: var(--app-text-title);
 }
 
-.activity-description {
-    font-size: 14px;
-    color: var(--ion-color-medium);
-    line-height: 1.4;
-    margin: 0;
-}
-
-.info-grid {
+.activity-meta {
+    list-style: none;
+    margin: 0 0 var(--app-spacing-lg);
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: var(--app-spacing-sm);
 }
 
-.info-item {
+.activity-meta li {
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-.info-item ion-icon {
-    margin-top: 2px;
-    font-size: 16px;
-}
-
-.info-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.info-label {
-    font-size: 12px;
-    color: var(--ion-color-medium);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.info-value {
-    font-size: 14px;
-    color: var(--ion-color-dark);
-    font-weight: 500;
-    margin-top: 2px;
-}
-
-.footer-section {
-    border-top: 1px solid var(--ion-color-light);
-    padding-top: 16px;
-    margin-top: 16px;
-}
-
-.price-section {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-}
-
-.price-label {
+    gap: var(--app-spacing-sm);
     font-size: 14px;
-    color: var(--ion-color-medium);
-    font-weight: 600;
+    color: var(--app-text-body);
 }
 
-.price-value {
-    font-size: 16px;
+.activity-meta ion-icon {
+    flex-shrink: 0;
+    font-size: 18px;
     color: var(--ion-color-primary);
-    font-weight: 700;
 }
 
-.price-value.free-price {
-    color: var(--ion-color-success);
+.activity-meta em {
+    font-style: normal;
+    color: var(--app-text-secondary);
 }
 
 .enroll-button {
-    --border-radius: 12px;
-    --padding-top: 12px;
-    --padding-bottom: 12px;
+    margin: 0;
+    min-height: var(--app-tap-target);
     font-weight: 600;
     font-size: 14px;
     text-transform: none;
-}
-
-.uba-exclusive {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 12px;
-    padding: 8px;
-    background-color: var(--ion-color-primary-tint);
-    border-radius: 8px;
-    border: 1px solid var(--ion-color-primary);
-}
-
-.uba-exclusive span {
-    font-size: 12px;
-    color: var(--ion-color-primary);
-    font-weight: 600;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-    .info-grid {
-        gap: 10px;
-    }
-    
-    .activity-title {
-        font-size: 16px;
-    }
-    
-    .activity-description {
-        font-size: 13px;
-    }
-}
-
-/* Mejoras de accesibilidad */
-.activity-card:focus-within {
-    outline: 2px solid var(--ion-color-primary);
-    outline-offset: 2px;
-}
-
-ion-button:focus {
-    --box-shadow: 0 0 0 2px var(--ion-color-primary-tint);
 }
 </style>
