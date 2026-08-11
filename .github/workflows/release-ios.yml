@@ -1,0 +1,62 @@
+name: Publicar versión pendiente (iOS)
+
+# Publica una versión de iOS que Apple ya aprobó y quedó esperando publicación
+# manual ("Pendiente de publicación" / PENDING_DEVELOPER_RELEASE), sin entrar a
+# App Store Connect. Sirve para dos cosas:
+#
+#   1. Ver el estado de las versiones de la ficha sin acceso a la consola
+#      (arranca en modo diagnóstico: no publica nada).
+#   2. Liberar el cupo de la ficha. Apple permite UNA sola versión en trámite:
+#      mientras haya una esperando publicación, crear la siguiente falla con
+#      "You cannot create a new version of the App in the current state" — el
+#      error que tira el workflow "Enviar iOS a revisión".
+#
+# Corre en Linux: no compila nada, solo habla con la API de App Store Connect.
+# La API key con rol App Manager alcanza.
+#
+# Requiere los mismos secrets que los otros workflows de iOS:
+#   ASC_API_KEY_P8 / ASC_API_KEY_ID / ASC_API_ISSUER_ID
+
+on:
+  workflow_dispatch:
+    inputs:
+      solo_diagnostico:
+        description: 'Solo diagnosticar: lista los estados y NO publica nada'
+        type: boolean
+        default: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      # Sin pin de versión, igual que en el resto de los workflows de iOS:
+      # fastlane sigue la API de App Store Connect, que Apple cambia sin avisar.
+      - name: Instalar fastlane
+        run: gem install fastlane --no-document
+
+      - name: Publicar versión pendiente
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+          APP_SOLO_DIAGNOSTICO: ${{ inputs.solo_diagnostico }}
+          FASTLANE_SKIP_UPDATE_CHECK: 'true'
+          FASTLANE_HIDE_CHANGELOG: 'true'
+        run: |
+          if [ -z "$ASC_API_KEY_P8" ] || [ -z "$ASC_API_KEY_ID" ] || [ -z "$ASC_API_ISSUER_ID" ]; then
+            echo "::error::Faltan los secrets ASC_API_KEY_P8 / ASC_API_KEY_ID / ASC_API_ISSUER_ID"; exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/private_keys"
+          export ASC_API_KEY_PATH="$RUNNER_TEMP/private_keys/AuthKey_$ASC_API_KEY_ID.p8"
+          printf '%s' "$ASC_API_KEY_P8" > "$ASC_API_KEY_PATH"
+
+          fastlane ios release_pending

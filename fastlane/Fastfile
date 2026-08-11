@@ -89,6 +89,61 @@ platform :ios do
     UI.success("Versión #{version} (build #{build_number}) enviada a revisión.")
     UI.success(auto_release ? "Se publica sola en cuanto Apple la apruebe." : "Al aprobarse queda esperando publicación manual.")
   end
+
+  desc "Lista el estado de las versiones de la ficha y publica la que esté pendiente de publicación"
+  lane :release_pending do |options|
+    # Arranca en modo diagnóstico a propósito: publicar es irreversible y sale
+    # a todos los usuarios, así que la primera corrida solo informa.
+    solo_diagnostico = valor(options[:solo_diagnostico], "APP_SOLO_DIAGNOSTICO", "true") != "false"
+
+    app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_API_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_API_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_API_KEY_PATH"),
+      duration: 1200,
+      in_house: false
+    )
+
+    app = Spaceship::ConnectAPI::App.find(BUNDLE_ID)
+    UI.user_error!("No hay ninguna ficha con el bundle ID #{BUNDLE_ID} en esta cuenta") if app.nil?
+
+    versiones = versiones_ios(app)
+    UI.user_error!("La ficha no tiene ninguna versión de iOS todavía") if versiones.empty?
+
+    UI.important("Versiones de iOS en la ficha:")
+    versiones.each { |v| UI.important("  #{v.version_string.to_s.ljust(10)} #{estado_de(v)}") }
+
+    pendiente = versiones.find { |v| estado_de(v) == "PENDING_DEVELOPER_RELEASE" }
+
+    if pendiente.nil?
+      UI.important("Ninguna versión está esperando publicación manual.")
+      UI.important("Si el envío de una versión nueva falla con \"cannot create a new version\", el cupo lo está ocupando otro de los estados de la lista de arriba (WAITING_FOR_REVIEW o IN_REVIEW se destraban cancelando el envío en la consola).")
+      next
+    end
+
+    UI.important("Pendiente de publicación: #{pendiente.version_string}")
+
+    if solo_diagnostico
+      UI.important("Modo diagnóstico: no se publicó nada. Para publicarla, correr el workflow destildando \"Solo diagnosticar\".")
+      next
+    end
+
+    # Dos formas de pedir la publicación: el método del modelo (lo normal) y la
+    # función de módulo como respaldo, porque spaceship movió esto de lugar más
+    # de una vez y acá no hay forma de probarlo antes de correrlo.
+    begin
+      if pendiente.respond_to?(:create_app_store_version_release_request)
+        pendiente.create_app_store_version_release_request
+      else
+        Spaceship::ConnectAPI.post_app_store_version_release_request(app_store_version_id: pendiente.id)
+      end
+    rescue StandardError => e
+      UI.user_error!("Apple rechazó la solicitud de publicación de #{pendiente.version_string}: #{e.message}")
+    end
+
+    UI.success("Publicación de #{pendiente.version_string} solicitada: Apple la pone en la tienda en minutos.")
+    UI.success("El cupo de la ficha queda libre, así que ya se puede enviar la versión siguiente con el workflow \"Enviar iOS a revisión\".")
+  end
 end
 
 # --- helpers ---------------------------------------------------------------
@@ -127,6 +182,32 @@ def esperar_procesamiento(app:, version:, build_number:, intentos: 45, espera: 6
   end
 
   UI.user_error!("Se agotó la espera de #{intentos * espera / 60} minutos y el build sigue sin procesarse. Cuando aparezca como \"Listo para enviar\", corré el workflow \"Enviar iOS a revisión\" solo (sin recompilar).")
+end
+
+# Todas las versiones de iOS de la ficha, no solo la editable: los estados que
+# bloquean la creación de una versión nueva (en revisión, esperando publicación)
+# justamente NO son editables, así que get_edit_app_store_version los esconde.
+def versiones_ios(app)
+  Spaceship::ConnectAPI::AppStoreVersion.all(
+    app_id: app.id,
+    filter: { platform: Spaceship::ConnectAPI::Platform::IOS },
+    limit: 20
+  )
+rescue StandardError => e
+  UI.user_error!("No se pudieron leer las versiones de la ficha: #{e.message}")
+end
+
+# Apple renombró el campo de estado entre revisiones de la API; se prueban los
+# dos nombres antes de rendirse, para no fallar por un rename.
+def estado_de(version)
+  %i[app_store_state app_version_state state].each do |campo|
+    next unless version.respond_to?(campo)
+
+    valor = version.public_send(campo)
+    return valor.to_s unless valor.nil?
+  end
+
+  "DESCONOCIDO"
 end
 
 # Idiomas cargados en la ficha. Se mira primero la versión en edición y si no

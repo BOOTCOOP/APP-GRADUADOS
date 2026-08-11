@@ -240,6 +240,22 @@ Detalles operativos de cada camino:
 
 ⚠️ **Las novedades salen de [fastlane/release-notes.txt](../fastlane/release-notes.txt)** (o del input `release_notes`, que gana). Ese archivo es texto **que van a leer los usuarios en la tienda**: se actualiza en el mismo commit que el bump de versión. A propósito no se genera desde `CHANGELOG.md`, que está escrito para devs (menciona `versionCode`, workflows, nombres de archivos) y sería un desastre publicarlo tal cual.
 
+### Cuando la ficha queda bloqueada
+
+Apple permite **una sola versión en trámite** por app. Mientras haya una esperando publicación manual (*Pendiente de publicación*), en revisión o esperando revisión, crear la siguiente falla — el envío corta con `You cannot create a new version of the App in the current state` sobre `/data/relationships/app`. No se puede "pisar" la pendiente con una versión más nueva: hay que liberar el cupo primero.
+
+El síntoma en el log es reconocible: fastlane lee bien los idiomas de la ficha pero después no encuentra ninguna versión **editable**, y el stack muere en `post_app_store_version` (o sea, intentando *crear*). Los estados en trámite no cuentan como editables, de ahí la combinación.
+
+Cómo se destraba, según el estado:
+
+| Estado | Salida |
+|---|---|
+| **Pendiente de publicación** | Publicarla. Se puede **sin entrar a la consola** con el workflow **"Publicar versión pendiente (iOS)"** ([release-ios.yml](../.github/workflows/release-ios.yml) + el lane `release_pending`). Arranca en **modo diagnóstico**: la primera corrida solo lista las versiones y sus estados —útil cuando no hay acceso a App Store Connect— y publica recién al destildar "Solo diagnosticar". |
+| **Esperando revisión** / **En revisión** | Cancelar el envío en la consola. La versión vuelve a editable y el workflow de envío la **renombra** a la versión nueva en vez de crear otra. |
+| **Pendiente de publicación que no se quiere publicar** | Rechazo del desarrollador. Último recurso: hay reportes de versiones que quedan trabadas después de eso, sin aceptar builds nuevos ni permitir crear versiones ([fastlane#17539](https://github.com/fastlane/fastlane/issues/17539), [foro de Apple](https://developer.apple.com/forums/thread/821386)). La bandera `reject_if_possible` de `deliver` **no** sirve acá: el error explota en `verify_version`, antes de que el rechazo se ejecute. |
+
+Publicar la pendiente casi nunca es una pérdida: si su binario ya es Capacitor 8, el usuario que la instale recibe el shell nuevo y el **OTA lo sube al JS más reciente en el primer arranque** (mientras `min_native_version` del manifiesto se lo permita). Sale en minutos en vez de esperar otra revisión.
+
 ⚠️ **La primera publicación de la ficha va a mano.** Una app que nunca se publicó necesita capturas, descripción, categorías, clasificación por edad y política de privacidad; eso se hace en la consola. El workflow automatiza los releases siguientes: reusa la metadata de la versión anterior (Apple la copia al crear la versión nueva) y solo escribe las novedades. Las capturas nunca se tocan (`skip_screenshots`).
 
 Notas de implementación: `precheck` (el lint de ficha de fastlane) corre en nivel **warn** a propósito — sus reglas dan falsos positivos con textos en español y no debe bloquear un envío. `fastlane` se instala sin pin de versión: sigue la API de App Store Connect, que Apple cambia sin avisar, y un pin viejo falla justo cuando hay que publicar.
