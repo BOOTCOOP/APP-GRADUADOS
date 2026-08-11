@@ -1,0 +1,4 @@
+• Ahora la app avisa cuando hay una versión nueva y se actualiza al instante, sin salir ni reinstalar
+• Nuevo botón "Buscar actualizaciones" en el menú
+• El contacto con una búsqueda laboral se hace desde el botón "Contactar" del detalle
+• Mejoras de estabilidad y correcciones menores

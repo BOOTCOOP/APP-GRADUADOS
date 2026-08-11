@@ -1,0 +1,142 @@
+# Automatización de la parte de consola del release de iOS.
+#
+# Este Fastfile NO compila ni firma nada: el archive y la subida del .ipa los
+# hace xcodebuild en el workflow "Build iOS (release, para App Store)". Acá
+# solo se automatiza lo que quedaba a mano en App Store Connect: crear la
+# versión nueva en la ficha, adjuntarle el build ya subido, escribir las
+# "Novedades de esta versión" y mandarla a revisión.
+#
+# Apple SIEMPRE revisa (1-2 días): no existe publicar sin revisión. Con
+# auto_release, al aprobarse sale a la tienda sin volver a entrar a la consola.
+#
+# Uso (lo corre el workflow "Enviar iOS a revisión (App Store)"):
+#   ASC_API_KEY_ID=... ASC_API_ISSUER_ID=... ASC_API_KEY_PATH=... \
+#   APP_VERSION=1.3.5 APP_BUILD_NUMBER=6 APP_RELEASE_NOTES="..." \
+#   fastlane ios submit
+#
+# La API key de App Store Connect con rol App Manager alcanza: puede editar
+# la ficha y enviar a revisión. Admin solo haría falta para cloud signing
+# (ver docs/releases-y-actualizaciones.md).
+
+default_platform(:ios)
+
+BUNDLE_ID = "ar.uba.derecho.graduados".freeze
+
+platform :ios do
+  desc "Adjunta un build ya subido a una versión nueva de la ficha y la manda a revisión"
+  lane :submit do |options|
+    version = valor(options[:version], "APP_VERSION")
+    build_number = valor(options[:build_number], "APP_BUILD_NUMBER")
+    notas = valor(options[:release_notes], "APP_RELEASE_NOTES")
+    auto_release = valor(options[:auto_release], "APP_AUTO_RELEASE", "true") != "false"
+
+    UI.user_error!("Falta version (MARKETING_VERSION del build)") if version.empty?
+    UI.user_error!("Falta build_number (CURRENT_PROJECT_VERSION del build)") if build_number.empty?
+    # Apple exige el texto de novedades en toda actualización: sin él el envío
+    # se rechaza en la validación, no en la revisión.
+    UI.user_error!("Faltan las novedades de la versión (fastlane/release-notes.txt)") if notas.empty?
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_API_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_API_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_API_KEY_PATH"),
+      duration: 1200,
+      in_house: false
+    )
+
+    app = Spaceship::ConnectAPI::App.find(BUNDLE_ID)
+    UI.user_error!("No hay ninguna ficha con el bundle ID #{BUNDLE_ID} en esta cuenta") if app.nil?
+
+    esperar_procesamiento(app: app, version: version, build_number: build_number)
+
+    # Las novedades se cargan por idioma, y los idiomas dependen de la ficha:
+    # se leen de App Store Connect en vez de hardcodear un locale que no exista.
+    notas_por_idioma = idiomas_de_la_ficha(app).map { |locale| [locale, notas] }.to_h
+    UI.message("Novedades para: #{notas_por_idioma.keys.join(', ')}")
+
+    deliver(
+      api_key: api_key,
+      app_identifier: BUNDLE_ID,
+      app_version: version,
+      build_number: build_number,
+      release_notes: notas_por_idioma,
+
+      # El .ipa ya lo subió xcodebuild; acá solo se trabaja sobre la ficha.
+      # Las capturas y el resto de la metadata se administran en la consola.
+      skip_binary_upload: true,
+      skip_screenshots: true,
+
+      submit_for_review: true,
+      automatic_release: auto_release,
+
+      # precheck es un lint de la ficha: que avise, nunca que bloquee el envío
+      # (sus reglas dan falsos positivos con textos en español).
+      precheck_include_in_app_purchases: false,
+      precheck_default_rule_level: :warn,
+
+      # Cuestionario del envío. Lo de cifrado ya está declarado en Info.plist
+      # (ITSAppUsesNonExemptEncryption = false); esto solo lo repite. Los
+      # derechos de contenido NO se tocan: se responden una vez en la consola
+      # y persisten a nivel app.
+      submission_information: {
+        export_compliance_uses_encryption: false,
+        add_id_info_uses_idfa: false
+      },
+
+      force: true # sin confirmación interactiva del HTML de preview
+    )
+
+    UI.success("Versión #{version} (build #{build_number}) enviada a revisión.")
+    UI.success(auto_release ? "Se publica sola en cuanto Apple la apruebe." : "Al aprobarse queda esperando publicación manual.")
+  end
+end
+
+# --- helpers ---------------------------------------------------------------
+
+# Cada dato puede venir como opción del lane (uso local) o por variable de
+# entorno (lo que hace el workflow). Se compara contra nil y no por
+# truthiness: `auto_release:false` es un valor válido, no un dato ausente.
+def valor(opcion, env, default = "")
+  crudo = opcion.nil? ? ENV[env] : opcion
+  (crudo.nil? ? default : crudo).to_s.strip
+end
+
+# deliver no puede adjuntar un build que Apple todavía está procesando (el
+# estado "Procesando" de la consola). Tarda entre 5 y 20 minutos desde que
+# termina la subida, así que se espera acá en vez de fallar y hacer reintentar
+# el workflow a mano.
+def esperar_procesamiento(app:, version:, build_number:, intentos: 45, espera: 60)
+  UI.message("Buscando el build #{version} (#{build_number}) en App Store Connect…")
+
+  intentos.times do |intento|
+    build = Spaceship::ConnectAPI::Build.all(
+      app_id: app.id,
+      version: version,
+      build_number: build_number
+    ).first
+    estado = build&.processing_state
+
+    return build if estado == "VALID"
+
+    if %w[INVALID FAILED].include?(estado)
+      UI.user_error!("El build #{version} (#{build_number}) quedó en estado #{estado}: Apple lo rechazó al procesarlo. Revisá el mail de App Store Connect.")
+    end
+
+    UI.message("#{estado || 'todavía no aparece'} (intento #{intento + 1}/#{intentos})")
+    sleep(espera) unless intento == intentos - 1
+  end
+
+  UI.user_error!("Se agotó la espera de #{intentos * espera / 60} minutos y el build sigue sin procesarse. Cuando aparezca como \"Listo para enviar\", corré el workflow \"Enviar iOS a revisión\" solo (sin recompilar).")
+end
+
+# Idiomas cargados en la ficha. Se mira primero la versión en edición y si no
+# hay, la publicada; en una ficha nueva sin ninguna versión todavía, el idioma
+# principal de la app.
+def idiomas_de_la_ficha(app)
+  plataforma = Spaceship::ConnectAPI::Platform::IOS
+  version = app.get_edit_app_store_version(platform: plataforma) ||
+            app.get_live_app_store_version(platform: plataforma)
+  idiomas = version.nil? ? [] : version.get_app_store_version_localizations.map(&:locale)
+
+  idiomas.empty? ? [app.primary_locale] : idiomas
+end

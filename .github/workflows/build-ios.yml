@@ -2,8 +2,16 @@ name: Build iOS (release, para App Store)
 
 # Se dispara manualmente desde la pestaña Actions de GitHub.
 # Archiva la app con Xcode en un runner de macOS y la sube a App Store
-# Connect: el build queda en TestFlight, y desde ahí se asocia a una
-# versión nueva de la ficha y se manda a revisión.
+# Connect. Todo binario entra por el mismo canal: aparece en la lista de
+# builds (lo que la consola muestra como TestFlight) y de ahí se adjunta a
+# una versión de la ficha — no hay forma de "subir directo al App Store",
+# y la revisión de Apple es obligatoria.
+#
+# Tildando "submit_for_review" al lanzarlo, al terminar la subida llama al
+# workflow "Enviar iOS a revisión (App Store)", que espera a que Apple
+# procese el build, crea la versión en la ficha, le carga las novedades de
+# fastlane/release-notes.txt y la manda a revisión (con "Publicar al
+# aprobarse" no hay que volver a entrar a la consola).
 #
 # FIRMA MANUAL (no cloud signing): el certificado de distribución y el
 # provisioning profile se inyectan como secrets. Se eligió así a
@@ -18,7 +26,9 @@ name: Build iOS (release, para App Store)
 #   IOS_PROFILE_BASE64 — el .mobileprovision de App Store en base64
 #   ASC_API_KEY_P8     — contenido del AuthKey_XXXXXX.p8 (App Store
 #                        Connect → Usuarios y acceso → Integraciones);
-#                        rol App Manager alcanza: solo se usa para SUBIR.
+#                        rol App Manager alcanza, tanto para subir como para
+#                        editar la ficha y enviar a revisión. Admin solo haría
+#                        falta para cloud signing, que acá no se usa.
 #   ASC_API_KEY_ID     — "ID de clave" de esa key
 #   ASC_API_ISSUER_ID  — "ID de emisor" del equipo
 #
@@ -28,6 +38,15 @@ name: Build iOS (release, para App Store)
 # PROVISIONING_PROFILE_SPECIFIER en el target App del pbxproj (Release).
 on:
   workflow_dispatch:
+    inputs:
+      submit_for_review:
+        description: 'Además de subir, crear la versión en la ficha y mandarla a revisión'
+        type: boolean
+        default: false
+      auto_release:
+        description: 'Publicar automáticamente al aprobarse (solo si se manda a revisión)'
+        type: boolean
+        default: true
 
 env:
   TEAM_ID: 7RARYSNZU9
@@ -152,3 +171,18 @@ jobs:
             -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.ASC_API_KEY_ID }}.p8 \
             -authenticationKeyID "${{ secrets.ASC_API_KEY_ID }}" \
             -authenticationKeyIssuerID "${{ secrets.ASC_API_ISSUER_ID }}"
+
+  # Corre en Linux y arranca esperando a que Apple procese el build (5-20 min),
+  # así que no se paga runner de macOS por la espera. Si falla acá (ej. se agotó
+  # la espera), "Re-run failed jobs" reintenta solo el envío, sin recompilar.
+  enviar-a-revision:
+    needs: build-ios
+    if: ${{ inputs.submit_for_review }}
+    uses: ./.github/workflows/submit-ios.yml
+    with:
+      # fromJSON y no `inputs.auto_release` pelado: encadenar un input booleano
+      # de workflow_dispatch a un input booleano de workflow_call falla con
+      # "Unexpected value type. Expected boolean, got string". fromJSON lo
+      # normaliza y funciona venga como venga.
+      auto_release: ${{ fromJSON(inputs.auto_release) }}
+    secrets: inherit

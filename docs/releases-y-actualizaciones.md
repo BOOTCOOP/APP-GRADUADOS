@@ -47,17 +47,30 @@ Hay **dos versiones** que evolucionan a ritmos distintos:
 | **Nativa** (versión del shell) | `versionName` en `android/app/build.gradle` = `MARKETING_VERSION` en iOS = tag del release de tienda | En cada **release de tienda** |
 | **Bundle JS** | `version` en `package.json` (expuesta al código como `VITE_APP_VERSION` vía `vite.config.ts`) | En cada **OTA**, y se **realinea con la nativa** en cada release de tienda |
 
-Estado actual (versión unificada 1.2.0, release de tienda por Capacitor 8 / targetSdk 36):
+### Una sola línea de versiones, siempre creciente
 
-- `package.json`: `1.2.0`
-- Android: `versionName "1.2.0"` / `versionCode 15`
-- iOS: `MARKETING_VERSION 1.2.0` / `CURRENT_PROJECT_VERSION 4`
+Aunque son dos versiones, **comparten la misma línea de numeración y nunca se reusa un número**. No es una convención estética: la app compara la versión del manifiesto contra la del bundle que está corriendo, y cuando corre el bundle embebido esa versión es `VITE_APP_VERSION` = `package.json` del build de tienda (`evaluateManifest()` en `src/uses/otaUpdate.ts`). Los dos números se comparan entre sí, así que tienen que vivir en la misma escala.
+
+De ahí salen las dos invariantes:
+
+1. **Cada OTA es estrictamente mayor que el OTA anterior.** Si es igual o menor, `compareVersions(manifiesto, actual) <= 0` → la app lo ve como "up-to-date" y el bundle nunca se aplica, en silencio.
+2. **Cada release de tienda es estrictamente mayor que el último OTA publicado.** Si sale con un número menor, la app recién actualizada se descarga el OTA viejo (número más alto, código más viejo) y **pisa el JS nuevo del shell con el anterior**: un downgrade silencioso. Si sale con el mismo número, no hay downgrade pero quedan dos artefactos distintos con la misma versión y ya no se sabe cuál corre un usuario.
+
+Ejemplo, que es exactamente cómo se encadena: tienda `1.3.5` → OTA `1.3.6` → OTA `1.3.7` → tienda `1.3.8`. El release de tienda **no vuelve atrás ni repite**: toma el próximo número libre. Que sea `patch`, `minor` o `major` lo decide SemVer según el cambio (`1.3.7` → `1.4.0` si el release de tienda trae una feature); lo obligatorio es que sea mayor.
+
+⚠️ Corolario, y es la trampa fácil: **`package.json` y la versión nativa tienen que salir iguales del mismo build de tienda.** Alimentan comparaciones distintas — `package.json` es la versión del bundle (comparación OTA) y `versionName`/`MARKETING_VERSION` es la que devuelve `App.getInfo()` (comparación de `min_native_version` y de `latest_version` del backend). Si el build de tienda va con la nativa atrasada respecto de `package.json`, `checkStoreUpdate()` compara la nativa vieja contra `latest_version` y le ofrece "ir a la tienda" a alguien que **ya tiene lo último instalado**, sin salida posible.
+
+Estado actual (2026-08-10):
+
+- `package.json`: `1.3.5` — último OTA publicado (`public/ota/latest.json`)
+- Android: `versionName "1.3.3"` / `versionCode 23`
+- iOS: `MARKETING_VERSION 1.3.3` / `CURRENT_PROJECT_VERSION 5`
+- Las nativas quedaron en `1.3.3` porque `1.3.4` y `1.3.5` salieron solo por OTA. El **próximo release de tienda arranca en `1.3.6`** (o más), no en `1.3.5`.
 
 Reglas:
 
-- `versionCode` (Android) y `CURRENT_PROJECT_VERSION` (iOS) se incrementan **SIEMPRE +1** en cada subida a consola — es obligatorio para Play Console y App Store Connect, aunque el `versionName` no cambie.
+- `versionCode` (Android) y `CURRENT_PROJECT_VERSION` (iOS) se incrementan **SIEMPRE +1** en cada subida a consola — es obligatorio para Play Console y App Store Connect, aunque el `versionName` no cambie. Son contadores internos de las consolas, no versiones: no participan de la línea de arriba.
 - **SemVer** para ambas versiones: `patch` = fixes, `minor` = features, `major` = breaking.
-- Ejemplo de vida real: release de tienda `1.1.0` → OTA `1.1.1` → OTA `1.1.2` → nuevo release de tienda `1.2.0` (y `package.json` vuelve a `1.2.0`).
 
 ---
 
@@ -100,12 +113,19 @@ Campo `min_native_version` del manifiesto: los shells nativos con versión menor
 
 Para publicar cambios de solo código web (ej. de `1.1.0` a `1.1.1`):
 
+0. **Chequeo de versión** (ver [Una sola línea de versiones](#una-sola-línea-de-versiones-siempre-creciente)): el número nuevo tiene que ser **mayor** que el `version` de `public/ota/latest.json`. Esto lo **valida `make-bundle.js`**, que aborta si no sube — no hay que verificarlo a mano.
+   ```bash
+   node -p "require('./public/ota/latest.json').version"  # piso: hay que superarlo
+   ```
+   Ojo con el orden: el manifiesto se edita en el paso 4, **después** de generar el zip. Si se toca antes, el chequeo lo lee como "ya publicada" y aborta. Para reempaquetar a propósito una versión ya publicada (ej. se perdió el zip): `OTA_ALLOW_SAME_VERSION=1 npm run ota:build`.
+
+   El OTA **no toca** `versionName` / `MARKETING_VERSION` (el shell no cambia) ni `latest_version` del backend (ese campo anuncia la versión de **tienda**: adelantarlo manda a todos a buscar en la tienda algo que no existe).
 1. **Bump** de `version` en `package.json` → `1.1.1`.
 2. **Build del bundle**:
    ```bash
    npm run ota:build
    ```
-   Corre `build:native` y después `tools/ota/make-bundle.js`, que valida que la base sea `/` y genera `bundle-1.1.1.zip`.
+   Corre `build:native` y después `tools/ota/make-bundle.js`, que valida que la versión suba, que la base sea `/` y que no haya URLs de dev embebidas, y genera `bundle-1.1.1.zip`.
 3. **Publicar el zip**, por cualquiera de las dos vías:
    - **GitHub Releases** (recomendado — no engorda el repo):
      ```bash
@@ -130,22 +150,28 @@ Actualizar también `CHANGELOG.md` con la entrada de la versión.
 
 Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Las fichas de las tiendas se crean con el ID `ar.uba.derecho.graduados` (ver [Bundle ID](#bundle-id)).
 
-1. **Bump de versiones nativas**:
+0. **Chequeo de versión** (ver [Una sola línea de versiones](#una-sola-línea-de-versiones-siempre-creciente)): la versión de tienda tiene que ser **estrictamente mayor que el último OTA publicado**, no igual y menos aún menor — si no, la app recién instalada se baja el OTA viejo y pisa el JS nuevo del shell.
+   ```bash
+   node -p "require('./public/ota/latest.json').version"  # piso: hay que superarlo
+   ```
+1. **Bump de versiones nativas** — las tres al **mismo** número:
    - Android (`android/app/build.gradle`): `versionName` nuevo + `versionCode` **+1**.
    - iOS: `MARKETING_VERSION` nuevo + `CURRENT_PROJECT_VERSION` **+1**.
-   - **Realinear** `version` de `package.json` con la versión nativa nueva.
+   - **Realinear** `version` de `package.json` con la versión nativa nueva. No es opcional: si el build sale con `package.json` y la nativa distintas, `checkStoreUpdate()` le ofrece "ir a la tienda" a usuarios que ya tienen lo último (ver el corolario del esquema de versionado).
 2. **Build y sync**:
    ```bash
    npm run build:native
    npx cap sync
    ```
 3. **Android** — dos caminos:
-   - **GitHub Actions (recomendado, no requiere Android Studio)**: pestaña Actions → workflow **"Build AAB (release, para Play Store)"** → Run workflow → descargar el artifact `app-release-aab` → subir el `.aab` a **Play Console**. Requiere los secrets del repo `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` (ver comentario del workflow). El keystore es la **upload key** (Play App Signing custodia la clave final); backup del `.jks` fuera del repo — jamás commitearlo (`.gitignore` ya lo cubre).
+   - **GitHub Actions (recomendado, no requiere Android Studio)**: pestaña Actions → workflow **"Build AAB (release, para Play Store)"** → Run workflow → elegir la **pista** (por defecto `internal`) → el AAB se compila y se **sube solo a Play Console**; el artifact `app-release-aab` queda igual como respaldo. Es el equivalente Android de lo que el workflow de iOS ya hace con TestFlight. Requiere los secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` y, para la subida, `PLAY_SERVICE_ACCOUNT_JSON` (ver comentario del workflow). El keystore es la **upload key** (Play App Signing custodia la clave final); backup del `.jks` fuera del repo — jamás commitearlo (`.gitignore` ya lo cubre).
    - **Local**: `npx cap open android` y en Android Studio: Build → Generate Signed Bundle (usa `android/keystore.properties`) → subir a Play Console.
-4. **iOS** — dos caminos:
-   - **GitHub Actions (recomendado, no requiere Mac)**: pestaña Actions → workflow **"Build iOS (release, para App Store)"** → Run workflow → el build se sube solo a App Store Connect y queda en **TestFlight**; desde ahí se crea la versión nueva en la ficha y se manda a revisión. Usa **firma manual**: 6 secrets, `IOS_P12_BASE64` / `IOS_P12_PASSWORD` / `IOS_PROFILE_BASE64` (certificado + profile) y `ASC_API_KEY_P8` / `ASC_API_KEY_ID` / `ASC_API_ISSUER_ID` (API key de App Store Connect, **rol App Manager alcanza** porque solo se usa para subir). Ver el comentario al tope del workflow.
 
-  ⚠️ **Por qué manual y no cloud signing**: el cloud signing (que crearía certificado y profile solo) exige una API key con rol **Admin** — con App Manager falla con `Cloud signing permission error` + `No signing certificate "iOS Distribution" found`. Se eligió firma manual a propósito para no tener que emitir una credencial con permisos de administración de la cuenta: el `.p12` solo firma y la key App Manager solo sube, así que ninguna de las dos puede administrar usuarios ni certificados.
+  ⚠️ **A producción se llega promoviendo, nunca subiendo directo.** El AAB entra por `internal`, se verifica, y en la consola se promueve Prueba interna → Producción. El motivo no es ceremonia: Play cuenta **las pistas de prueba** para el requisito de nivel de API objetivo, así que subir directo a producción deja las pistas congeladas en un bundle viejo que sigue marcando la app como incumplidora. Pasó en agosto de 2026 — producción ya estaba en targetSdk 36 (bundle 23) y los bundles 15 y 16, activos en Prueba interna y en la cerrada Alpha con targetSdk 35, mantuvieron el aviso. Con la regla de promover, la pista interna nunca puede quedar más vieja que producción. Si igual elegís `production` en el workflow, el release entra como **borrador** y hay que publicarlo a mano.
+4. **iOS** — dos caminos:
+   - **GitHub Actions (recomendado, no requiere Mac)**: pestaña Actions → workflow **"Build iOS (release, para App Store)"** → Run workflow → el build se sube solo a App Store Connect. Tildando **"Además de subir, crear la versión en la ficha y mandarla a revisión"** no queda nada por hacer a mano (ver [Envío a revisión automatizado (iOS)](#envío-a-revisión-automatizado-ios)); sin tildar, el build queda en la lista de builds y la versión se arma en la consola. Usa **firma manual**: 6 secrets, `IOS_P12_BASE64` / `IOS_P12_PASSWORD` / `IOS_PROFILE_BASE64` (certificado + profile) y `ASC_API_KEY_P8` / `ASC_API_KEY_ID` / `ASC_API_ISSUER_ID` (API key de App Store Connect, **rol App Manager alcanza**: sube, edita la ficha y envía a revisión). Ver el comentario al tope del workflow.
+
+  ⚠️ **Por qué manual y no cloud signing**: el cloud signing (que crearía certificado y profile solo) exige una API key con rol **Admin** — con App Manager falla con `Cloud signing permission error` + `No signing certificate "iOS Distribution" found`. Se eligió firma manual a propósito para no tener que emitir una credencial con permisos de administración de la cuenta: el `.p12` solo firma y la key App Manager solo opera sobre las apps (subir builds, editar fichas, enviar a revisión), así que ninguna de las dos puede administrar usuarios ni certificados.
 
   **Renovación**: el certificado de distribución vence al año (el actual, 8/8/2027). Para renovarlo no hace falta Mac — se genera clave privada + CSR con el OpenSSL que trae Git para Windows, se sube el CSR en developer.apple.com → Certificates, se baja el `.cer`, se crea el profile de App Store, y se arma el `.p12` combinando `.cer` + clave privada + el intermedio [WWDR G3](https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer). Revocar y recrear certificados **no afecta la app publicada**: Apple re-firma los builds del App Store con su propio certificado.
    - **Local** (requiere Mac con **Xcode 26+**, exigido por Capacitor 8):
@@ -155,6 +181,31 @@ Obligatorio ante cualquier cambio nativo (ver tabla de decisión). Las fichas de
      En Xcode: Product → **Archive** → subir a **App Store Connect**.
 5. **Tag y changelog**: tag de release con la versión nativa, entrada en `CHANGELOG.md`.
 6. **Revisión de tiendas**: horas (Google) / 1-2 días (Apple).
+
+---
+
+## Envío a revisión automatizado (iOS)
+
+**No existe "subir directo al App Store".** Apple tiene un solo canal de ingesta: todo binario que se sube aparece en la lista de builds de App Store Connect (lo que la consola muestra bajo TestFlight) y de ahí se adjunta a una versión de la ficha. Ese mismo binario es el que llega a la tienda, no se re-sube nada. Que el build esté "en TestFlight" **no** significa que se distribuyó a testers: sin grupos configurados, es solo el área de ingesta. Y la **revisión de Apple es obligatoria** — ningún flujo la saltea.
+
+Lo que sí está automatizado es todo el trabajo de consola posterior, con el workflow **"Enviar iOS a revisión (App Store)"** ([.github/workflows/submit-ios.yml](../.github/workflows/submit-ios.yml) + el lane `submit` de [fastlane/Fastfile](../fastlane/Fastfile)):
+
+1. Espera a que Apple termine de **procesar** el build (5-20 min; hasta 45 de tope).
+2. Crea la **versión nueva** en la ficha y le adjunta ese build.
+3. Carga las **"Novedades de esta versión"** en todos los idiomas de la ficha (los lee de la API, no están hardcodeados).
+4. Responde el cuestionario del envío (cifrado — ya declarado en `Info.plist` con `ITSAppUsesNonExemptEncryption` — e IDFA) y **manda a revisión**.
+5. Con **"Publicar automáticamente al aprobarse"**, sale a la tienda sola cuando Apple aprueba.
+
+Dos formas de usarlo:
+
+- **Encadenado (un solo click)**: al lanzar "Build iOS", tildar **"Además de subir, crear la versión en la ficha y mandarla a revisión"**. El envío corre como job aparte en un runner **Linux** (no compila, solo habla con la API), así que la espera del procesamiento no paga minutos de macOS. Si ese job falla, **"Re-run failed jobs"** reintenta solo el envío sin recompilar.
+- **Suelto**: Actions → "Enviar iOS a revisión (App Store)" → Run workflow. Para mandar a revisión un build que ya está subido, o **reenviar después de un rechazo**, sin recompilar. Los inputs de versión y build son opcionales: por defecto salen del `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` del proyecto iOS del commit.
+
+⚠️ **Las novedades salen de [fastlane/release-notes.txt](../fastlane/release-notes.txt)** (o del input `release_notes`, que gana). Ese archivo es texto **que van a leer los usuarios en la tienda**: se actualiza en el mismo commit que el bump de versión. A propósito no se genera desde `CHANGELOG.md`, que está escrito para devs (menciona `versionCode`, workflows, nombres de archivos) y sería un desastre publicarlo tal cual.
+
+⚠️ **La primera publicación de la ficha va a mano.** Una app que nunca se publicó necesita capturas, descripción, categorías, clasificación por edad y política de privacidad; eso se hace en la consola. El workflow automatiza los releases siguientes: reusa la metadata de la versión anterior (Apple la copia al crear la versión nueva) y solo escribe las novedades. Las capturas nunca se tocan (`skip_screenshots`).
+
+Notas de implementación: `precheck` (el lint de ficha de fastlane) corre en nivel **warn** a propósito — sus reglas dan falsos positivos con textos en español y no debe bloquear un envío. `fastlane` se instala sin pin de versión: sigue la API de App Store Connect, que Apple cambia sin avisar, y un pin viejo falla justo cuando hay que publicar.
 
 ---
 
@@ -176,7 +227,8 @@ Relación con OTA: force update empuja hacia la **tienda** (shell nativo); OTA e
 
 Antes de dar por publicado un release (tienda u OTA):
 
-- [ ] **Versiones sincronizadas**: `package.json` / `versionName` + `versionCode` / `MARKETING_VERSION` + `CURRENT_PROJECT_VERSION` según el esquema de versionado (OTA: solo `package.json`; tienda: todo realineado).
+- [ ] **Versión mayor que la última publicada**: mayor que el `version` de `public/ota/latest.json`. En el OTA lo valida `make-bundle.js` (aborta si no sube); **en el release de tienda hay que mirarlo a mano** — un release de tienda que no supera al último OTA provoca un downgrade silencioso del JS. Nunca reusar un número.
+- [ ] **Versiones sincronizadas**: `package.json` / `versionName` + `versionCode` / `MARKETING_VERSION` + `CURRENT_PROJECT_VERSION` según el esquema de versionado (OTA: solo `package.json`, y NO `latest_version` del backend; tienda: `package.json` y las dos nativas al mismo número).
 - [ ] **Bundle ID**: las fichas de las tiendas se crean con `ar.uba.derecho.graduados` (ver sección Bundle ID).
 - [ ] **`CHANGELOG.md` actualizado** con la versión y la fecha.
 - [ ] **Build correcto**: `build:native` para nativo/OTA, nunca un build web sincronizado a Capacitor.
