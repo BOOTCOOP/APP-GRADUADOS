@@ -221,10 +221,22 @@ Lo que sí está automatizado es todo el trabajo de consola posterior, con el wo
 4. Responde el cuestionario del envío (cifrado — ya declarado en `Info.plist` con `ITSAppUsesNonExemptEncryption` — e IDFA) y **manda a revisión**.
 5. Con **"Publicar automáticamente al aprobarse"**, sale a la tienda sola cuando Apple aprueba.
 
-Dos formas de usarlo:
+### Las dos variantes: elegir una, siempre
 
-- **Encadenado (un solo click)**: al lanzar "Build iOS", tildar **"Además de subir, crear la versión en la ficha y mandarla a revisión"**. El envío corre como job aparte en un runner **Linux** (no compila, solo habla con la API), así que la espera del procesamiento no paga minutos de macOS. Si ese job falla, **"Re-run failed jobs"** reintenta solo el envío sin recompilar.
-- **Suelto**: Actions → "Enviar iOS a revisión (App Store)" → Run workflow. Para mandar a revisión un build que ya está subido, o **reenviar después de un rechazo**, sin recompilar. Los inputs de versión y build son opcionales: por defecto salen del `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` del proyecto iOS del commit.
+Al cerrar una versión lista para iPhone se corre con una de estas dos combinaciones. No hay una tercera, y conviene decidirla **antes** de lanzar el workflow.
+
+| | Directo a producción | Pasando por TestFlight |
+|---|---|---|
+| **"Build iOS"** | `submit_for_review` **true** + `auto_release` **true** | `submit_for_review` **false** |
+| **Después** | Nada. Cuando Apple aprueba, publica solo | Instalar el build desde TestFlight y probarlo; después correr **"Enviar iOS a revisión (App Store)"** con `auto_release` **true** |
+| **Cuándo** | Cambios de bajo riesgo, o JS que ya se validó por OTA en Android | Cambios nativos (plugins, versión de Capacitor, permisos, deployment target) o cualquier cosa que no se pueda verificar sin instalar el binario |
+
+En las dos, la revisión de Apple es obligatoria (1-2 días) y `auto_release: true` hace que al aprobarse salga a la tienda sin volver a entrar a la consola.
+
+Detalles operativos de cada camino:
+
+- **Encadenado**: el envío corre como job aparte en un runner **Linux** (no compila, solo habla con la API), así que la espera del procesamiento no paga minutos de macOS. Si ese job falla, **"Re-run failed jobs"** reintenta solo el envío sin recompilar.
+- **Suelto**: los inputs de versión y build son opcionales — por defecto salen del `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` del proyecto iOS del commit. Es también la vía para **reenviar después de un rechazo**, sin recompilar.
 
 ⚠️ **Las novedades salen de [fastlane/release-notes.txt](../fastlane/release-notes.txt)** (o del input `release_notes`, que gana). Ese archivo es texto **que van a leer los usuarios en la tienda**: se actualiza en el mismo commit que el bump de versión. A propósito no se genera desde `CHANGELOG.md`, que está escrito para devs (menciona `versionCode`, workflows, nombres de archivos) y sería un desastre publicarlo tal cual.
 
