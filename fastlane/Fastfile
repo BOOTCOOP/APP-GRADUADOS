@@ -136,20 +136,27 @@ platform :ios do
 
     UI.important("Pendiente de publicación: #{pendiente.version_string}")
 
-    # Barrera: publicar una versión MENOR que la que está en la tienda haría
-    # retroceder el número de versión de la ficha. Si aparece este caso, hay
-    # algo que no cierra (por ejemplo una versión publicada fuera del repo) y
-    # se decide a mano, no en una corrida de CI.
-    if retrocede?(pendiente, live)
-      UI.user_error!(
-        "La versión pendiente (#{pendiente.version_string}) es MENOR que la publicada (#{live.version_string}). " \
-        "Publicarla haría retroceder el número de versión de la ficha, así que no se publica sola: revisar por qué pasó antes de forzar nada."
-      )
+    # Publicar una versión MENOR que la que está en la tienda haría retroceder
+    # el número de versión de la ficha. Si aparece este caso, hay algo que no
+    # cierra (por ejemplo una versión publicada fuera del repo) y se decide a
+    # mano, no en una corrida de CI.
+    retroceso = retrocede?(pendiente, live)
+    if retroceso
+      UI.error("OJO: #{pendiente.version_string} es MENOR que la publicada (#{live.version_string}): publicarla haría retroceder el número de versión de la ficha.")
     end
 
+    # El corte por diagnóstico va ANTES de cualquier error: una corrida que solo
+    # mira no debe terminar en rojo, por más feo que sea lo que encuentre.
     if solo_diagnostico
       UI.important("Modo diagnóstico: no se publicó nada. Para publicarla, correr el workflow destildando \"Solo diagnosticar\".")
       next
+    end
+
+    if retroceso
+      UI.user_error!(
+        "La versión pendiente (#{pendiente.version_string}) es MENOR que la publicada (#{live.version_string}). " \
+        "No se publica sola: revisar por qué pasó antes de forzar nada."
+      )
     end
 
     # Dos formas de pedir la publicación: el método del modelo (lo normal) y la
