@@ -24,6 +24,10 @@ on:
         description: 'Solo diagnosticar: lista los estados y NO publica nada'
         type: boolean
         default: true
+      forzar_retroceso:
+        description: 'Publicar aunque la pendiente sea MENOR que la publicada (hace bajar el número de versión de la ficha)'
+        type: boolean
+        default: false
 
 jobs:
   release:
@@ -49,6 +53,7 @@ jobs:
           ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
           ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
           APP_SOLO_DIAGNOSTICO: ${{ inputs.solo_diagnostico }}
+          APP_FORZAR_RETROCESO: ${{ inputs.forzar_retroceso }}
           FASTLANE_SKIP_UPDATE_CHECK: 'true'
           FASTLANE_HIDE_CHANGELOG: 'true'
         run: |
