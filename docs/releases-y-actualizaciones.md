@@ -199,6 +199,8 @@ El workflow deja el AAB en **Prueba interna** y ahí termina la automatización:
 6. **Promover también a Prueba cerrada** si esa pista se usa; es el mismo botón. Si no se usa, dejarla **vacía** es mejor que dejarla con un bundle viejo (ver la advertencia del paso 3 del proceso de release). Que la interna quede sin versión activa después de promover no es problema: una pista sin versiones no incumple nada.
 7. **Confirmar la publicación**: la revisión de Google tarda horas → *"Disponible en Google Play"*. En **Últimas versiones y app bundles** el bundle nuevo tiene que quedar **Activo** y el anterior **Inactivo**.
 
+⚠️ **Las novedades de Play viven en [distribution/whatsnew/](../distribution/whatsnew/)**, un archivo `whatsnew-<idioma>` por cada idioma de la ficha, y las sube el workflow junto con el AAB. Es el equivalente Android de `fastlane/release-notes.txt`: texto **que leen los usuarios**, se actualiza en el mismo commit que el bump de versión. Dos diferencias con iOS: Play corta en **500 caracteres** por idioma (el workflow lo valida antes de compilar) y el nombre del archivo tiene que coincidir **exacto** con un idioma cargado en la ficha (*Crecer → Ficha principal de Play Store*), o la API rechaza la subida.
+
 ### Cuando algo sale mal
 
 | Síntoma | Causa y salida |

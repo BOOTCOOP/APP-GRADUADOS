@@ -57,6 +57,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Las "Novedades de esta versión" viajan con el AAB, igual que en iOS
+      # con fastlane/release-notes.txt. Se validan acá y no al final, para no
+      # descubrir el problema después de compilar.
+      - name: Verificar notas de la versión
+        if: inputs.track != 'ninguna'
+        run: |
+          dir=distribution/whatsnew
+          if [ ! -d "$dir" ] || [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then
+            echo "::error::No hay notas de versión en $dir (hace falta un archivo whatsnew-<idioma> por cada idioma de la ficha)"; exit 1
+          fi
+          for f in "$dir"/*; do
+            n=$(wc -m < "$f" | tr -d ' ')
+            echo "$(basename "$f"): $n caracteres"
+            if [ "$n" -gt 500 ]; then
+              echo "::error::$(basename "$f") tiene $n caracteres y Play corta en 500"; exit 1
+            fi
+          done
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -128,6 +146,10 @@ jobs:
           packageName: ar.uba.derecho.graduados
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           track: ${{ inputs.track }}
+          # Un archivo whatsnew-<idioma> por idioma de la ficha. El nombre tiene
+          # que coincidir EXACTO con un idioma cargado en Play, o la API rechaza
+          # la subida (Play Console → Crecer → Ficha principal de Play Store).
+          whatsNewDirectory: distribution/whatsnew
           # Producción entra como borrador para que publicar siga siendo una
           # decisión humana (y se pueda elegir el % de lanzamiento gradual).
           status: ${{ inputs.track == 'production' && 'draft' || 'completed' }}
