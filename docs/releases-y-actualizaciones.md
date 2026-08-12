@@ -64,8 +64,8 @@ Estado actual (2026-08-11):
 
 - `package.json`: `2.0.1` — realineado con las nativas para el release de tienda
 - `public/ota/latest.json`: `1.3.6` — último OTA publicado
-- Android: `versionName "2.0.1"` / `versionCode 25`. En Play, producción está en `1.3.3` / `23` y Prueba interna en `1.3.7` / `24` (ese AAB queda descartado por el renumerado)
-- iOS: `MARKETING_VERSION 2.0.1` / `CURRENT_PROJECT_VERSION 7`
+- Android: `versionName "2.0.1"` / `versionCode 25`. En Play, producción sigue en `1.3.3` / `23` hasta que se promueva el 25 desde Prueba interna (el AAB `1.3.7` / `24` quedó descartado por el renumerado)
+- iOS: `MARKETING_VERSION 2.0.1` / `CURRENT_PROJECT_VERSION 7`. En App Store Connect, la **2.0.1 está en revisión** y la publicada es la **1.3.3** (se publicó el 11/8/2026 para liberar el cupo que ocupaba, ver más abajo)
 - El **próximo OTA arranca en `2.0.2`**.
 
 ⚠️ **Por qué el salto de 1.3.x a 2.0.1.** El App Store tiene publicada una versión **2.0** creada el 18/7/2026 que **no salió de este repo** (el repo nunca pasó de 1.3.x; se descubrió el 11/8/2026 con el diagnóstico del workflow "Publicar versión pendiente"). Como la línea de versiones es única y compartida entre OTA, Android e iOS, y tiene que crecer siempre por encima de lo publicado, la única salida coherente era subir las tres por encima de 2.0. Lección: **una publicación hecha fuera del repo desincroniza el versionado de todo el proyecto**, y no se detecta hasta que una tienda rechaza algo. Ya había pasado en Android con el `versionCode` (Play en 21 mientras el repo decía 15).
