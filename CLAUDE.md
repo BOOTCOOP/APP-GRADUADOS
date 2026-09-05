@@ -35,6 +35,16 @@ El mismo guard fuerza `complete-profile` si el usuario logueado tiene `profile_c
 
 ⚠️ **Pendiente**: la API de producción todavía debe abrir los 11 endpoints GET públicos (courses, workshops, feeds, interests, bibliographies, slider/home) con auth opcional. El detalle está en `BACKEND-PROMPT-endpoints-publicos.md` (borrable una vez aplicado en el backend).
 
+### Inscripción múltiple ("mi selección")
+
+Se puede armar una selección de talleres y cursos e inscribirse a todos juntos. El estado vive en [src/uses/enrollmentCart.ts](src/uses/enrollmentCart.ts) (ref compartido + localStorage, mismo patrón que `currentUser.ts` — **no** Vuex, que acá son repositorios sin estado) y la llamada HTTP en el módulo `enrollments/batch`. Tres reglas que no son obvias:
+
+- **No reserva nada.** El carrito es una lista local de intenciones; el cupo se revalida contra la API al abrir [/mi-seleccion](src/views/inscriptions/Cart.vue) y lo que ya no está disponible se marca con el motivo y no se envía.
+- **La API responde 200 con `{enrolled, failed}`**, no todo-o-nada: hay que mirar `failed` y no solo el `catch`. La pantalla de resultado lista lo que falló con su motivo, incluyendo lo que se bloqueó en la revalidación y nunca se mandó.
+- **El login se pide al confirmar, no al agregar.** Un anónimo puede armar la selección; `/mi-seleccion` es pública y el `?redirect=` lo trae de vuelta con la selección intacta (persistida).
+
+El botón `EnrollmentCartToggle` solo aparece cuando la actividad admite inscripción (flags `is_ended` / `is_full` / `registration_closed` / `is_enrolled`), y la barra `EnrollmentCartBar` se monta en el slot `#footer` del layout para no tapar la última card ni pelearse con el FAB. El flujo de inscripción de a uno desde el detalle queda intacto.
+
 ### Postulación a búsquedas laborales
 
 El botón "Contactar" del detalle ([src/views/jobs/Show.vue](src/views/jobs/Show.vue)) abre el teléfono o el mail de la búsqueda y, cuando es por mail, **registra la postulación de forma silenciosa** con `POST jobs/{id}/apply`. Ese endpoint no lleva body: el backend identifica a la persona por el Bearer token y toma los datos del perfil, por eso la acción `jobs/apply` recibe el **id pelado** (`dispatch('jobs/apply', job.id)`) y no un objeto. Como la API necesita nombre y apellido, antes de registrar se chequea el perfil y si faltan se piden con un popup (`promptCompleteProfile`) que los guarda con `PUT profile`. Si el registro falla no se interrumpe ni se avisa: el contacto por mail es lo que la persona pidió.

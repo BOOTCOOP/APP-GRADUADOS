@@ -221,6 +221,19 @@ const routes: Array<RouteRecordRaw> = [
     meta: { auth: true },
   },
   {
+    // "Mi selección": pública a propósito. Se puede armar sin sesión; el login
+    // se pide recién al confirmar, con retorno acá (la selección se persiste).
+    path: '/mi-seleccion',
+    name: 'cart.index',
+    component: () => import('../views/inscriptions/Cart.vue'),
+  },
+  {
+    path: '/mi-seleccion/resultado',
+    name: 'cart.success',
+    component: () => import('../views/inscriptions/CartSuccess.vue'),
+    meta: { auth: true },
+  },
+  {
     path: '/inscripciones/:id/datos-bancarios',
     name: 'inscripciones.accountData',
     component: () => import('../views/inscriptions/AccountData.vue'),

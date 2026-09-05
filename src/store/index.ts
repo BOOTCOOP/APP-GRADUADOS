@@ -9,6 +9,7 @@ import avisos from './modules/avisos/avisos'
 import workshops from './modules/resources/activity/workshops'
 import bibliographies from './modules/resources/bibliography/bibliographies'
 import courses from './modules/resources/course/courses'
+import enrollments from './modules/resources/enrollment/enrollments'
 import feeds from './modules/resources/feed/feeds'
 import home from './modules/resources/home/home'
 import inscriptions from './modules/resources/inscription/inscriptions'
@@ -23,6 +24,7 @@ export default new Vuex.Store({
     appVersion,
     bibliographies,
     courses,
+    enrollments,
     feeds,
     home,
     images,

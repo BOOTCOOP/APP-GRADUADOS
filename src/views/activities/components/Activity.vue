@@ -73,18 +73,24 @@
                 </li>
             </ul>
 
-            <ion-button
-                class="enroll-button"
-                expand="block"
-                shape="round"
-                :color="buttonColor"
-                :fill="buttonFill"
-                @click.stop="showDetail"
-                :aria-label="`${buttonText} para el taller ${activity.title}`"
-            >
-                <ion-icon :icon="schoolOutline" slot="start" aria-hidden="true"></ion-icon>
-                {{ buttonText }}
-            </ion-button>
+            <div class="activity-actions">
+                <ion-button
+                    class="enroll-button"
+                    expand="block"
+                    shape="round"
+                    :color="buttonColor"
+                    :fill="buttonFill"
+                    @click.stop="showDetail"
+                    :aria-label="`${buttonText} para el taller ${activity.title}`"
+                >
+                    <ion-icon :icon="schoolOutline" slot="start" aria-hidden="true"></ion-icon>
+                    {{ buttonText }}
+                </ion-button>
+
+                <!-- Sólo si realmente se puede inscribir: agregar a la selección
+                     algo finalizado o sin cupo sería una promesa falsa. -->
+                <EnrollmentCartToggle v-if="selectable" :item="cartItem" />
+            </div>
         </ion-card-content>
     </ion-card>
 </template>
@@ -106,6 +112,8 @@ import {
     modalityIcon as resolveModalityIcon,
 } from '@/utils/modality';
 import { teachersLabel } from '@/utils/teachers';
+import EnrollmentCartToggle from '@/components/EnrollmentCartToggle.vue';
+import type { CartItem } from '@/uses/enrollmentCart';
 
 interface ActivityItem {
     id: string | number;
@@ -185,6 +193,25 @@ const buttonText = computed(() => {
     if (isClosed.value) return 'Ver detalles';
     return isStartingSoon.value ? '¡Inscribirse ahora!' : 'Inscribirse';
 });
+
+// "Mi selección" sólo tiene sentido si el taller admite inscripción ahora.
+const selectable = computed(
+    () =>
+        !props.inscribed &&
+        !props.activity.is_enrolled &&
+        !props.activity.is_ended &&
+        !props.activity.is_full &&
+        !props.activity.registration_closed
+);
+
+const cartItem = computed<CartItem>(() => ({
+    type: 'workshop',
+    id: Number(props.activity.id),
+    title: props.activity.title ?? 'Taller',
+    teachers: props.activity.teachers,
+    start: props.activity.start,
+    modality: props.activity.modality,
+}));
 
 function showDetail() {
     router.push({ name: 'activities.show', params: { slug: props.activity.id } });
@@ -303,6 +330,12 @@ function formatDate(dateString?: string): string {
 .activity-meta em {
     font-style: normal;
     color: var(--app-text-secondary);
+}
+
+.activity-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-sm);
 }
 
 .enroll-button {

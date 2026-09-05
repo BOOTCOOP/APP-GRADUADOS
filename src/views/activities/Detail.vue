@@ -151,6 +151,11 @@
           <ion-icon :icon="schoolOutline" slot="start"></ion-icon>
           Iniciá sesión para inscribirte
         </ion-button>
+        <!-- Sin sesión igual se puede armar la selección: el login se pide al
+             confirmar y la selección sobrevive al ida y vuelta. -->
+        <div class="cart-action">
+          <EnrollmentCartToggle :item="cartItem" size="default" />
+        </div>
         <ion-text color="medium" class="ion-text-center ion-margin-top">
           <small>Para inscribirte necesitás iniciar sesión con tu cuenta de graduado.</small>
         </ion-text>
@@ -158,19 +163,22 @@
 
       <!-- Botón de inscripción -->
       <div v-else-if="workshop.can_enroll || (!workshop.is_enrolled && !workshop.can_unenroll)">
-        <ion-button 
-          @click="confirm" 
-          shape="round" 
-          expand="full" 
+        <ion-button
+          @click="confirm"
+          shape="round"
+          expand="full"
           color="primary"
           :disabled="!canEnrollNow()"
         >
           <ion-icon :icon="schoolOutline" slot="start"></ion-icon>
           {{ getEnrollButtonText() }}
         </ion-button>
-        <ion-text 
-          v-if="!canEnrollNow() && enrollmentMessage" 
-          color="medium" 
+        <div class="cart-action" v-if="canEnrollNow()">
+          <EnrollmentCartToggle :item="cartItem" size="default" />
+        </div>
+        <ion-text
+          v-if="!canEnrollNow() && enrollmentMessage"
+          color="medium"
           class="ion-text-center ion-margin-top"
         >
           <small>{{ enrollmentMessage }}</small>
@@ -249,6 +257,8 @@ import {
 } from '@/utils/modality'
 import { teachersLabel } from '@/utils/teachers'
 import SocialShare from '@/components/SocialShare.vue'
+import EnrollmentCartToggle from '@/components/EnrollmentCartToggle.vue'
+import type { CartItem } from '@/uses/enrollmentCart'
 import { useCurrentUser } from '@/uses/currentUser'
 import { useRequireAuth } from '@/uses/requireAuth'
 import { refreshUser } from '@/uses/session'
@@ -273,6 +283,15 @@ const workshopAvailable = computed(
     !workshop.value?.is_full &&
     !workshop.value?.registration_closed
 )
+
+const cartItem = computed<CartItem>(() => ({
+  type: 'workshop',
+  id: Number(workshop.value?.id),
+  title: workshop.value?.title ?? 'Taller',
+  teachers: workshop.value?.teachers,
+  start: workshop.value?.start,
+  modality: workshop.value?.modality,
+}))
 
 const modalityKind = computed(() => resolveModalityKind(workshop.value?.modality))
 const modalityIcon = computed(() => resolveModalityIcon(modalityKind.value))
@@ -617,6 +636,16 @@ onMounted(() => {
   max-width: 100%;
   height: auto;
   border-radius: var(--app-radius-sm);
+}
+
+/* El toggle de "mi selección" es la acción secundaria del pie */
+.cart-action {
+  display: flex;
+  margin-top: var(--app-spacing-sm);
+}
+
+.cart-action > * {
+  flex: 1;
 }
 
 /* Estilos para los botones de inscripción */

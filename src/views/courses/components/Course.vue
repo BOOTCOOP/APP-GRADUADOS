@@ -83,6 +83,11 @@
                     <ion-label>Inscripto</ion-label>
                 </ion-chip>
             </div>
+
+            <!-- Sólo si el curso admite inscripción ahora (flags del index). -->
+            <div v-if="selectable" class="card-select ion-margin-top">
+                <EnrollmentCartToggle :item="cartItem" />
+            </div>
         </ion-card-content>
     </ion-card>
 </template>
@@ -109,6 +114,9 @@ import {
     checkmarkCircleOutline
 } from 'ionicons/icons';
 
+import EnrollmentCartToggle from '@/components/EnrollmentCartToggle.vue';
+import type { CartItem } from '@/uses/enrollmentCart';
+
 interface Course {
     id: number;
     title: string;
@@ -117,6 +125,12 @@ interface Course {
     beginning?: string;
     is_only_for_graduado_uba: boolean;
     slug: string;
+    // Flags de disponibilidad (mismos que el detalle, ahora también en el listado)
+    is_enrolled?: boolean;
+    is_ended?: boolean;
+    is_full?: boolean;
+    registration_closed?: boolean;
+    can_enroll?: boolean;
 }
 
 interface Inscribed {
@@ -143,9 +157,27 @@ const hasValidInscriptionStatus = computed(() => {
     return !['aprobada', 'test', 'ejemplo', 'prueba'].includes(statusValue);
 });
 
+// "Mi selección" sólo si el curso admite inscripción ahora.
+const selectable = computed(
+    () =>
+        !props.inscribed &&
+        !props.course.is_enrolled &&
+        !props.course.is_ended &&
+        !props.course.is_full &&
+        !props.course.registration_closed
+);
+
+const cartItem = computed<CartItem>(() => ({
+    type: 'course',
+    id: Number(props.course.id),
+    title: props.course.title,
+    teachers: props.course.teachers,
+    start: props.course.start,
+}));
+
 function showDetail() {
     router.push({
-        name: 'courses.show', 
+        name: 'courses.show',
         params: { slug: props.course.id }
     });
 }
@@ -224,6 +256,14 @@ function showDetail() {
 
 .details-hint ion-icon {
     font-size: 15px;
+}
+
+.card-select {
+    display: flex;
+}
+
+.card-select > * {
+    flex: 1;
 }
 
 .status-chip {

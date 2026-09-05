@@ -193,6 +193,12 @@
           No disponible para inscripción
         </ion-button>
 
+        <!-- "Mi selección": disponible mientras el curso admita inscripción,
+             con o sin sesión (el login se pide al confirmar la selección). -->
+        <div class="cart-action" v-if="selectable">
+          <EnrollmentCartToggle :item="cartItem" size="default" />
+        </div>
+
         <!-- Mensaje informativo -->
         <div class="info-message ion-text-center ion-margin-top">
           <ion-text color="medium">
@@ -259,6 +265,8 @@ import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import SocialShare from "@/components/SocialShare.vue";
+import EnrollmentCartToggle from "@/components/EnrollmentCartToggle.vue";
+import type { CartItem } from "@/uses/enrollmentCart";
 import { analyzeCourseForModality } from "@/utils/modalityDetector";
 import { useCurrentUser } from "@/uses/currentUser";
 import { useRequireAuth } from "@/uses/requireAuth";
@@ -281,6 +289,21 @@ const { isLoggedIn, goToLogin } = useRequireAuth();
 const canEnroll = computed(
   () => !course.value.is_enrolled && course.value.can_enroll && canOperate.value
 );
+
+// Disponibilidad del curso, sin mirar al usuario: el anónimo también puede
+// sumarlo a su selección (a diferencia de `canEnroll`, que exige canOperate).
+const selectable = computed(
+  () => !course.value.is_enrolled && Boolean(course.value.can_enroll)
+);
+
+const cartItem = computed<CartItem>(() => ({
+  type: "course",
+  id: Number(course.value?.id),
+  title: course.value?.title ?? "Curso",
+  teachers: course.value?.teachers,
+  start: course.value?.start,
+  modality: course.value?.modality,
+}));
 
 function goBack() {
   router.replace({ name: "courses.index" });
@@ -440,6 +463,16 @@ onMounted(() => {
 
 .main-action-btn ion-spinner {
   margin-right: 8px;
+}
+
+/* El toggle de "mi selección" es la acción secundaria del pie */
+.cart-action {
+  display: flex;
+  margin-top: var(--app-spacing-sm);
+}
+
+.cart-action > * {
+  flex: 1;
 }
 
 .info-message {

@@ -66,6 +66,12 @@
         </ion-list>
       </template>
     </InfinitePagination>
+
+    <!-- Barra de "mi selección": sólo cuando hay algo seleccionado. Va en el
+         footer del layout (no flotando) para no tapar la última card. -->
+    <template #footer v-if="cartCount > 0">
+      <EnrollmentCartBar />
+    </template>
   </graduados-app>
 </template>
 
@@ -94,8 +100,12 @@ import Skeleton from "./Skeleton.vue";
 import InfinitePagination from "../app/components/pagination/InfinitePagination.vue";
 import FormSearchBar from "../app/components/form/FormSearchBar.vue";
 import EmptyState from "@/components/EmptyState.vue";
+import EnrollmentCartBar from "@/components/EnrollmentCartBar.vue";
+import { useEnrollmentCart } from "@/uses/enrollmentCart";
 
 import "@ionic/vue/css/ionic-swiper.css";
+
+const { count: cartCount } = useEnrollmentCart();
 
 // const perView = 1;
 

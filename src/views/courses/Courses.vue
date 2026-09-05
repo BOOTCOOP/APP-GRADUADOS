@@ -73,6 +73,11 @@
                 </div>
             </template>
         </InfinitePagination>
+
+        <!-- Barra de "mi selección": sólo cuando hay algo seleccionado. -->
+        <template #footer v-if="cartCount > 0">
+            <EnrollmentCartBar />
+        </template>
     </graduados-app>
 </template>
   
@@ -96,8 +101,12 @@ import MyCourses from "./components/MyCourses.vue";
 import Course from "./components/Course.vue";
 import Skeleton from "./Skeleton.vue";
 import InfinitePagination from "../app/components/pagination/InfinitePagination.vue";
+import EnrollmentCartBar from "@/components/EnrollmentCartBar.vue";
+import { useEnrollmentCart } from "@/uses/enrollmentCart";
 
 import "@ionic/vue/css/ionic-swiper.css";
+
+const { count: cartCount } = useEnrollmentCart();
 
 const searchTerm = ref('');
 const selectedFilter = ref('todos');
