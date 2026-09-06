@@ -279,6 +279,7 @@ const { isLoggedIn, goToLogin } = useRequireAuth()
 // Disponibilidad pura del taller (independiente del usuario).
 const workshopAvailable = computed(
   () =>
+    workshop.value?.is_enabled !== false &&
     !workshop.value?.is_ended &&
     !workshop.value?.is_full &&
     !workshop.value?.registration_closed
@@ -327,6 +328,8 @@ const unavailableLabel = computed(() => {
   if (workshop.value?.is_ended) return 'Finalizado'
   if (workshop.value?.is_full) return 'Sin cupos'
   if (workshop.value?.registration_closed) return 'Inscripciones cerradas'
+  // `=== false` y no `!`: ver nota en canEnrollNow().
+  if (workshop.value?.is_enabled === false) return 'No disponible'
   return null
 })
 
@@ -340,6 +343,7 @@ const enrollmentMessage = computed(() => {
   if (workshop.value.is_full) return 'Taller completo - Sin cupos disponibles';
   if (workshop.value.is_ended) return 'Taller finalizado';
   if (workshop.value.registration_closed) return 'Inscripciones cerradas';
+  if (workshop.value.is_enabled === false) return 'El taller no está disponible en este momento';
 
   return '';
 })
@@ -353,7 +357,10 @@ function canEnrollNow() {
 
   // Los bloqueos ganan siempre, incluso si can_enroll viene en true:
   // el enroll del backend valida estas condiciones y rechazaría igual.
-  if (workshop.value.is_ended ||
+  // `is_enabled === false` y no `!is_enabled`: la app viaja por OTA y puede
+  // correr contra una API que todavía no expone el flag; undefined = disponible.
+  if (workshop.value.is_enabled === false ||
+      workshop.value.is_ended ||
       workshop.value.is_full ||
       workshop.value.registration_closed) {
     return false;

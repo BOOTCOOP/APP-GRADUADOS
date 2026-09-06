@@ -126,6 +126,7 @@ interface ActivityItem {
     is_only_for_graduado_uba?: boolean;
     // Flags de disponibilidad (mismos que el detalle, ahora también en el listado)
     is_enrolled?: boolean;
+    is_enabled?: boolean;
     is_ended?: boolean;
     is_full?: boolean;
     registration_closed?: boolean;
@@ -169,6 +170,9 @@ const unavailableLabel = computed(() => {
     if (props.activity.is_ended) return 'Finalizado';
     if (props.activity.is_full) return 'Sin cupos';
     if (props.activity.registration_closed) return 'Inscripciones cerradas';
+    // `=== false` y no `!`: la app viaja por OTA y puede correr contra una API
+    // que todavía no expone is_enabled; undefined tiene que seguir siendo disponible.
+    if (props.activity.is_enabled === false) return 'No disponible';
     return null;
 });
 
@@ -199,6 +203,7 @@ const selectable = computed(
     () =>
         !props.inscribed &&
         !props.activity.is_enrolled &&
+        props.activity.is_enabled !== false &&
         !props.activity.is_ended &&
         !props.activity.is_full &&
         !props.activity.registration_closed

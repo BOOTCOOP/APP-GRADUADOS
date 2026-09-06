@@ -173,6 +173,8 @@ function formatDate(value?: string): string {
 
 function unavailableReason(data: any): string | null {
   if (data.is_enrolled) return "Ya estás inscripto.";
+  // `=== false` y no `!`: undefined (API sin el flag todavía) = disponible.
+  if (data.is_enabled === false) return "Ya no está disponible.";
   if (data.is_ended) return "La actividad ya finalizó.";
   if (data.is_full) return "Se quedó sin cupos.";
   if (data.registration_closed) return "Las inscripciones están cerradas.";

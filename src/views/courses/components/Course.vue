@@ -127,6 +127,7 @@ interface Course {
     slug: string;
     // Flags de disponibilidad (mismos que el detalle, ahora también en el listado)
     is_enrolled?: boolean;
+    is_enabled?: boolean;
     is_ended?: boolean;
     is_full?: boolean;
     registration_closed?: boolean;
@@ -162,6 +163,7 @@ const selectable = computed(
     () =>
         !props.inscribed &&
         !props.course.is_enrolled &&
+        props.course.is_enabled !== false &&
         !props.course.is_ended &&
         !props.course.is_full &&
         !props.course.registration_closed
