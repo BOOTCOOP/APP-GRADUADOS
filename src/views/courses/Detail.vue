@@ -137,6 +137,15 @@
           </p>
         </div>
       </div>
+
+      <!-- Qué falta después de preinscribirse. Se muestra acá y no en una
+           pantalla de éxito aparte para que quede accesible al volver al curso. -->
+      <EnrollmentNextSteps
+        v-if="showNextSteps"
+        class="ion-margin-top"
+        :needs-diploma="isGraduadoOtraUniversidad"
+        :price-label="coursePriceLabel"
+      />
     </div>
     <template v-if="course && loaded" #footer>
       <div class="footer-actions">
@@ -266,6 +275,7 @@ import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import SocialShare from "@/components/SocialShare.vue";
 import EnrollmentCartToggle from "@/components/EnrollmentCartToggle.vue";
+import EnrollmentNextSteps from "@/components/EnrollmentNextSteps.vue";
 import type { CartItem } from "@/uses/enrollmentCart";
 import { analyzeCourseForModality } from "@/utils/modalityDetector";
 import { useCurrentUser } from "@/uses/currentUser";
@@ -280,7 +290,7 @@ const course = ref<any>({});
 const router = useIonRouter();
 
 // Gate a nivel usuario (can_operate / operability_issue).
-const { canOperate, operabilityIssue } = useCurrentUser();
+const { canOperate, operabilityIssue, isGraduadoOtraUniversidad } = useCurrentUser();
 
 // Anónimos: el footer muestra "Iniciá sesión para inscribirte" (con retorno acá).
 const { isLoggedIn, goToLogin } = useRequireAuth();
@@ -288,6 +298,19 @@ const { isLoggedIn, goToLogin } = useRequireAuth();
 // Puede inscribirse si el recurso lo permite Y el usuario puede operar.
 const canEnroll = computed(
   () => !course.value.is_enrolled && course.value.can_enroll && canOperate.value
+);
+
+// Precio formateado del curso, o null si es gratuito.
+const coursePriceLabel = computed(() =>
+  course.value?.price && course.value.price.raw > 0 ? `$${course.value.price.value}` : null
+);
+
+// Los pasos pendientes solo tienen sentido si ya se preinscribió Y falta algo:
+// acreditar título (graduado de otra universidad) o pagar.
+const showNextSteps = computed(
+  () =>
+    Boolean(course.value?.is_enrolled) &&
+    (isGraduadoOtraUniversidad.value || Boolean(coursePriceLabel.value))
 );
 
 // Disponibilidad del curso, sin mirar al usuario: el anónimo también puede
@@ -323,10 +346,11 @@ async function enroll() {
 
     // Mostrar mensaje de éxito
     const alert = await alertController.create({
-      header: "¡Inscripción exitosa!",
+      header: showNextSteps.value ? "¡Preinscripción registrada!" : "¡Inscripción exitosa!",
       subHeader: course.value.title,
-      message:
-        "Te has inscripto correctamente en este curso. Recibirás más información por email.",
+      message: showNextSteps.value
+        ? "Te enviamos un mail con los pasos que faltan para confirmarla. También los tenés detallados en esta pantalla."
+        : "Te has inscripto correctamente en este curso. Recibirás más información por email.",
       buttons: ["Entendido"],
     });
 

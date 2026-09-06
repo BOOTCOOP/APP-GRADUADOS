@@ -1,8 +1,15 @@
 <template>
   <graduados-app header-title="Inscripción" :header-show-back-button="true" body="white">
     <SuccessState :title="title" :message="message">
-      <template #details v-if="failed.length">
-        <div class="failed-block">
+      <template #details v-if="failed.length || showNextSteps">
+        <!-- Si entró algún curso, queda en preinscripción: primero lo que falta hacer. -->
+        <EnrollmentNextSteps
+          v-if="showNextSteps"
+          :needs-diploma="isGraduadoOtraUniversidad"
+          :price-label="coursePriceLabel"
+        />
+
+        <div v-if="failed.length" class="failed-block" :class="{ 'failed-block--stacked': showNextSteps }">
           <h3 class="failed-title">
             <ion-icon :icon="alertCircleOutline" aria-hidden="true"></ion-icon>
             No pudimos inscribirte a
@@ -37,15 +44,42 @@ import { IonButton, IonIcon, useIonRouter } from "@ionic/vue";
 import { alertCircleOutline } from "ionicons/icons";
 import { computed, onMounted } from "vue";
 import SuccessState from "@/components/SuccessState.vue";
+import EnrollmentNextSteps from "@/components/EnrollmentNextSteps.vue";
+import { useCurrentUser } from "@/uses/currentUser";
 import { useEnrollmentCart } from "@/uses/enrollmentCart";
 
 // El resultado vive en memoria (uses/enrollmentCart) y es de un solo uso: si se
 // entra por deep-link o se recarga, no hay nada que mostrar y volvemos al listado.
 const { lastResult } = useEnrollmentCart();
+const { isGraduadoOtraUniversidad } = useCurrentUser();
 const router = useIonRouter();
 
 const enrolled = computed(() => lastResult.value?.enrolled ?? []);
 const failed = computed(() => lastResult.value?.failed ?? []);
+
+// Los cursos quedan en preinscripción: si entró alguno, hay pasos pendientes.
+// `type` viene con el FQCN del modelo legacy (…\External\Programa).
+const enrolledCourses = computed(() =>
+  enrolled.value.filter((item: any) => String(item?.inscriptionable?.type ?? "").endsWith("Programa"))
+);
+
+// El más caro de los que entraron: si hay que transferir, que se vea el importe
+// mayor y no uno gratuito que subestime lo que falta pagar.
+const coursePriceLabel = computed(() => {
+  const precios = enrolledCourses.value
+    .map((item: any) => item?.inscriptionable?.price)
+    .filter((p: any) => p && p.raw > 0);
+
+  if (!precios.length) return null;
+
+  return `$${precios.sort((a: any, b: any) => b.raw - a.raw)[0].value}`;
+});
+
+const showNextSteps = computed(
+  () =>
+    enrolledCourses.value.length > 0 &&
+    (isGraduadoOtraUniversidad.value || Boolean(coursePriceLabel.value))
+);
 
 const title = computed(() =>
   enrolled.value.length ? "¡Inscripción exitosa!" : "No pudimos completar la inscripción"
@@ -76,6 +110,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.failed-block--stacked {
+  margin-top: var(--app-spacing-lg);
+}
+
 .failed-block {
   padding: var(--app-spacing-lg);
   background: var(--app-surface-alt);

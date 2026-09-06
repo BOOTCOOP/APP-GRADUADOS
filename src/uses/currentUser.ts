@@ -16,6 +16,10 @@ function hydrate() {
   return data ? JSON.parse(data) : null;
 }
 
+// user_types.id del backend. Los graduados de otra universidad tienen que
+// acreditar el título para que la inscripción a un curso quede confirmada.
+const TIPO_GRADUADO_OTRA_UNIVERSIDAD = 4;
+
 const currentUser = ref<any>(hydrate());
 
 export function setCurrentUser(user: any) {
@@ -34,6 +38,9 @@ export function useCurrentUser() {
   const typeValidationStatus = computed(
     () => currentUser.value?.type_validation_status ?? null
   );
+  const isGraduadoOtraUniversidad = computed(
+    () => currentUser.value?.type_id === TIPO_GRADUADO_OTRA_UNIVERSIDAD
+  );
 
   return {
     user: currentUser,
@@ -42,5 +49,6 @@ export function useCurrentUser() {
     canOperate,
     operabilityIssue,
     typeValidationStatus,
+    isGraduadoOtraUniversidad,
   };
 }

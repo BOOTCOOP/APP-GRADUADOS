@@ -17,14 +17,15 @@
                 Una vez que realices la transferencia, adjuntá una foto del comprobante para completar la preinscripción. Te enviaremos una notificación cuando tu inscripción sea aprobada.
             </div>
             <h5>Datos para la transferencia</h5>
-            <p>BANCO NACIÓN ARGENTINA.SUCURSAL AZCUENAGA N° 18</p>
-            <p>AV.SANTA FE 2299.CAP.FED.BUENOS AIRES. ARGENTINA</p>
-            <p>CUENTA CORRIENTE N° 141434/89 - FACULTAD DE DERECHO UBA</p>
-            <p>CUIT N° 30-54666656-1</p>
-            <p>CBU N° 01100037-20000141434894</p>
-            <p>CÓDIGO SWIFT NACNARBA</p>
-            <p>CONCEPTO POR EL CUAL SE EFECTUA TRANSFERENCIA.</p>
-            <p>UNA VEZ EFECTUADA LA TRANSFERENCIA, ES OBLIGATORIO REMITIR COPIA DEL COMPROBANTE DE LA TRANSACCIÓN POR E-MAIL: contablepos@derecho.uba.ar, DE LO CONTRARIO NO QUEDARA COMPLETO EL TRAMITE.</p>
+            <p v-for="dato in DATOS_TRANSFERENCIA" :key="dato.label">
+                <strong>{{ dato.label }}:</strong> {{ dato.value }}
+            </p>
+            <p>Indicá tu nombre y el del curso en el concepto de la transferencia.</p>
+            <p>
+                Una vez efectuada la transferencia es obligatorio remitir copia del comprobante
+                por mail a <a :href="`mailto:${EMAIL_COMPROBANTE}`">{{ EMAIL_COMPROBANTE }}</a>,
+                de lo contrario el trámite no queda completo.
+            </p>
         </div>
         <template v-if="inscription && loaded" #footer>
             <ion-button @click="goToAttachProof" shape="round" expand="full" color="primary">Realicé la transferencia</ion-button>
@@ -38,6 +39,9 @@
   import { ref, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
   import { useStore } from 'vuex';
+  // Los datos de la cuenta vivían hardcodeados acá; ahora salen de un único
+  // módulo que comparte con el bloque de pasos pendientes del curso.
+  import { DATOS_TRANSFERENCIA, EMAIL_COMPROBANTE } from '@/utils/transferencia';
 
   const route = useRoute();
   const store = useStore();
