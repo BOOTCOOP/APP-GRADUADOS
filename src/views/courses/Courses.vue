@@ -132,17 +132,14 @@ const myCourses = ref([]);
 const store = useStore();
 const { isLoggedIn } = useCurrentUser();
 
-// Computed para filtrar cursos válidos (no datos de prueba)
-const validMyCourses = computed(() => {
-    return myCourses.value.filter((course: any) => {
-        // Si no tiene inscripciones válidas, no mostrar
-        if (!course.inscriptions?.[0]?.status?.value) return false;
-        
-        const statusValue = course.inscriptions[0].status.value.toLowerCase();
-        // Filtrar estados que parecen ser de prueba
-        return !['aprobada', 'test', 'ejemplo', 'prueba'].includes(statusValue);
-    });
-});
+// Cursos con inscripción registrada. Antes se descartaban los estados
+// "aprobada/test/ejemplo/prueba" para ocultar datos de prueba, pero "Aprobada"
+// es el estado REAL de una inscripción paga: el filtro escondía justamente las
+// válidas. Sumado a que el backend mandaba `inscriptions` siempre vacío, la
+// sección "Mis cursos" no se mostraba nunca.
+const validMyCourses = computed(() =>
+    myCourses.value.filter((course: any) => Boolean(course.inscriptions?.[0]?.status?.value))
+);
 
 // "Mis cursos" requiere sesión: solo pedimos courses/own con usuario logueado.
 // El watch (y no onMounted) cubre el caso de loguearse y volver sin recargar.

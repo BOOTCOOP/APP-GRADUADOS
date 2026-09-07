@@ -7,7 +7,7 @@
     </template>
 
     <InfinitePagination
-      fetch-data-store="courses/fetchAll"
+      fetch-data-store="courses/history"
       :filters="filters"
       empty-results-text="No hay información para mostrar"
     >

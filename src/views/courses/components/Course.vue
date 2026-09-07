@@ -150,13 +150,12 @@ const props = defineProps<{
 
 const router = useIonRouter();
 
-// Computed para verificar si el estado de inscripción es válido (no datos de prueba)
-const hasValidInscriptionStatus = computed(() => {
-    if (!props.inscribed?.inscriptions?.[0]?.status) return false;
-    const statusValue = props.inscribed.inscriptions[0].status.value.toLowerCase();
-    // Evitar mostrar estados que parecen ser de prueba o genéricos
-    return !['aprobada', 'test', 'ejemplo', 'prueba'].includes(statusValue);
-});
+// Hay inscripción con estado para mostrar. No se filtra por valor: "Aprobada"
+// es el estado real de una inscripción paga y descartarlo escondía el badge
+// justo en el caso que más importa (ver nota en Courses.vue).
+const hasValidInscriptionStatus = computed(() =>
+    Boolean(props.inscribed?.inscriptions?.[0]?.status?.value)
+);
 
 // "Mi selección" sólo si el curso admite inscripción ahora.
 const selectable = computed(

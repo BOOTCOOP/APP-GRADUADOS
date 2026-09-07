@@ -37,10 +37,12 @@ export default {
     },
 
     // History
-    history() {
+    // Recibe { page, per_page, filters } de InfinitePagination: sin reenviarlos
+    // el scroll infinito volvía a pedir siempre la página 1.
+    history(ctx, filters = {}) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`workshops/history`)
+          .get(`workshops/history`, {params: filters})
           .then((response) => resolve(response))
           .catch(error => reject(error))
       })
