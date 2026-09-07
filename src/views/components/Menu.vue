@@ -145,7 +145,7 @@ import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { useAuth } from "@/uses/auth";
 import { useCurrentUser } from "@/uses/currentUser";
-import { openYoutubePlaylist } from "@/uses/externalLinks";
+import { openYoutubeChannel } from "@/uses/externalLinks";
 import { useNotifications } from "@/uses/notifications";
 import { applyOtaUpdateNow } from "@/uses/otaUpdate";
 import { checkStoreUpdate } from "@/uses/appUpdate";
@@ -177,7 +177,7 @@ const items = [
   { title: "Cursos",                   url: "/cursos",                  icon: ribbonOutline },
   { title: "Talleres y Jornadas",      url: "/talleres",                icon: schoolOutline },
   // Mismo destino que el acceso rápido del inicio: la playlist, sin intermediarios.
-  { title: "Actividades Online",       action: openYoutubePlaylist,     icon: logoYoutube },
+  { title: "Actividades Online",       action: openYoutubeChannel,     icon: logoYoutube },
   { title: "Búsquedas Laborales",      url: "/busqueda-laboral",        icon: briefcaseOutline },
   { title: "Bibliografía",             url: "/material-bibliografico",  icon: libraryOutline },
   { title: "Noticias",                 url: "/noticias",                icon: newspaperOutline },

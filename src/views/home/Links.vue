@@ -29,7 +29,7 @@
         IonIcon, IonText
     } from '@ionic/vue';
 
-    import { openWhatsapp, openYoutubePlaylist } from '@/uses/externalLinks';
+    import { openWhatsapp, openYoutubeChannel } from '@/uses/externalLinks';
 
     /*
      * Este componente está desactivado hoy (Home.vue lo tiene comentado), pero
@@ -42,7 +42,7 @@
     }
 
     function goToYoutube(){
-        openYoutubePlaylist();
+        openYoutubeChannel();
     }
 </script>
 

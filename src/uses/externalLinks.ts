@@ -12,18 +12,16 @@
  */
 
 /**
- * Playlist "Actividades Online" del Centro.
+ * Canal de YouTube del CENTRO DE GRADUADOS.
  *
- * OJO: no es lo mismo que el canal de abajo. "Actividades Online" (atajo del
- * inicio y ítem del menú) va a ESTA playlist; el "Canal de YouTube" de la
- * pantalla de Contacto va al canal de la Facultad. Son dos destinos distintos a
- * propósito, así que no los unifiques.
+ * Antes había dos destinos distintos y los dos estaban mal: "Actividades
+ * Online" abría una playlist puntual en vez del canal completo, y el "Canal de
+ * YouTube" de Contacto apuntaba al canal de la Facultad (@DerechoUBA) y no al
+ * de graduados. El Centro pidió que ambos lleven acá, así que ahora hay una
+ * sola constante y un solo helper.
  */
-export const YOUTUBE_PLAYLIST_URL =
-  'https://www.youtube.com/playlist?list=PL9y1i2ILzxlA0gHxYkXcWlq31_UjsmDRj'
-
-/** Canal de YouTube de la Facultad (link de la pantalla de Contacto). */
-export const YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@DerechoUBA'
+export const YOUTUBE_CHANNEL_URL =
+  'https://youtube.com/@centrodegraduadosderechouba'
 
 /**
  * Teléfono de atención y consultas, en formato internacional sin `+` ni
@@ -95,12 +93,11 @@ export function openExternal(url: string): void {
   window.open(url, '_system')
 }
 
-/** Actividades Online: va derecho a la playlist, sin pantalla intermedia. */
-export function openYoutubePlaylist(): void {
-  openExternal(YOUTUBE_PLAYLIST_URL)
-}
-
-/** Canal de YouTube de la Facultad (Contacto). */
+/**
+ * Canal de YouTube del Centro. Lo usan tanto "Actividades Online" (atajo del
+ * inicio y del menú) como el link de Contacto: van derecho al canal, sin
+ * pantalla intermedia.
+ */
 export function openYoutubeChannel(): void {
   openExternal(YOUTUBE_CHANNEL_URL)
 }

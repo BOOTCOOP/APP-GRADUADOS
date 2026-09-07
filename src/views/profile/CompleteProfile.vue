@@ -37,10 +37,23 @@
 
       <IonItem>
         <IonLabel position="stacked">Fecha de nacimiento</IonLabel>
-        <IonDatetimeButton datetime="birthDate" v-if="data.birth_date"></IonDatetimeButton>
-        <ion-button v-else fill="clear" size="small" @click="showDatePicker = true">Seleccionar</ion-button>
+        <!-- El botón "Seleccionar" seteaba showDatePicker, pero el modal no
+             tenía is-open: no abría nada. Un único control, siempre visible,
+             con el modal atado al ref. -->
+        <ion-button
+          fill="clear"
+          size="small"
+          slot="end"
+          @click="showDatePicker = true"
+        >
+          {{ birthDateLabel }}
+        </ion-button>
       </IonItem>
-      <ion-modal :keep-contents-mounted="true">
+      <ion-modal
+        :is-open="showDatePicker"
+        @didDismiss="showDatePicker = false"
+        :keep-contents-mounted="true"
+      >
         <IonDatetime
           id="birthDate"
           presentation="date"
@@ -67,11 +80,11 @@
 
 <script setup lang="ts">
 import { useProfile } from '@/uses/profile'
+import { parseApiDate } from '@/libs/dates'
 import User from '@/utils/user'
 import {
   IonButton,
   IonDatetime,
-  IonDatetimeButton,
   IonInput,
   IonItem,
   IonLabel,
@@ -80,7 +93,7 @@ import {
   useIonRouter,
 } from '@ionic/vue'
 import { ErrorMessage, Field, Form } from 'vee-validate'
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useStore } from 'vuex'
 
 const ionRouter = useIonRouter()
@@ -96,6 +109,18 @@ const data = reactive({
   lastname: existing.lastname || '',
   phone: existing.phone || '',
   birth_date: existing.birth_date || '',
+})
+
+// Texto del botón: la fecha cargada o la invitación a elegirla.
+const birthDateLabel = computed(() => {
+  const date = parseApiDate(data.birth_date)
+  if (!date) return 'Seleccionar'
+
+  return date.toLocaleDateString('es-AR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
 })
 
 function onDateChange(event: any) {

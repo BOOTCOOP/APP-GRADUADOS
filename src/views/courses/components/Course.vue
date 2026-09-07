@@ -24,6 +24,14 @@
                 </ion-badge>
             </div>
             
+            <!-- Modalidad (presencial / virtual / híbrida) -->
+            <div v-if="course.modality" class="modality-indicator">
+                <ion-chip :class="`chip--${modalityKind}`" size="small">
+                    <ion-icon :icon="modalityIcon"></ion-icon>
+                    <ion-label>{{ course.modality }}</ion-label>
+                </ion-chip>
+            </div>
+
             <!-- Indicador UBA Graduados -->
             <div v-if="course.is_only_for_graduado_uba" class="uba-indicator">
                 <ion-chip color="warning" size="small">
@@ -114,6 +122,10 @@ import {
     checkmarkCircleOutline
 } from 'ionicons/icons';
 
+import {
+    modalityKind as resolveModalityKind,
+    modalityIcon as resolveModalityIcon,
+} from '@/utils/modality';
 import EnrollmentCartToggle from '@/components/EnrollmentCartToggle.vue';
 import type { CartItem } from '@/uses/enrollmentCart';
 
@@ -125,6 +137,7 @@ interface Course {
     beginning?: string;
     is_only_for_graduado_uba: boolean;
     slug: string;
+    modality?: string;
     // Flags de disponibilidad (mismos que el detalle, ahora también en el listado)
     is_enrolled?: boolean;
     is_enabled?: boolean;
@@ -149,6 +162,9 @@ const props = defineProps<{
 }>();
 
 const router = useIonRouter();
+
+const modalityKind = computed(() => resolveModalityKind(props.course.modality));
+const modalityIcon = computed(() => resolveModalityIcon(modalityKind.value));
 
 // Hay inscripción con estado para mostrar. No se filtra por valor: "Aprobada"
 // es el estado real de una inscripción paga y descartarlo escondía el badge
@@ -257,6 +273,30 @@ function showDetail() {
 
 .details-hint ion-icon {
     font-size: 15px;
+}
+
+.modality-indicator {
+    margin-bottom: 8px;
+}
+
+.modality-indicator ion-chip {
+    /* Default = virtual, igual que en la card de talleres */
+    --background: var(--app-primary-soft);
+    --color: var(--ion-color-primary-shade);
+    font-size: 0.75rem;
+    height: 26px;
+    margin: 0;
+    pointer-events: none;
+}
+
+.modality-indicator .chip--presencial {
+    --background: rgba(45, 211, 111, 0.14);
+    --color: var(--ion-color-success-shade);
+}
+
+.modality-indicator .chip--hibrida {
+    --background: rgba(255, 196, 9, 0.18);
+    --color: #8a6100;
 }
 
 .card-select {

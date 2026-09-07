@@ -36,7 +36,7 @@ import {
   giftOutline,
   callOutline,
 } from 'ionicons/icons';
-import { openYoutubePlaylist } from '@/uses/externalLinks';
+import { openYoutubeChannel } from '@/uses/externalLinks';
 import { tapFeedback } from '@/uses/haptics';
 
 const router = useIonRouter();
@@ -55,7 +55,7 @@ interface Shortcut {
 const shortcuts: Shortcut[] = [
   { label: 'Cursos',                 icon: ribbonOutline,            route: '/cursos',                 color: '#7A35AB' },
   { label: 'Talleres y Jornadas',    icon: schoolOutline,            route: '/talleres',               color: '#2563EB' },
-  { label: 'Actividades Online',     icon: logoYoutube,              action: openYoutubePlaylist,      color: '#DC2626' },
+  { label: 'Actividades Online',     icon: logoYoutube,              action: openYoutubeChannel,      color: '#DC2626' },
   { label: 'Búsqueda Laboral',       icon: briefcaseOutline,         route: '/busqueda-laboral',       color: '#D97706' },
   { label: 'Bibliografía',           icon: libraryOutline,           route: '/material-bibliografico', color: '#059669' },
   { label: 'Noticias',               icon: newspaperOutline,         route: '/noticias',               color: '#0891B2' },

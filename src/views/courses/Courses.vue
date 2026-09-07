@@ -45,6 +45,20 @@
                     <ion-label>Solo Graduados UBA</ion-label>
                 </ion-chip>
             </div>
+
+            <!-- Filtro por modalidad. Se aplica del lado del cliente, igual que
+                 en el listado de talleres: la API no filtra por modalidad. -->
+            <div class="filters-container ion-margin-top">
+                <ion-chip
+                    v-for="opcion in MODALIDADES"
+                    :key="opcion.value"
+                    :class="{ 'active': selectedModality === opcion.value }"
+                    @click="setModality(opcion.value)"
+                    outline
+                >
+                    <ion-label>{{ opcion.label }}</ion-label>
+                </ion-chip>
+            </div>
         </div>
 
         <InfinitePagination
@@ -60,12 +74,12 @@
             <template #default="{ items }">
                 <div class="courses-section">
                     <ion-text class="section-title">
-                        <h2>{{ getSectionTitle(items.length) }}</h2>
+                        <h2>{{ getSectionTitle(filteredCourses(items).length) }}</h2>
                     </ion-text>
                     <div class="courses-grid ion-margin-top">
                         <Course
                             :course="course"
-                            v-for="course in items"
+                            v-for="course in filteredCourses(items)"
                             :key="(course as any).id"
                             :inscribed="validMyCourses.find((c: any) => c.id == (course as any).id)"
                         ></Course>
@@ -96,6 +110,7 @@ import { ref, computed, watch } from "vue";
 import { useStore } from 'vuex';
 import { starOutline } from 'ionicons/icons';
 import { useCurrentUser } from '@/uses/currentUser';
+import { modalityKind } from '@/utils/modality';
 
 import MyCourses from "./components/MyCourses.vue";
 import Course from "./components/Course.vue";
@@ -108,8 +123,18 @@ import "@ionic/vue/css/ionic-swiper.css";
 
 const { count: cartCount } = useEnrollmentCart();
 
+// El backend no filtra por modalidad, así que se resuelve acá sobre la página
+// ya traída — mismo criterio que Activities.vue para talleres.
+const MODALIDADES = [
+    { value: 'all', label: 'Todas las modalidades' },
+    { value: 'presencial', label: 'Presencial' },
+    { value: 'virtual', label: 'Virtual' },
+    { value: 'hibrida', label: 'Híbrida' },
+] as const;
+
 const searchTerm = ref('');
 const selectedFilter = ref('todos');
+const selectedModality = ref<string>('all');
 const filterKey = ref(0);
 
 const filters = computed(() => {
@@ -163,6 +188,18 @@ function onSearchChange(event: CustomEvent) {
     searchTerm.value = event.detail.value;
     // Forzar recarga de la paginación
     filterKey.value += 1;
+}
+
+function setModality(value: string) {
+    selectedModality.value = value;
+}
+
+// `modalityKind` normaliza el texto libre que viene de la base legacy
+// ("Presencial", "A distancia", etc.) a las cuatro claves conocidas.
+function filteredCourses(items: any[]) {
+    if (selectedModality.value === 'all') return items;
+
+    return items.filter((course: any) => modalityKind(course.modality) === selectedModality.value);
 }
 
 function setFilter(filter: string) {

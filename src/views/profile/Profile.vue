@@ -87,10 +87,25 @@
 
       <IonItem>
         <IonLabel position="stacked">Fecha de nacimiento</IonLabel>
-        <IonDatetimeButton datetime="profileBirthDate" v-if="profile.birth_date"></IonDatetimeButton>
-        <ion-note v-else slot="end">Sin definir</ion-note>
+        <!-- Antes: el botón del datepicker sólo se renderizaba si ya había
+             fecha cargada, y si no había, en su lugar iba una nota de texto
+             plano. Resultado: no quedaba NADA tappable y era imposible cargar
+             la fecha la primera vez. Ahora hay un único botón, siempre visible,
+             que abre el modal con is-open. -->
+        <ion-button
+          fill="clear"
+          size="small"
+          slot="end"
+          @click="showDatePicker = true"
+        >
+          {{ birthDateLabel }}
+        </ion-button>
       </IonItem>
-      <ion-modal :keep-contents-mounted="true">
+      <ion-modal
+        :is-open="showDatePicker"
+        @didDismiss="showDatePicker = false"
+        :keep-contents-mounted="true"
+      >
         <IonDatetime
           id="profileBirthDate"
           presentation="date"
@@ -145,18 +160,17 @@
 import TypeValidationBadge from "@/components/TypeValidationBadge.vue";
 import { useCurrentUser } from "@/uses/currentUser";
 import { useProfile } from "@/uses/profile";
+import { parseApiDate } from "@/libs/dates";
 import { refreshUser } from "@/uses/session";
 import { USER_TYPES, isGraduateType, isOtherUniversity } from "@/utils/userTypes";
 import {
   IonButton,
   IonDatetime,
-  IonDatetimeButton,
   IonIcon,
   IonInput,
   IonItem,
   IonLabel,
   IonModal,
-  IonNote,
   IonSelect,
   IonSkeletonText,
   IonText,
@@ -218,6 +232,20 @@ onMounted(() => {
     .catch(() => {
       loading.value = false;
     });
+});
+
+const showDatePicker = ref(false);
+
+// Texto del botón: la fecha cargada o la invitación a elegirla.
+const birthDateLabel = computed(() => {
+  const date = parseApiDate(profile.value.birth_date);
+  if (!date) return "Seleccionar";
+
+  return date.toLocaleDateString("es-AR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 });
 
 function onDateChange(event: any) {

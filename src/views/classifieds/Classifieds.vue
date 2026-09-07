@@ -24,7 +24,7 @@
         color="danger"
         size="large"
         class="youtube-button"
-        @click="openYoutubePlaylist"
+        @click="openYoutubeChannel"
       >
         <ion-icon :icon="logoYoutube" slot="start" aria-hidden="true"></ion-icon>
         Ver el canal
@@ -47,7 +47,7 @@
  */
 import { IonIcon, IonButton } from '@ionic/vue'
 import { logoYoutube, playCircleOutline, libraryOutline, schoolOutline } from 'ionicons/icons'
-import { openYoutubePlaylist } from '@/uses/externalLinks'
+import { openYoutubeChannel } from '@/uses/externalLinks'
 
 const features = [
   { icon: playCircleOutline, label: 'Conferencias en vivo' },
