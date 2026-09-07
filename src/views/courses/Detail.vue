@@ -190,6 +190,19 @@
           Ya estás inscripto
         </ion-button>
 
+        <!-- Graduado de otra universidad sin título cargado: en vez de un botón
+             muerto, lo mandamos derecho a subirlo. -->
+        <ion-button
+          v-else-if="course.requires_diploma"
+          @click="goToTypeValidation"
+          shape="round"
+          expand="full"
+          color="warning"
+          class="main-action-btn"
+        >
+          Cargá tu título para inscribirte
+        </ion-button>
+
         <!-- Si no puede inscribirse -->
         <ion-button
           v-else
@@ -213,6 +226,13 @@
           <ion-text color="medium">
             <p v-if="!isLoggedIn && course.can_enroll">
               <small>Para inscribirte en este curso necesitás iniciar sesión con tu cuenta de graduado.</small>
+            </p>
+            <p v-else-if="course.requires_diploma">
+              <small
+                >Los cursos de perfeccionamiento requieren acreditar tu título.
+                Subí una foto y podrás inscribirte; la revisión del Centro puede
+                demorar, pero no te bloquea.</small
+              >
             </p>
             <p v-else-if="!canOperate && operabilityIssue">
               <small>{{ operabilityIssue }}</small>
@@ -316,7 +336,10 @@ const showNextSteps = computed(
 // Disponibilidad del curso, sin mirar al usuario: el anónimo también puede
 // sumarlo a su selección (a diferencia de `canEnroll`, que exige canOperate).
 const selectable = computed(
-  () => !course.value.is_enrolled && Boolean(course.value.can_enroll)
+  () =>
+    !course.value.is_enrolled &&
+    !course.value.requires_diploma &&
+    Boolean(course.value.can_enroll)
 );
 
 const cartItem = computed<CartItem>(() => ({
@@ -330,6 +353,10 @@ const cartItem = computed<CartItem>(() => ({
 
 function goBack() {
   router.replace({ name: "courses.index" });
+}
+
+function goToTypeValidation() {
+  router.push({ name: "type-validation" });
 }
 
 // Función para inscribirse al curso

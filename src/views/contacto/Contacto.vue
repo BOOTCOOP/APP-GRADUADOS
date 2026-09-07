@@ -21,13 +21,24 @@
           <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
         </button>
 
+        <button type="button" class="link-row" @click="goToWhatsappChannel">
+          <span class="link-icon whatsapp">
+            <ion-icon :icon="megaphoneOutline" aria-hidden="true"></ion-icon>
+          </span>
+          <span class="link-text">
+            <span class="link-title">Canal de novedades</span>
+            <span class="link-sub">Suscribite por WhatsApp</span>
+          </span>
+          <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
+        </button>
+
         <button type="button" class="link-row" @click="goToYoutube">
           <span class="link-icon youtube">
             <ion-icon :icon="logoYoutube" aria-hidden="true"></ion-icon>
           </span>
           <span class="link-text">
             <span class="link-title">Canal de YouTube</span>
-            <span class="link-sub">Videos de la Facultad</span>
+            <span class="link-sub">Videos del Centro de Graduados</span>
           </span>
           <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
         </button>
@@ -79,7 +90,8 @@ import {
   logoYoutube,
   logoFacebook,
   logoInstagram,
-  chevronForwardOutline
+  chevronForwardOutline,
+  megaphoneOutline
 } from 'ionicons/icons';
 
 import { IonIcon } from '@ionic/vue';
@@ -87,6 +99,7 @@ import { IonIcon } from '@ionic/vue';
 import {
   openExternal,
   openWhatsapp,
+  openWhatsappChannel,
   openYoutubeChannel,
   FACEBOOK_URL,
   TWITTER_URL,
@@ -105,7 +118,13 @@ function goToWhatsapp() {
   openWhatsapp();
 }
 
-// Al canal, NO a la playlist de "Actividades Online": son destinos distintos.
+function goToWhatsappChannel() {
+  tapFeedback();
+  openWhatsappChannel();
+}
+
+// Canal del CENTRO de graduados, no el de la Facultad (que era el que estaba
+// antes acá). Es el mismo destino que "Actividades Online".
 function goToYoutube() {
   tapFeedback();
   openYoutubeChannel();

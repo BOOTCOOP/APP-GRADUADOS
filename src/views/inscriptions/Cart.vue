@@ -174,6 +174,7 @@ function formatDate(value?: string): string {
 function unavailableReason(data: any): string | null {
   if (data.is_enrolled) return "Ya estás inscripto.";
   // `=== false` y no `!`: undefined (API sin el flag todavía) = disponible.
+  if (data.requires_diploma) return "Necesitás cargar tu título para inscribirte.";
   if (data.is_enabled === false) return "Ya no está disponible.";
   if (data.is_ended) return "La actividad ya finalizó.";
   if (data.is_full) return "Se quedó sin cupos.";
@@ -234,7 +235,9 @@ async function submit() {
     reason: reasonFor(item) as string,
   }));
 
-  const payload = enrollable.value.map((item) => ({ type: item.type, id: item.id }));
+  // Se mandan los ítems completos: si la API todavía no tiene `enrollments/batch`,
+  // el store cae a los enroll de a uno y necesita los títulos para el resultado.
+  const payload = enrollable.value.map((item) => ({ ...item }));
 
   try {
     const response = await store.dispatch("enrollments/batch", payload);

@@ -45,6 +45,14 @@ export const WHATSAPP_PHONE = '5491138315897'
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_PHONE}`
 
 /**
+ * Canal de difusión del Centro en WhatsApp. No confundir con WHATSAPP_URL: ese
+ * abre un chat 1 a 1 con la oficina, este es el canal al que uno se suscribe
+ * para recibir novedades. Son dos cosas distintas y conviven en Contacto.
+ */
+export const WHATSAPP_CHANNEL_URL =
+  'https://whatsapp.com/channel/0029Vb2CyZ8BVJkwVKIXd70D'
+
+/**
  * Link para compartir un texto por WhatsApp, sin destinatario fijo (lo elige la
  * persona en la app).
  *
@@ -105,6 +113,11 @@ export function openYoutubeChannel(): void {
 /** Atención y consultas: abre el chat en la app de WhatsApp. */
 export function openWhatsapp(): void {
   openExternal(WHATSAPP_URL)
+}
+
+/** Canal de novedades del Centro en WhatsApp (suscripción, no chat). */
+export function openWhatsappChannel(): void {
+  openExternal(WHATSAPP_CHANNEL_URL)
 }
 
 /** Consultas por mail: abre el cliente de correo con la casilla del Centro. */

@@ -145,6 +145,7 @@ interface Course {
     is_full?: boolean;
     registration_closed?: boolean;
     can_enroll?: boolean;
+    requires_diploma?: boolean;
 }
 
 interface Inscribed {
@@ -178,6 +179,7 @@ const selectable = computed(
     () =>
         !props.inscribed &&
         !props.course.is_enrolled &&
+        !props.course.requires_diploma &&
         props.course.is_enabled !== false &&
         !props.course.is_ended &&
         !props.course.is_full &&
