@@ -73,7 +73,7 @@
                 <div v-if="step.step == 2">
                     <Field v-model="job.provincia_id" label="Provincia" name="provincia_id" v-slot="{ field }" :rules="step.step == 2 ? 'required' : ''">
                         <IonItem>
-                            <ion-label>Provincia</ion-label>
+                            <ion-label position="stacked">Provincia</ion-label>
                             <ion-select v-bind="field" interface="popover">
                                 <ion-select-option v-for="item in provincias" :key="item.value" :value="item.value">{{item.label}}</ion-select-option>
                             </ion-select>
@@ -84,7 +84,7 @@
 
                     <Field v-model="job.localidad_id" label="Localidad" name="localidad_id" v-slot="{ field }" :rules="step.step == 2 ? 'required' : ''">
                         <IonItem>
-                            <ion-label>Localidad</ion-label>
+                            <ion-label position="stacked">Localidad</ion-label>
                             <ion-select v-bind="field" interface="popover">
                                 <ion-select-option v-for="item in localidades" :key="item.value" :value="item.value">{{item.label}}</ion-select-option>
                             </ion-select>
@@ -111,7 +111,7 @@
                     
                     <Field v-model="job.modality_id" label="modalidad" name="modality_id" v-slot="{ field }" :rules="step.step == 2 ? 'required' : ''">
                         <IonItem>
-                            <ion-label>Modalidad</ion-label>
+                            <ion-label position="stacked">Modalidad</ion-label>
                             <ion-select v-bind="field" interface="popover">
                                 <ion-select-option v-for="item in modalities" :key="item.value" :value="item.value">{{item.label}}</ion-select-option>
                             </ion-select>
@@ -131,7 +131,7 @@
                 <div v-if="step.step == 3">
                     <Field v-model="job.gender_id" label="sexo" name="gender_id" v-slot="{ field }">
                         <IonItem>
-                            <ion-label>Sexo</ion-label>
+                            <ion-label position="stacked">Sexo</ion-label>
                             <ion-select v-bind="field" interface="popover" >
                                 <ion-select-option v-for="item in genders" :key="item.value" :value="item.value">{{item.label}}</ion-select-option>
                             </ion-select>
@@ -182,7 +182,7 @@
 
                     <Field label="idiomas" name="languages" v-slot="{ field }">
                         <IonItem>
-                            <ion-label>Idiomas</ion-label>
+                            <ion-label position="stacked">Idiomas</ion-label>
                             <ion-select v-bind="field" :value="job.languages" @ionChange="job.languages = $event.target.value" :multiple="true" interface="popover">
                                 <ion-select-option v-for="item in languages" :key="item.value" :value="item.value">{{item.label}}</ion-select-option>
                             </ion-select>
@@ -192,7 +192,7 @@
 
                     <Field v-model="job.education_level" label="nivel educativo" name="education_level" v-slot="{ field }" :rules="step.step == 3 ? 'required' : ''">
                         <IonItem>
-                            <ion-label>Nivel educativo</ion-label>
+                            <ion-label position="stacked">Nivel educativo</ion-label>
                             <ion-select v-bind="field" interface="popover">
                                 <ion-select-option v-for="item in educationalLevels" :key="item.value" :value="item.value">{{item.label}}</ion-select-option>
                             </ion-select>

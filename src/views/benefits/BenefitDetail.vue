@@ -30,7 +30,17 @@
       <div class="benefit-content">
         <div class="benefit-section">
           <h2 class="section-title">Descripción</h2>
-          <p class="benefit-description">{{ benefit.description }}</p>
+          <p class="benefit-description">
+            <template v-for="(segment, i) in descriptionSegments" :key="i">
+              <a
+                v-if="segment.type === 'link'"
+                :href="segment.href"
+                class="benefit-link-inline"
+                @click.prevent="openExternal(segment.href)"
+                >{{ segment.value }}</a
+              ><template v-else>{{ segment.value }}</template>
+            </template>
+          </p>
         </div>
 
         <div class="benefit-section">
@@ -92,9 +102,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+import { computed, defineComponent, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
+// La URL para acceder al beneficio viene DENTRO de la descripción: la tabla
+// `benefits` no tiene columna de link. Como se pintaba con {{ }}, quedaba como
+// texto muerto y no había manera de abrirla desde la app.
+import { linkify } from '@/utils/linkify'
+import { openExternal } from '@/uses/externalLinks'
 
 export default defineComponent({
   name: 'BenefitDetail',
@@ -159,6 +174,10 @@ export default defineComponent({
       loadBenefit()
     })
 
+    const descriptionSegments = computed(() =>
+      linkify((benefit.value as any)?.description)
+    )
+
     return {
       benefit,
       loading,
@@ -166,6 +185,8 @@ export default defineComponent({
       getImageUrl,
       formatDate,
       loadBenefit,
+      descriptionSegments,
+      openExternal,
     }
   },
 })
@@ -231,13 +252,14 @@ export default defineComponent({
 .discount-value {
   font-size: 32px;
   font-weight: 700;
-  color: #e74c3c;
+  /* Antes #e74c3c: el mismo dato se veía violeta en el listado y rojo acá. */
+  color: var(--ion-color-primary);
   margin-right: 8px;
 }
 
 .discount-label {
   font-size: 16px;
-  color: #666;
+  color: var(--app-text-secondary);
 }
 
 .benefit-content {
@@ -263,6 +285,16 @@ export default defineComponent({
   margin: 0 0 15px 0;
   padding-bottom: 10px;
   border-bottom: 2px solid #f0f0f0;
+}
+
+.benefit-link-inline {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  /* Se toca y se copia: dejamos el texto seleccionable y con área cómoda. */
+  -webkit-user-select: text;
+  user-select: text;
+  word-break: break-word;
 }
 
 .benefit-description {
