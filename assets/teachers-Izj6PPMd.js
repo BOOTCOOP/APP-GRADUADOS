@@ -1,0 +1,1 @@
+function e(e,n){return(typeof e==`number`?e:t(n))>1?`Exponen`:`Expone`}function t(e){return(e==null?``:e).split(`,`).map(e=>e.trim()).filter(Boolean).length}export{e as t};
