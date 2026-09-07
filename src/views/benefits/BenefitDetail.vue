@@ -1,5 +1,12 @@
 <template>
-  <graduados-app :header-title="benefit.title || 'Detalle de Beneficio'">
+  <!-- Era la única pantalla de detalle sin "atrás" en el header: sólo tenía el
+       link del final del contenido, que obliga a scrollear hasta abajo. En las
+       secciones de primer nivel no se agrega, porque el layout muestra o el
+       botón atrás o el del menú, nunca los dos. -->
+  <graduados-app
+    :header-title="benefit.title || 'Detalle de Beneficio'"
+    :header-show-back-button="true"
+  >
     <div v-if="loading" class="loading-container">
       <div class="spinner"></div>
       <p>Cargando detalles del beneficio...</p>
