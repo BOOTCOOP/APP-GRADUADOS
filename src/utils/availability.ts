@@ -1,3 +1,5 @@
+import { parseApiDate } from '@/libs/dates'
+
 /**
  * Flags de disponibilidad que mandan los resources de talleres y cursos. Todos
  * opcionales a propósito: la app se distribuye por OTA y puede quedar corriendo
@@ -59,4 +61,40 @@ export function isDisabledByAdmin(
   if (resource.registration_closed) return false
 
   return true
+}
+
+/**
+ * ¿El taller/curso ya arrancó?
+ *
+ * La ventana de inscripción que manda la API es del PERÍODO, no del curso: los
+ * cursos de la oferta "Agosto 2026" comparten `inscripcion_hasta` 23-09-2026,
+ * así que uno que empezó el 28-08 sigue llegando con `registration_closed:
+ * false` y `can_enroll: true` dos semanas después de su primera clase. Y
+ * `is_ended` tampoco lo tapa, porque mira el FIN (18-09) y no el inicio.
+ *
+ * En talleres pasa lo mismo por otro camino: `is_ended` se calcula sobre la
+ * ÚLTIMA fecha, así que un taller de varias fechas que ya empezó sigue abierto.
+ *
+ * OJO — esto es un corte de interfaz, no la regla. `POST /enroll` sigue
+ * aceptando la inscripción si alguien lo llama directo: la versión autoritativa
+ * tiene que ir en EnrollmentChecker::canEnroll() del lado de la API.
+ *
+ * Sin fecha (o con uno de los 0000-00-00 del legacy, que no parsean) devuelve
+ * false: un dato faltante no puede sacar el curso de circulación.
+ *
+ * El corte es estricto: un curso que empieza HOY todavía se puede inscribir.
+ */
+export function hasStarted(start?: string | null, now: Date = new Date()): boolean {
+  const date = parseApiDate(start)
+  if (!date) return false
+
+  // El legacy guarda "sin fecha" como 0000-00-00, y el constructor de Date mapea
+  // los años 0-99 a 1900+: sin este corte, un curso sin inicio parsearía como
+  // "empezado en 1899" y desaparecería del catálogo. Es el mismo recaudo que
+  // toma EnrollmentChecker::validDate() del lado de la API.
+  if (date.getFullYear() < 1900) return false
+
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+  return date.getTime() < today.getTime()
 }

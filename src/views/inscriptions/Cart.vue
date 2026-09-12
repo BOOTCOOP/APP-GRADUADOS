@@ -127,7 +127,7 @@ import { useStore } from "vuex";
 import EmptyState from "@/components/EmptyState.vue";
 import { parseApiDate } from "@/libs/dates";
 import { useCurrentUser } from "@/uses/currentUser";
-import { isDisabledByAdmin } from "@/utils/availability";
+import { hasStarted, isDisabledByAdmin } from "@/utils/availability";
 import { useEnrollmentCart, type CartItem } from "@/uses/enrollmentCart";
 import { useRequireAuth } from "@/uses/requireAuth";
 import { refreshUser } from "@/uses/session";
@@ -180,6 +180,9 @@ function unavailableReason(data: any): string | null {
   if (data.is_ended) return "La actividad ya finalizó.";
   if (data.is_full) return "Se quedó sin cupos.";
   if (data.registration_closed) return "Las inscripciones están cerradas.";
+  // La ventana de inscripción es del período, no del curso: uno que ya tuvo
+  // su primera clase llega igual como disponible. Ver hasStarted.
+  if (hasStarted(data.start)) return "Ya comenzó y no admite nuevas inscripciones.";
   return null;
 }
 

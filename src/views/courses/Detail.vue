@@ -153,7 +153,7 @@
              Si el curso no admite inscripción (can_enroll anónimo = disponibilidad),
              cae a la rama "No disponible para inscripción". -->
         <ion-button
-          v-if="!isLoggedIn && course.can_enroll"
+          v-if="!isLoggedIn && course.can_enroll && !started"
           @click="goToLogin()"
           shape="round"
           expand="full"
@@ -203,6 +203,19 @@
           Cargá tu título para inscribirte
         </ion-button>
 
+        <!-- Ya empezó: es el motivo más frecuente de "no disponible" y
+             merece decirlo con todas las letras, con la fecha a la vista. -->
+        <ion-button
+          v-else-if="started"
+          shape="round"
+          expand="full"
+          color="medium"
+          class="main-action-btn"
+          disabled
+        >
+          Inscripción cerrada
+        </ion-button>
+
         <!-- Si no puede inscribirse -->
         <ion-button
           v-else
@@ -224,7 +237,15 @@
         <!-- Mensaje informativo -->
         <div class="info-message ion-text-center ion-margin-top">
           <ion-text color="medium">
-            <p v-if="!isLoggedIn && course.can_enroll">
+            <!-- `!is_enrolled`: el que YA está inscripto a un curso en curso
+                 tiene que seguir viendo su confirmación, no este aviso. -->
+            <p v-if="started && !course.is_enrolled">
+              <small
+                >Este curso comenzó el {{ course.start }} y ya no admite nuevas
+                inscripciones.</small
+              >
+            </p>
+            <p v-else-if="!isLoggedIn && course.can_enroll">
               <small>Para inscribirte en este curso necesitás iniciar sesión con tu cuenta de graduado.</small>
             </p>
             <p v-else-if="course.requires_diploma">
@@ -298,6 +319,7 @@ import EnrollmentCartToggle from "@/components/EnrollmentCartToggle.vue";
 import EnrollmentNextSteps from "@/components/EnrollmentNextSteps.vue";
 import type { CartItem } from "@/uses/enrollmentCart";
 import { analyzeCourseForModality } from "@/utils/modalityDetector";
+import { hasStarted } from "@/utils/availability";
 import { useCurrentUser } from "@/uses/currentUser";
 import { useRequireAuth } from "@/uses/requireAuth";
 import { refreshUser } from "@/uses/session";
@@ -315,9 +337,17 @@ const { canOperate, operabilityIssue, isGraduadoOtraUniversidad } = useCurrentUs
 // Anónimos: el footer muestra "Iniciá sesión para inscribirte" (con retorno acá).
 const { isLoggedIn, goToLogin } = useRequireAuth();
 
+// El curso ya tuvo su primera clase. La API lo sigue dando por inscribible
+// porque su ventana de inscripción es del período, no del curso (ver hasStarted).
+const started = computed(() => hasStarted(course.value?.start));
+
 // Puede inscribirse si el recurso lo permite Y el usuario puede operar.
 const canEnroll = computed(
-  () => !course.value.is_enrolled && course.value.can_enroll && canOperate.value
+  () =>
+    !course.value.is_enrolled &&
+    course.value.can_enroll &&
+    !started.value &&
+    canOperate.value
 );
 
 // Precio formateado del curso, o null si es gratuito.
@@ -339,6 +369,7 @@ const selectable = computed(
   () =>
     !course.value.is_enrolled &&
     !course.value.requires_diploma &&
+    !started.value &&
     Boolean(course.value.can_enroll)
 );
 

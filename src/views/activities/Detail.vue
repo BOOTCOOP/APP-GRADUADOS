@@ -260,7 +260,7 @@ import SocialShare from '@/components/SocialShare.vue'
 import EnrollmentCartToggle from '@/components/EnrollmentCartToggle.vue'
 import type { CartItem } from '@/uses/enrollmentCart'
 import { useCurrentUser } from '@/uses/currentUser'
-import { isDisabledByAdmin } from '@/utils/availability'
+import { hasStarted, isDisabledByAdmin } from '@/utils/availability'
 import { useRequireAuth } from '@/uses/requireAuth'
 import { refreshUser } from '@/uses/session'
 
@@ -284,10 +284,15 @@ const disabledByAdmin = computed(() =>
 // Anónimos: el footer muestra "Iniciá sesión para inscribirte" (con retorno acá).
 const { isLoggedIn, goToLogin } = useRequireAuth()
 
+// El taller ya tuvo su primera fecha: `is_ended` mira la ÚLTIMA, así que uno
+// de varias fechas que ya arrancó sigue llegando como disponible.
+const started = computed(() => hasStarted(workshop.value?.start))
+
 // Disponibilidad pura del taller (independiente del usuario).
 const workshopAvailable = computed(
   () =>
     !disabledByAdmin.value &&
+    !started.value &&
     !workshop.value?.is_ended &&
     !workshop.value?.is_full &&
     !workshop.value?.registration_closed

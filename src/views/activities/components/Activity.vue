@@ -112,7 +112,7 @@ import {
     modalityIcon as resolveModalityIcon,
 } from '@/utils/modality';
 import { teachersLabel } from '@/utils/teachers';
-import { isDisabledByAdmin } from '@/utils/availability';
+import { hasStarted, isDisabledByAdmin } from '@/utils/availability';
 import { useCurrentUser } from '@/uses/currentUser';
 import EnrollmentCartToggle from '@/components/EnrollmentCartToggle.vue';
 import type { CartItem } from '@/uses/enrollmentCart';
@@ -181,6 +181,9 @@ const unavailableLabel = computed(() => {
     if (props.activity.is_ended) return 'Finalizado';
     if (props.activity.is_full) return 'Sin cupos';
     if (props.activity.registration_closed) return 'Inscripciones cerradas';
+    // `is_ended` mira la ÚLTIMA fecha del taller, así que uno de varias fechas
+    // que ya arrancó llega como disponible. Ver hasStarted.
+    if (hasStarted(props.activity.start)) return 'Ya comenzó';
     // Contempla el caso de la API sin `is_enabled` deducíéndolo de can_enroll;
     // ver la nota en isDisabledByAdmin.
     if (disabledByAdmin.value) return 'No disponible';

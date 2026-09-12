@@ -90,6 +90,18 @@
                     <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
                     <ion-label>Inscripto</ion-label>
                 </ion-chip>
+
+                <!-- Ya empezó: sin esto la card de un curso que arrancó hace
+                     dos semanas se ve igual que la de uno por comenzar. -->
+                <ion-chip
+                    v-else-if="started"
+                    color="medium"
+                    size="small"
+                    class="status-chip"
+                >
+                    <ion-icon :icon="lockClosedOutline"></ion-icon>
+                    <ion-label>Ya comenzó</ion-label>
+                </ion-chip>
             </div>
 
             <!-- Sólo si el curso admite inscripción ahora (flags del index). -->
@@ -119,7 +131,8 @@ import {
     starOutline,
     timeOutline,
     chevronForwardOutline,
-    checkmarkCircleOutline
+    checkmarkCircleOutline,
+    lockClosedOutline
 } from 'ionicons/icons';
 
 import {
@@ -128,7 +141,7 @@ import {
 } from '@/utils/modality';
 import EnrollmentCartToggle from '@/components/EnrollmentCartToggle.vue';
 import type { CartItem } from '@/uses/enrollmentCart';
-import { isDisabledByAdmin } from '@/utils/availability';
+import { hasStarted, isDisabledByAdmin } from '@/utils/availability';
 import { useCurrentUser } from '@/uses/currentUser';
 
 interface Course {
@@ -185,6 +198,10 @@ const hasValidInscriptionStatus = computed(() =>
     Boolean(props.inscribed?.inscriptions?.[0]?.status?.value)
 );
 
+// La ventana que manda la API es del período, no del curso: uno que ya tuvo
+// su primera clase sigue llegando como inscribible (ver hasStarted).
+const started = computed(() => hasStarted(props.course.start));
+
 // "Mi selección" sólo si el curso admite inscripción ahora.
 const selectable = computed(
     () =>
@@ -192,6 +209,7 @@ const selectable = computed(
         !props.course.is_enrolled &&
         !props.course.requires_diploma &&
         !disabledByAdmin.value &&
+        !started.value &&
         !props.course.is_ended &&
         !props.course.is_full &&
         !props.course.registration_closed
