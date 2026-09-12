@@ -1,1 +1,0 @@
-function e(e,t={}){return e?e.is_enabled===void 0?!(e.can_enroll!==!1||t.userCanOperate===!1||e.is_enrolled||e.requires_diploma||e.is_ended||e.is_full||e.registration_closed):e.is_enabled===!1:!1}export{e as t};
