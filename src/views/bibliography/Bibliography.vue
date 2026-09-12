@@ -1,5 +1,5 @@
 <template>
-  <graduados-app header-title="Material Bibliográfico">
+  <graduados-app header-title="Material Bibliográfico" :header-show-back-button="true">
     <div class="filters" v-if="true">
       <FormSearchBar
         placeholder="Buscar material bibliográfico..."

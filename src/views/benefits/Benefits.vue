@@ -1,5 +1,5 @@
 <template>
-  <graduados-app header-title="Beneficios">
+  <graduados-app header-title="Beneficios" :header-show-back-button="true">
     <div v-if="loading" class="loading-container">
       <div class="spinner"></div>
       <p>Cargando beneficios...</p>

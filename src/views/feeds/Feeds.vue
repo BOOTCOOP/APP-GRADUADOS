@@ -1,5 +1,5 @@
 <template>
-  <graduados-app header-title="Noticias">
+  <graduados-app header-title="Noticias" :header-show-back-button="true">
     <!-- Barra de búsqueda -->
     <div class="search-container ion-padding-horizontal">
       <FormSearchBar 

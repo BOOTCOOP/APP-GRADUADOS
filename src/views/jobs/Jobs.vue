@@ -1,5 +1,5 @@
 <template>
-  <graduados-app header-title="Búsqueda laboral">
+  <graduados-app header-title="Búsqueda laboral" :header-show-back-button="true">
     <template #header-end>
       <ion-button color="dark" @click="showOptions">
         <ion-icon

@@ -1,6 +1,6 @@
 
 <template>
-    <graduados-app header-title="Trivias">
+    <graduados-app header-title="Trivias" :header-show-back-button="true">
         <div>
             <h1>Quizzes</h1>
             <ul>

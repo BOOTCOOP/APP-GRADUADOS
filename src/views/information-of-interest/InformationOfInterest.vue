@@ -1,5 +1,5 @@
 <template>
-  <graduados-app header-title="Información de interés">  
+  <graduados-app header-title="Información de interés" :header-show-back-button="true">  
     <!-- Búsqueda y filtros -->
     <div class="search-filter-container ion-margin-bottom">
       <FormSearchBar 

@@ -1,5 +1,5 @@
 <template>
-    <graduados-app header-title="Cursos de Perfeccionamiento">
+    <graduados-app header-title="Cursos de Perfeccionamiento" :header-show-back-button="true">
         <template #header-end>
             <ion-button v-if="isLoggedIn" color="primary" @click="goToHistory()">
                 <ion-icon src="/assets/icons/history-2.svg"></ion-icon>
