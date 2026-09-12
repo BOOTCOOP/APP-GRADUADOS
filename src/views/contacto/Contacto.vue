@@ -21,16 +21,6 @@
           <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
         </button>
 
-        <button type="button" class="link-row" @click="goToWhatsappChannel">
-          <span class="link-icon whatsapp">
-            <ion-icon :icon="megaphoneOutline" aria-hidden="true"></ion-icon>
-          </span>
-          <span class="link-text">
-            <span class="link-title">Canal de novedades</span>
-            <span class="link-sub">Suscribite por WhatsApp</span>
-          </span>
-          <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
-        </button>
 
         <button type="button" class="link-row" @click="goToYoutube">
           <span class="link-icon youtube">
@@ -39,6 +29,18 @@
           <span class="link-text">
             <span class="link-title">Canal de YouTube</span>
             <span class="link-sub">Videos del Centro de Graduados</span>
+          </span>
+          <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
+        </button>
+
+
+        <button type="button" class="link-row" @click="goToWhatsappChannel">
+          <span class="link-icon whatsapp">
+            <ion-icon :icon="megaphoneOutline" aria-hidden="true"></ion-icon>
+          </span>
+          <span class="link-text">
+            <span class="link-title">Canal de novedades</span>
+            <span class="link-sub">Suscribite por WhatsApp</span>
           </span>
           <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
         </button>
