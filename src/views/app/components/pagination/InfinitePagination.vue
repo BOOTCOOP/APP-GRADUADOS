@@ -194,7 +194,9 @@ function removeItem(item) {
   items.value = items.value.filter((i) => i.id != id);
 }
 
-defineExpose({ removeItem });
+// `items` va expuesto para que la vista pueda decidir sobre el set ya traído
+// (ej.: Cursos oculta el filtro por modalidad si ningún curso la informa).
+defineExpose({ removeItem, items });
 </script>
 
 <style scoped>

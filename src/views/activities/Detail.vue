@@ -260,6 +260,7 @@ import SocialShare from '@/components/SocialShare.vue'
 import EnrollmentCartToggle from '@/components/EnrollmentCartToggle.vue'
 import type { CartItem } from '@/uses/enrollmentCart'
 import { useCurrentUser } from '@/uses/currentUser'
+import { isDisabledByAdmin } from '@/utils/availability'
 import { useRequireAuth } from '@/uses/requireAuth'
 import { refreshUser } from '@/uses/session'
 
@@ -273,13 +274,20 @@ const router = useIonRouter()
 // Gate a nivel usuario (can_operate / operability_issue).
 const { canOperate, operabilityIssue } = useCurrentUser()
 
+// Apagado desde el Administrador. El gate de la cuenta va aparte: si el usuario
+// no puede operar, `can_enroll` viene en false para TODO y no hay que leerlo
+// como que el taller está deshabilitado.
+const disabledByAdmin = computed(() =>
+  isDisabledByAdmin(workshop.value, { userCanOperate: canOperate.value })
+)
+
 // Anónimos: el footer muestra "Iniciá sesión para inscribirte" (con retorno acá).
 const { isLoggedIn, goToLogin } = useRequireAuth()
 
 // Disponibilidad pura del taller (independiente del usuario).
 const workshopAvailable = computed(
   () =>
-    workshop.value?.is_enabled !== false &&
+    !disabledByAdmin.value &&
     !workshop.value?.is_ended &&
     !workshop.value?.is_full &&
     !workshop.value?.registration_closed
@@ -328,8 +336,7 @@ const unavailableLabel = computed(() => {
   if (workshop.value?.is_ended) return 'Finalizado'
   if (workshop.value?.is_full) return 'Sin cupos'
   if (workshop.value?.registration_closed) return 'Inscripciones cerradas'
-  // `=== false` y no `!`: ver nota en canEnrollNow().
-  if (workshop.value?.is_enabled === false) return 'No disponible'
+  if (disabledByAdmin.value) return 'No disponible'
   return null
 })
 
@@ -343,7 +350,7 @@ const enrollmentMessage = computed(() => {
   if (workshop.value.is_full) return 'Taller completo - Sin cupos disponibles';
   if (workshop.value.is_ended) return 'Taller finalizado';
   if (workshop.value.registration_closed) return 'Inscripciones cerradas';
-  if (workshop.value.is_enabled === false) return 'El taller no está disponible en este momento';
+  if (disabledByAdmin.value) return 'El taller no está disponible en este momento';
 
   return '';
 })
@@ -359,7 +366,7 @@ function canEnrollNow() {
   // el enroll del backend valida estas condiciones y rechazaría igual.
   // `is_enabled === false` y no `!is_enabled`: la app viaja por OTA y puede
   // correr contra una API que todavía no expone el flag; undefined = disponible.
-  if (workshop.value.is_enabled === false ||
+  if (disabledByAdmin.value ||
       workshop.value.is_ended ||
       workshop.value.is_full ||
       workshop.value.registration_closed) {
@@ -368,6 +375,12 @@ function canEnrollNow() {
 
   // Si el backend permite explícitamente la inscripción
   if (workshop.value.can_enroll) return true;
+
+  // Un `can_enroll` en false es una negativa del backend, no un dato faltante:
+  // el fallback de abajo es sólo para APIs que todavía no mandan el flag. Sin
+  // este corte, el botón quedaba habilitado para cualquier taller que el
+  // backend estuviera rechazando.
+  if (workshop.value.can_enroll === false) return false;
 
   // Si no está inscrito
   if (!workshop.value.is_enrolled) return true;

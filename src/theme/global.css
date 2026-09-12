@@ -414,11 +414,12 @@ ion-item.item-select.item-has-focus {
     --border-color: var(--ion-color-primary) !important;
 } */
 
-/* Chips */
-ion-chip.active {
-    --background: var(--ion-color-primary);
-    --color: white;
-}
+/* Chips
+ * No hay regla para el estado activo: con `color`/`outline`, Ionic escribe
+ * `background` y `color` directo en el host y le gana a `--background`/`--color`,
+ * asi que el chip "activo" quedaba con fondo transparente y texto blanco.
+ * Los filtros seleccionables usan .filter-chip (un <button>) en su vista.
+ */
 
 /* Typography */
 .text-title { font-size: 18px; font-weight: 700; color: var(--app-text-title, #1A1A2E); }
@@ -709,4 +710,86 @@ ion-alert .alert-button.alert-button-role-cancel {
 
 ion-alert .alert-button.sc-ion-alert-md.alert-button-role-confirm {
     background: rgba(232, 28, 98, 0.1);
+}
+
+/* --- Fecha de nacimiento --------------------------------------------------
+   El modal por defecto va a pantalla completa y deja el calendario (350px)
+   pegado arriba a la izquierda, con muchísimo blanco abajo. Lo achicamos a
+   una tarjeta centrada del tamaño del calendario. */
+.birthdate-item {
+  cursor: pointer;
+}
+
+.birthdate-caption {
+  margin: 0;
+  font-size: 12px;
+  color: var(--app-text-body, #4e5457);
+  text-align: left;
+}
+
+.birthdate-value {
+  margin: 2px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-title, #1a1a2e);
+  text-align: left;
+}
+
+ion-modal.birthdate-modal {
+  --width: 350px;
+  --max-width: 94vw;
+  --height: auto;
+  --border-radius: 16px;
+  --box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  --backdrop-opacity: 0.45;
+  align-items: center;
+  justify-content: center;
+}
+
+ion-modal.birthdate-modal::part(content) {
+  position: relative;
+  display: block;
+  contain: content;
+}
+
+ion-modal.birthdate-modal .ion-page {
+  position: relative;
+  display: block;
+  contain: content;
+}
+
+/* La app invierte la escala --ion-color-step-* en `body` (variables.css), así
+   que el ion-datetime heredaba una paleta oscura y la grilla quedaba gris
+   sobre gris: se veía como si los días estuvieran deshabilitados. Acá le
+   devolvemos una escala clara, sólo para este componente. */
+ion-modal.birthdate-modal ion-datetime {
+  width: 100%;
+  max-width: 100%;
+  /* Ionic pinta los días con `color: currentColor`, así que el número hereda
+     el `color` del host: sin esta línea los días quedaban blancos sobre el
+     fondo blanco del calendario y sólo se veía el seleccionado. */
+  color: var(--app-text-title, #1a1a2e);
+  --background: #ffffff;
+  --background-rgb: 255, 255, 255;
+  --title-color: var(--app-text-title, #1a1a2e);
+  --ion-text-color: var(--app-text-title, #1a1a2e);
+  --ion-color-step-50: #f7f7f7;
+  --ion-color-step-100: #ffffff;
+  --ion-color-step-150: #ebebeb;
+  --ion-color-step-200: #e0e0e0;
+  --ion-color-step-250: #d6d6d6;
+  --ion-color-step-300: #c2c2c2;
+  --ion-color-step-350: #b3b3b3;
+  --ion-color-step-400: #a3a3a3;
+  --ion-color-step-450: #949494;
+  --ion-color-step-500: #808080;
+  --ion-color-step-550: #757575;
+  --ion-color-step-600: #666666;
+  --ion-color-step-650: #575757;
+  --ion-color-step-700: #474747;
+  --ion-color-step-750: #383838;
+  --ion-color-step-800: #2e2e2e;
+  --ion-color-step-850: #1f1f1f;
+  --ion-color-step-900: #141414;
+  --ion-color-step-950: #0a0a0a;
 }

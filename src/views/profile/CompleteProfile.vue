@@ -35,31 +35,39 @@
         </IonItem>
       </Field>
 
-      <IonItem>
-        <IonLabel position="stacked">Fecha de nacimiento</IonLabel>
-        <!-- El botón "Seleccionar" seteaba showDatePicker, pero el modal no
-             tenía is-open: no abría nada. Un único control, siempre visible,
-             con el modal atado al ref. -->
-        <ion-button
-          fill="clear"
-          size="small"
+      <!-- Mismo picker que en Mi cuenta: item entero tappable y modal con
+           botones Cancelar/Confirmar (sin show-default-buttons Ionic no
+           renderiza ninguno y el calendario queda sin salida). -->
+      <IonItem button :detail="false" class="birthdate-item" @click="openDatePicker">
+        <IonLabel>
+          <p class="birthdate-caption">Fecha de nacimiento</p>
+          <h3 class="birthdate-value">{{ birthDateLabel }}</h3>
+        </IonLabel>
+        <ion-icon
           slot="end"
-          @click="showDatePicker = true"
-        >
-          {{ birthDateLabel }}
-        </ion-button>
+          :icon="calendarOutline"
+          color="primary"
+          aria-hidden="true"
+        ></ion-icon>
       </IonItem>
       <ion-modal
+        class="birthdate-modal"
         :is-open="showDatePicker"
         @didDismiss="showDatePicker = false"
         :keep-contents-mounted="true"
       >
         <IonDatetime
           id="birthDate"
+          :key="datePickerKey"
           presentation="date"
-          :value="data.birth_date"
+          locale="es-AR"
+          :first-day-of-week="1"
+          :show-default-buttons="true"
+          :value="draftBirthDate"
+          :min="minBirthDate"
           :max="today"
           @ionChange="onDateChange"
+          @ionCancel="showDatePicker = false"
           cancel-text="Cancelar"
           done-text="Confirmar"
         ></IonDatetime>
@@ -85,6 +93,7 @@ import User from '@/utils/user'
 import {
   IonButton,
   IonDatetime,
+  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
@@ -92,6 +101,7 @@ import {
   IonText,
   useIonRouter,
 } from '@ionic/vue'
+import { calendarOutline } from 'ionicons/icons'
 import { ErrorMessage, Field, Form } from 'vee-validate'
 import { computed, reactive, ref } from 'vue'
 import { useStore } from 'vuex'
@@ -101,7 +111,14 @@ const store = useStore()
 const form = ref<any>(null)
 const sending = ref(false)
 const showDatePicker = ref(false)
-const today = new Date().toISOString()
+// Sólo la parte de fecha: con la hora incluida el día de hoy queda fuera de :max.
+const today = new Date().toISOString().split('T')[0]
+const minBirthDate = '1920-01-01'
+const defaultBirthDate = `${new Date().getFullYear() - 30}-01-01`
+const draftBirthDate = ref<string | undefined>(undefined)
+// Ver Profile.vue: con keep-contents-mounted el calendario no salta al mes del
+// `value`, así que lo remontamos en cada apertura.
+const datePickerKey = ref(0)
 
 const existing = User.get() || {}
 const data = reactive({
@@ -123,11 +140,21 @@ const birthDateLabel = computed(() => {
   })
 })
 
+function openDatePicker() {
+  // Sin fecha previa abrimos ~30 años atrás: arrancar en "hoy" con :max=hoy
+  // muestra una grilla casi toda deshabilitada y parece rota.
+  draftBirthDate.value = data.birth_date || defaultBirthDate
+  datePickerKey.value += 1
+  showDatePicker.value = true
+}
+
 function onDateChange(event: any) {
   const iso = event.detail.value
   if (!iso) return
   // IonDatetime devuelve ISO; el backend espera YYYY-MM-DD.
-  data.birth_date = iso.split('T')[0]
+  data.birth_date = String(iso).split('T')[0]
+  // Con show-default-buttons esto llega al confirmar: ya podemos cerrar.
+  showDatePicker.value = false
 }
 
 function save() {

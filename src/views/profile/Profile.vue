@@ -85,33 +85,41 @@
         </IonItem>
       </Field>
 
-      <IonItem>
-        <IonLabel position="stacked">Fecha de nacimiento</IonLabel>
-        <!-- Antes: el botón del datepicker sólo se renderizaba si ya había
-             fecha cargada, y si no había, en su lugar iba una nota de texto
-             plano. Resultado: no quedaba NADA tappable y era imposible cargar
-             la fecha la primera vez. Ahora hay un único botón, siempre visible,
-             que abre el modal con is-open. -->
-        <ion-button
-          fill="clear"
-          size="small"
+      <!-- El item entero abre el picker: antes sólo el texto del costado era
+           tappable y el modal no tenía botones (cancel-text/done-text no
+           alcanzan: sin show-default-buttons Ionic no los renderiza), así que
+           se abría el calendario a pantalla completa y no había forma de
+           confirmar ni de cerrarlo. -->
+      <IonItem button :detail="false" class="birthdate-item" @click="openDatePicker">
+        <IonLabel>
+          <p class="birthdate-caption">Fecha de nacimiento</p>
+          <h3 class="birthdate-value">{{ birthDateLabel }}</h3>
+        </IonLabel>
+        <ion-icon
           slot="end"
-          @click="showDatePicker = true"
-        >
-          {{ birthDateLabel }}
-        </ion-button>
+          :icon="calendarOutline"
+          color="primary"
+          aria-hidden="true"
+        ></ion-icon>
       </IonItem>
       <ion-modal
+        class="birthdate-modal"
         :is-open="showDatePicker"
         @didDismiss="showDatePicker = false"
         :keep-contents-mounted="true"
       >
         <IonDatetime
           id="profileBirthDate"
+          :key="datePickerKey"
           presentation="date"
-          :value="profile.birth_date"
+          locale="es-AR"
+          :first-day-of-week="1"
+          :show-default-buttons="true"
+          :value="draftBirthDate"
+          :min="minBirthDate"
           :max="today"
           @ionChange="onDateChange"
+          @ionCancel="showDatePicker = false"
           cancel-text="Cancelar"
           done-text="Confirmar"
         ></IonDatetime>
@@ -177,7 +185,11 @@ import {
   IonThumbnail,
   useIonRouter,
 } from "@ionic/vue";
-import { ellipsisHorizontalCircleOutline, lockClosedOutline } from "ionicons/icons";
+import {
+  calendarOutline,
+  ellipsisHorizontalCircleOutline,
+  lockClosedOutline,
+} from "ionicons/icons";
 import { ErrorMessage, Field, Form } from "vee-validate";
 import { computed, onMounted, ref } from "vue";
 import { useStore } from "vuex";
@@ -188,7 +200,11 @@ const loading = ref(true);
 const router = useIonRouter();
 const store = useStore();
 const form = ref<any>("");
-const today = new Date().toISOString();
+// Ionic compara los límites como string ISO; mandamos sólo la parte de fecha
+// para que el día de hoy quede habilitado y no dependa de la hora.
+const today = new Date().toISOString().split("T")[0];
+const minBirthDate = "1920-01-01";
+const defaultBirthDate = `${new Date().getFullYear() - 30}-01-01`;
 const userTypes = USER_TYPES;
 
 const { typeValidationStatus } = useCurrentUser();
@@ -236,6 +252,23 @@ onMounted(() => {
 
 const showDatePicker = ref(false);
 
+// Valor con el que abre el calendario. Si el perfil todavía no tiene fecha
+// arrancamos en una fecha razonable para un adulto en vez de en "hoy", que
+// con :max=hoy deja media grilla deshabilitada y parece que no se puede tocar.
+const draftBirthDate = ref<string | undefined>(undefined);
+
+// keep-contents-mounted monta el IonDatetime una sola vez, y una vez montado
+// ya no reposiciona el calendario al mes del `value`: abría siempre en el mes
+// actual aunque el perfil tuviera otra fecha. Remontarlo en cada apertura lo
+// deja parado en el mes correcto.
+const datePickerKey = ref(0);
+
+function openDatePicker() {
+  draftBirthDate.value = profile.value.birth_date || defaultBirthDate;
+  datePickerKey.value += 1;
+  showDatePicker.value = true;
+}
+
 // Texto del botón: la fecha cargada o la invitación a elegirla.
 const birthDateLabel = computed(() => {
   const date = parseApiDate(profile.value.birth_date);
@@ -251,7 +284,10 @@ const birthDateLabel = computed(() => {
 function onDateChange(event: any) {
   const iso = event.detail.value;
   if (!iso) return;
-  profile.value.birth_date = iso.split("T")[0];
+  profile.value.birth_date = String(iso).split("T")[0];
+  // Con show-default-buttons el ionChange llega recién al confirmar, así que
+  // acá ya podemos cerrar: el usuario ve el valor reflejado en el item.
+  showDatePicker.value = false;
 }
 
 function onTypeChange() {

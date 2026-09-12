@@ -128,6 +128,8 @@ import {
 } from '@/utils/modality';
 import EnrollmentCartToggle from '@/components/EnrollmentCartToggle.vue';
 import type { CartItem } from '@/uses/enrollmentCart';
+import { isDisabledByAdmin } from '@/utils/availability';
+import { useCurrentUser } from '@/uses/currentUser';
 
 interface Course {
     id: number;
@@ -164,6 +166,15 @@ const props = defineProps<{
 
 const router = useIonRouter();
 
+// Apagado desde el Administrador. El gate de la cuenta va aparte: si el usuario
+// no puede operar, `can_enroll` viene en false para TODO y no hay que leerlo
+// como que el catálogo entero está deshabilitado.
+const { canOperate } = useCurrentUser();
+
+const disabledByAdmin = computed(() =>
+    isDisabledByAdmin(props.course, { userCanOperate: canOperate.value })
+);
+
 const modalityKind = computed(() => resolveModalityKind(props.course.modality));
 const modalityIcon = computed(() => resolveModalityIcon(modalityKind.value));
 
@@ -180,7 +191,7 @@ const selectable = computed(
         !props.inscribed &&
         !props.course.is_enrolled &&
         !props.course.requires_diploma &&
-        props.course.is_enabled !== false &&
+        !disabledByAdmin.value &&
         !props.course.is_ended &&
         !props.course.is_full &&
         !props.course.registration_closed

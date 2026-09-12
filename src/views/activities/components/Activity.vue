@@ -112,6 +112,8 @@ import {
     modalityIcon as resolveModalityIcon,
 } from '@/utils/modality';
 import { teachersLabel } from '@/utils/teachers';
+import { isDisabledByAdmin } from '@/utils/availability';
+import { useCurrentUser } from '@/uses/currentUser';
 import EnrollmentCartToggle from '@/components/EnrollmentCartToggle.vue';
 import type { CartItem } from '@/uses/enrollmentCart';
 
@@ -149,6 +151,15 @@ const props = defineProps<{
 
 const router = useIonRouter();
 
+// Apagado desde el Administrador. El gate de la cuenta va aparte: si el usuario
+// no puede operar, `can_enroll` viene en false para TODO y no hay que leerlo
+// como que el catálogo entero está deshabilitado.
+const { canOperate } = useCurrentUser();
+
+const disabledByAdmin = computed(() =>
+    isDisabledByAdmin(props.activity, { userCanOperate: canOperate.value })
+);
+
 // workshops/own puede devolver la inscripción recién creada sin status poblado:
 // el badge solo se muestra si el estado realmente vino.
 const inscriptionStatus = computed(() => props.inscribed?.inscriptions?.[0]?.status ?? null);
@@ -170,9 +181,9 @@ const unavailableLabel = computed(() => {
     if (props.activity.is_ended) return 'Finalizado';
     if (props.activity.is_full) return 'Sin cupos';
     if (props.activity.registration_closed) return 'Inscripciones cerradas';
-    // `=== false` y no `!`: la app viaja por OTA y puede correr contra una API
-    // que todavía no expone is_enabled; undefined tiene que seguir siendo disponible.
-    if (props.activity.is_enabled === false) return 'No disponible';
+    // Contempla el caso de la API sin `is_enabled` deducíéndolo de can_enroll;
+    // ver la nota en isDisabledByAdmin.
+    if (disabledByAdmin.value) return 'No disponible';
     return null;
 });
 
@@ -203,7 +214,7 @@ const selectable = computed(
     () =>
         !props.inscribed &&
         !props.activity.is_enrolled &&
-        props.activity.is_enabled !== false &&
+        !disabledByAdmin.value &&
         !props.activity.is_ended &&
         !props.activity.is_full &&
         !props.activity.registration_closed

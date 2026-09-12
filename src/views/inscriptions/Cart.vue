@@ -127,6 +127,7 @@ import { useStore } from "vuex";
 import EmptyState from "@/components/EmptyState.vue";
 import { parseApiDate } from "@/libs/dates";
 import { useCurrentUser } from "@/uses/currentUser";
+import { isDisabledByAdmin } from "@/utils/availability";
 import { useEnrollmentCart, type CartItem } from "@/uses/enrollmentCart";
 import { useRequireAuth } from "@/uses/requireAuth";
 import { refreshUser } from "@/uses/session";
@@ -175,7 +176,7 @@ function unavailableReason(data: any): string | null {
   if (data.is_enrolled) return "Ya estás inscripto.";
   // `=== false` y no `!`: undefined (API sin el flag todavía) = disponible.
   if (data.requires_diploma) return "Necesitás cargar tu título para inscribirte.";
-  if (data.is_enabled === false) return "Ya no está disponible.";
+  if (isDisabledByAdmin(data, { userCanOperate: canOperate.value })) return "Ya no está disponible.";
   if (data.is_ended) return "La actividad ya finalizó.";
   if (data.is_full) return "Se quedó sin cupos.";
   if (data.registration_closed) return "Las inscripciones están cerradas.";
