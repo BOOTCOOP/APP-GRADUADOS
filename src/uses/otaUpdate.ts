@@ -143,10 +143,7 @@ export async function applyPendingOtaUpdate(): Promise<void> {
   const pending = pendingUpdate.value;
   if (!pending) return;
 
-  const { bundles } = await CapacitorUpdater.list();
-  const bundle = bundles.find(
-    (b) => b.version === pending.version && b.status === "success"
-  );
+  const bundle = await findDownloadedBundle(pending.version);
 
   // Raro (el plugin borró el bundle, p. ej. por rollback): rearrancar el ciclo.
   if (!bundle) {
@@ -202,14 +199,30 @@ async function evaluateManifest(): Promise<ManifestEvaluation> {
 // Reusa un bundle ya descargado si existe (típico: el chequeo automático lo
 // bajó y lo dejó como next(), pero la app nunca tuvo un arranque en frío).
 async function getOrDownloadBundle(manifest: Manifest): Promise<BundleInfo> {
-  const { bundles } = await CapacitorUpdater.list();
-  const existing = bundles.find(
-    (b) => b.version === manifest.version && b.status === "success"
-  );
+  const existing = await findDownloadedBundle(manifest.version);
   if (existing) return existing;
 
   return CapacitorUpdater.download({
     url: manifest.url,
     version: manifest.version,
   });
+}
+
+// Busca un bundle ya bajado y utilizable para esa versión.
+//
+// OJO con el estado: un bundle recién descargado (y aun después de next())
+// queda en 'pending', NO en 'success' — el plugin recién lo marca 'success'
+// cuando ese bundle llegó a correr y llamó a notifyAppReady(). Filtrar por
+// 'success' hacía que nunca se encontrara el bundle del toast: el botón
+// "Actualizar" caía en la rama de rescate, limpiaba el pendiente y volvía a
+// chequear, con lo que el aviso reaparecía sin actualizar nada.
+async function findDownloadedBundle(
+  version: string
+): Promise<BundleInfo | undefined> {
+  const { bundles } = await CapacitorUpdater.list();
+  return bundles.find(
+    (b) =>
+      b.version === version &&
+      (b.status === "success" || b.status === "pending")
+  );
 }
