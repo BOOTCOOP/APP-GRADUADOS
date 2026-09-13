@@ -1,6 +1,6 @@
 {
-  "version": "2.0.2",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.0.2.zip",
+  "version": "2.0.3",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.0.3.zip",
   "min_native_version": "1.2.0",
-  "notes": "Se puede cargar la fecha de nacimiento, botón Volver en todas las secciones y no se ofrece inscripción a cursos ya empezados"
+  "notes": "La fecha de nacimiento queda guardada en Mi cuenta y el botón Actualizar del aviso de nueva versión ya aplica el update"
 }
