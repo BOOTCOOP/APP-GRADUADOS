@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] - 2026-09-12
+
+Bundle OTA sobre la 2.0.1 de tienda. Solo código web: no cambia el shell nativo
+(`versionName` sigue en 2.0.1) ni el `latest_version` del backend.
+
+### Fixed
+- **No se podía cargar la fecha de nacimiento** en "Mi cuenta" ni en "Completar perfil". El calendario abría pero sin botones: `cancel-text`/`done-text` solo ponen el texto, y sin `show-default-buttons` Ionic no renderiza ninguno, así que el modal quedaba sin salida ni forma de confirmar. Además el modal iba a pantalla completa, los días se veían apagados porque `variables.css` invierte la escala `--ion-color-step-*` sobre `body`, y los números quedaban invisibles porque Ionic los pinta con `color: currentColor` y no con `--ion-text-color`
+- El calendario abría siempre en el mes actual aunque el perfil ya tuviera una fecha: con `keep-contents-mounted` el `ion-datetime` se monta una sola vez y no reposiciona la vista al `value`
+- **Se ofrecía inscripción a cursos y talleres que ya habían empezado**. La ventana de inscripción que manda la API es del PERÍODO, no del curso: los de la oferta "Agosto 2026" comparten `inscripcion_hasta` 23-09, así que uno que arrancó el 28-08 llegaba con `registration_closed: false`; `is_ended` tampoco lo tapaba porque mira el fin. En talleres pasaba por otro camino: `isEnded()` se calcula sobre la última fecha. Se corta con `hasStarted()` en detalle y card de cursos, detalle y card de talleres, y la revalidación de "Mi selección". El corte es estricto pero no retroactivo: un curso que empieza HOY todavía se puede inscribir, y el que ya está inscripto sigue viendo su confirmación
+
+### Added
+- Botón **"Volver"** en las ocho pantallas de sección que no lo tenían: Cursos, Talleres y Jornadas, Beneficios, Noticias, Material Bibliográfico, Información de interés, Búsqueda laboral y Trivias. El detalle de cada ítem ya la tenía, así que la navegación era inconsistente según el nivel. Como en el resto de la app, la flecha reemplaza a la hamburguesa
+
+### Changed
+- Los cursos se ordenan por el prefijo numérico del título ("02 - ...") del lado del cliente, para que el listado se vea ordenado aunque la API que responde todavía no traiga ese cambio
+- En Contacto, el canal de YouTube va antes que el de novedades por WhatsApp
+
+### Known issues
+- El corte de "ya comenzó" es de interfaz: `POST /enroll` sigue aceptando la inscripción si se llama directo. La regla autoritativa tiene que ir en `EnrollmentChecker::canEnroll()` del lado de la API
+- `GET /api/courses/{slug}` resuelve por `id` cuando el slug arranca con número (`10-uniones-convivenciales` devuelve "Riesgos del Trabajo", id 10): MySQL castea el slug a entero. La app no lo sufre porque navega por `id`, pero rompe deep links
+
 ## [2.0.1] - 2026-08-11
 
 ### Changed
