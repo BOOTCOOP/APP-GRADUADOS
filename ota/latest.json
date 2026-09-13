@@ -1,6 +1,6 @@
 {
-  "version": "1.3.6",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-1.3.6.zip",
+  "version": "2.0.2",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.0.2.zip",
   "min_native_version": "1.2.0",
-  "notes": "Detalle de taller rediseñado, modalidad en el listado y compartir con link al contenido"
+  "notes": "Se puede cargar la fecha de nacimiento, botón Volver en todas las secciones y no se ofrece inscripción a cursos ya empezados"
 }
