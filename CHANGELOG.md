@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] - 2026-09-13
+
+Bundle OTA sobre la 2.0.1 de tienda. Solo código web: no cambia el shell nativo
+(`versionName` sigue en 2.0.1) ni el `latest_version` del backend.
+
+### Fixed
+- **La fecha de nacimiento no quedaba guardada** en "Mi cuenta". Sí se escribía en la base (`graduados_inscripto.fecha_nacimiento`), pero `UserResource` de la API no devolvía `birth_date`, así que la respuesta del `PUT /api/profile` pisaba el usuario cacheado con un objeto sin el campo y al reabrir la pantalla el botón volvía a decir "Seleccionar". Se arregla del lado de la API (campo nuevo en el resource, aditivo) y acá se hidrata la fecha desde el usuario fresco en `onMounted`, como ya se hacía con el DNI, para las sesiones cuyo cache viene de antes del cambio
+- **El botón "Actualizar" del aviso de nueva versión no actualizaba**: buscaba el bundle ya descargado filtrando por status `success`, pero el plugin recién marca así a un bundle que llegó a correr y llamó a `notifyAppReady()` — el recién bajado queda en `pending`. Como no lo encontraba, caía en la rama de rescate, limpiaba el pendiente y volvía a chequear, con lo que el aviso reaparecía sin aplicar nada
+
 ## [2.0.2] - 2026-09-12
 
 Bundle OTA sobre la 2.0.1 de tienda. Solo código web: no cambia el shell nativo
