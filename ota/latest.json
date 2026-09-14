@@ -1,6 +1,6 @@
 {
-  "version": "2.0.3",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.0.3.zip",
+  "version": "2.0.4",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.0.4.zip",
   "min_native_version": "1.2.0",
-  "notes": "La fecha de nacimiento queda guardada en Mi cuenta y el botón Actualizar del aviso de nueva versión ya aplica el update"
+  "notes": "El historial de cursos y talleres muestra el estado de cada inscripción y respeta el orden de la API; publicar una búsqueda laboral ya avisa cuando algo falla en vez de quedarse mudo"
 }
