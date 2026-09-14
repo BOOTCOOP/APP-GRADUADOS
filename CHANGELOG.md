@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.4] - 2026-09-13
+
+Bundle OTA sobre la 2.0.1 de tienda. Solo código web: no cambia el shell nativo
+(`versionName` sigue en 2.0.1) ni el `latest_version` del backend.
+
+### Fixed
+- **El historial de cursos y talleres no mostraba el estado de cada inscripción** y, peor, las cards se creían disponibles: el botón decía "Inscribirse" sobre un taller terminado. En el historial cada ítem YA es una inscripción y trae su `inscriptions[0].status`, así que se pasa a sí mismo como `inscribed` en vez de cruzar con `courses/own` / `workshops/own` como hace el listado principal, que sí mezcla catálogo con inscripciones
+- **El historial de talleres desordenaba la lista al paginar**: reordenaba en la vista con `sortByStartDate` sobre lo ya acumulado y por fecha de INICIO, así que los talleres de cada página nueva se intercalaban entre los de arriba. El orden (última fecha primero) lo manda la API y alcanza con respetarlo
+- **"Publicar búsqueda" no hacía nada al tocar Finalizar**: el botón pasaba de "Guardando..." a "Finalizar" sin ningún mensaje. El `catch` del wizard asumía siempre un 422 de Laravel (`error.response.data.errors`) y ante cualquier otro error tiraba un TypeError adentro del propio catch, que se perdía. Ahora hay un aviso por cada caso (validación, sin conexión, endpoint caído, error del servidor), el 422 lleva al paso donde vive el campo con error en lugar de volver siempre al paso 1, y si falta completar algo sale un toast y la pantalla baja hasta el campo — antes solo se pintaba un texto rojo que podía quedar fuera de la vista
+- La regla "teléfono o email" del mismo formulario rompía la validación entera cuando el valor no era un string, y el select de sexo escribía en `gender_id` mientras el modelo inicializaba `gender`
+
+### Nota
+⚠️ Publicar una búsqueda **sigue sin funcionar**: la API de producción no expone las rutas de escritura de `jobs` (`POST jobs`, `PUT/DELETE jobs/{id}` → 405; `switchStatus` y favoritos → 404). Este release arregla que la app lo avise; habilitarlas es trabajo del backend
+
 ## [2.0.3] - 2026-09-13
 
 Bundle OTA sobre la 2.0.1 de tienda. Solo código web: no cambia el shell nativo
