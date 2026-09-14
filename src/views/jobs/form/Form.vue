@@ -28,7 +28,7 @@
                             <IonLabel position="floating">Posición</IonLabel>
                             <IonInput v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="title" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="title" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
                     
                     <Field v-model="job.company" label="compañía" name="company" v-slot="{ field }" :rules="step.step == 1 ? 'required' : ''">
@@ -36,7 +36,7 @@
                             <IonLabel position="floating">Compañía</IonLabel>
                             <IonInput v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="company" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="company" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
                     
                     <Field v-model="job.description" label="descripción" name="description" v-slot="{ field }" :rules="step.step == 1 ? 'required' : ''">
@@ -44,7 +44,7 @@
                             <IonLabel position="floating">Descripción</IonLabel>
                             <ion-textarea :auto-grow="true" v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="description" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="description" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
                     
                     <Field v-model="job.duration" label="duración" name="duration" v-slot="{ field }" :rules="step.step == 1 ? 'required' : ''">
@@ -52,7 +52,7 @@
                             <IonLabel position="floating">Duración</IonLabel>
                             <IonInput v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="duration" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="duration" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
                     
                     <Field v-model="job.phone" label="teléfono" name="phone" v-slot="{ field }" :rules="step.step == 1 ? 'requiredWithout:email' : ''">
@@ -60,14 +60,14 @@
                             <IonLabel position="floating">Teléfono</IonLabel>
                             <IonInput v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="phone" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="phone" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
                     <Field v-model="job.email" label="email" name="email" v-slot="{ field }" :rules="step.step == 1 ? 'email' : ''">
                         <IonItem>
                             <IonLabel position="floating">Email</IonLabel>
                             <IonInput v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="email" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="email" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
                 </div>
                 <div v-if="step.step == 2">
@@ -79,7 +79,7 @@
                             </ion-select>
                         </IonItem>
 
-                        <ErrorMessage name="provincia_id" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="provincia_id" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
 
                     <Field v-model="job.localidad_id" label="Localidad" name="localidad_id" v-slot="{ field }" :rules="step.step == 2 ? 'required' : ''">
@@ -90,7 +90,7 @@
                             </ion-select>
                         </IonItem>
 
-                        <ErrorMessage name="localidad_id" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="localidad_id" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
                     
                     <!-- <Field v-model="job.city" label="ciudad" name="city" v-slot="{ field }" :rules="step.step == 2 ? 'required' : ''">
@@ -98,7 +98,7 @@
                             <IonLabel position="floating">Ciudad</IonLabel>
                             <IonInput v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="city" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="city" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field> -->
                     
                     <Field v-model="job.position" label="jerarquía" name="position" v-slot="{ field }" :rules="step.step == 2 ? 'required' : ''">
@@ -106,7 +106,7 @@
                             <IonLabel position="floating">Jerarquía</IonLabel>
                             <IonInput v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="position" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="position" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
                     
                     <Field v-model="job.modality_id" label="modalidad" name="modality_id" v-slot="{ field }" :rules="step.step == 2 ? 'required' : ''">
@@ -116,7 +116,7 @@
                                 <ion-select-option v-for="item in modalities" :key="item.value" :value="item.value">{{item.label}}</ion-select-option>
                             </ion-select>
                         </IonItem>
-                        <ErrorMessage name="modality_id" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="modality_id" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
 
                     
@@ -125,7 +125,7 @@
                             <IonLabel position="floating">Cant. Vacantes</IonLabel>
                             <IonInput type="number" v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="vacancies_amount" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="vacancies_amount" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
                 </div>
                 <div v-if="step.step == 3">
@@ -136,7 +136,7 @@
                                 <ion-select-option v-for="item in genders" :key="item.value" :value="item.value">{{item.label}}</ion-select-option>
                             </ion-select>
                         </IonItem>
-                        <ErrorMessage name="gender" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="gender_id" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
 
                     <div class="ion-padding-top">
@@ -149,7 +149,7 @@
                                         <IonInput type="number" v-bind="field"/>
                                     </IonItem>
                                  
-                                    <ErrorMessage name="age_from" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                                    <ErrorMessage name="age_from" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                                 </Field>
                             </div>
                             <div>
@@ -158,7 +158,7 @@
                                         <IonLabel position="floating">Hasta</IonLabel>
                                         <IonInput type="number" v-bind="field"/>
                                     </IonItem>
-                                    <ErrorMessage name="age_to" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                                    <ErrorMessage name="age_to" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                                 </Field>
                             </div>
                         </div>
@@ -169,7 +169,7 @@
                             <IonLabel position="floating">Lugar de residencia</IonLabel>
                             <IonInput v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="residency" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="residency" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
                     
                     <Field v-model="job.experience" label="experiencia" name="experience" v-slot="{ field }" :rules="step.step == 3 ? 'required' : ''">
@@ -177,7 +177,7 @@
                             <IonLabel position="floating">Experiencia</IonLabel>
                             <IonInput v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="experience" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="experience" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
 
                     <Field label="idiomas" name="languages" v-slot="{ field }">
@@ -187,7 +187,7 @@
                                 <ion-select-option v-for="item in languages" :key="item.value" :value="item.value">{{item.label}}</ion-select-option>
                             </ion-select>
                         </IonItem>
-                        <ErrorMessage name="languages" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="languages" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
 
                     <Field v-model="job.education_level" label="nivel educativo" name="education_level" v-slot="{ field }" :rules="step.step == 3 ? 'required' : ''">
@@ -197,7 +197,7 @@
                                 <ion-select-option v-for="item in educationalLevels" :key="item.value" :value="item.value">{{item.label}}</ion-select-option>
                             </ion-select>
                         </IonItem>
-                        <ErrorMessage name="education_level" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="education_level" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
 
                     <ion-item class="item-checkbox">
@@ -210,7 +210,7 @@
                             <IonLabel position="floating">Salario</IonLabel>
                             <IonInput v-bind="field"/>
                         </IonItem>
-                        <ErrorMessage name="salary" #default="{message}"> <ion-text color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
+                        <ErrorMessage name="salary" #default="{message}"> <ion-text class="field-error" color="danger"><small>{{message}}</small></ion-text></ErrorMessage>
                     </Field>
 
                 </div>
@@ -239,7 +239,7 @@
 </template>
 
 <script lang="ts" setup>
-    import { ref, computed, onMounted, watch } from 'vue';
+    import { ref, computed, onMounted, watch, nextTick } from 'vue';
     import { useRoute } from 'vue-router';
     import { IonText, IonImg, IonItem, IonCheckbox, IonLabel, IonInput, IonTextarea, IonButton, IonIcon, useIonRouter, IonSelect, IonSelectOption } from '@ionic/vue';
     import { arrowBackOutline } from 'ionicons/icons';
@@ -247,12 +247,16 @@
     import { useStore } from 'vuex';
     import { useSelect } from "@/uses/select"
 
+    const isBlank = (value) => value === null || value === undefined || String(value).trim() === "";
+
+    // Teléfono o email: al menos uno. Ojo con los valores no-string (null, números):
+    // la versión anterior hacía .length sobre ellos y rompía la validación entera.
     defineRule("requiredWithout", (value, params) => {
-        let result = true;
+        if (isBlank(value) && isBlank(job.value?.[params[0]])) {
+            return "Indicá al menos un teléfono o un email de contacto";
+        }
 
-        if(value === null || (!value.length && !job.value[params[0]].length)) result = "Este campo es obligatorio";
-
-        return result;
+        return true;
     })
 
     const initialize = ref(true);
@@ -286,7 +290,7 @@
         position:'',
         modality_id:'',
         vacancies_amount:'',
-        gender:'',
+        gender_id: null,
         age_from:'',
         age_to:'',
         residency:'',
@@ -347,10 +351,43 @@
         job.value.show_salary = !job.value.show_salary;
     }
     
-    async function stepValid(){
-        const valid = await form.value.validate();
+    // Qué campo se edita en qué paso: sirve para llevar al usuario al paso donde
+    // está el error cuando el que lo reporta es la API.
+    const stepFields = {
+        1: ["title", "company", "description", "duration", "phone", "email"],
+        2: ["provincia_id", "localidad_id", "province", "city", "position", "modality_id", "vacancies_amount"],
+        3: ["gender_id", "age_from", "age_to", "residency", "experience", "languages", "education_level", "show_salary", "salary"],
+    };
 
-        return valid.valid;
+    function stepOfField(name){
+        const found = Object.entries(stepFields).find(([, fields]) => fields.includes(name));
+
+        return found ? Number(found[0]) : null;
+    }
+
+    function notify(message){
+        store.dispatch("ui/toastr/create", { message, color: "danger", duration: 4000 });
+    }
+
+    async function scrollToFirstError(){
+        await nextTick();
+
+        const root = form.value?.$el;
+        const scope = root instanceof HTMLElement ? root : document;
+        scope.querySelector(".field-error")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    async function stepValid(){
+        const result = await form.value.validate();
+
+        // Sin esto el botón parecía no hacer nada cuando el campo con error
+        // quedaba fuera de la pantalla.
+        if (!result.valid) {
+            notify(Object.values(result.errors || {})[0] || "Revisá los campos marcados en rojo");
+            scrollToFirstError();
+        }
+
+        return result.valid;
     }
 
     async function nextStep(){
@@ -372,11 +409,54 @@
 
         store.dispatch(action, job.value).then(() => {
             sent.value = true;
-            nextStep();
-        }).catch((error) => {
-            form.value.setErrors(error.response.data.errors)
-            step.value = steps[0];
-        }).finally(() => sending.value = false)
+            step.value = steps[steps.length - 1];
+        }).catch(handleSaveError).finally(() => sending.value = false)
+    }
+
+    /**
+     * Antes esto era `setErrors(error.response.data.errors)` a secas: cualquier
+     * error que no fuera un 422 de Laravel (sin conexión, 404/405, 500) tiraba un
+     * TypeError adentro del propio catch y el usuario veía "Guardando..." y nada más.
+     */
+    async function handleSaveError(error){
+        const status = error?.response?.status;
+        const data = error?.response?.data || {};
+        const errors = data.errors;
+
+        // 422 de Laravel: el detalle ya lo avisa validationManager por toast; acá
+        // llevamos al usuario al paso donde vive el campo y marcamos los errores.
+        if (errors && Object.keys(errors).length) {
+            const target = stepOfField(Object.keys(errors)[0]);
+
+            if (target && target != step.value.step) {
+                step.value = steps.filter((s) => s.step == target)[0];
+                await nextTick();
+            }
+
+            form.value.setErrors(errors);
+            scrollToFirstError();
+
+            return;
+        }
+
+        // 401 y 403 ya los resuelve la capa HTTP (redirección a login / toast).
+        if (status == 401 || status == 403) return;
+
+        if (!error?.response) {
+            return notify("No pudimos conectarnos con el servidor. Revisá tu conexión e intentá de nuevo");
+        }
+
+        // El endpoint no existe o no acepta el método: no es algo que el usuario
+        // pueda arreglar cargando otra cosa.
+        if (status == 404 || status == 405) {
+            return notify("La publicación de búsquedas no está disponible en este momento. Intentá más tarde");
+        }
+
+        if (status >= 500) {
+            return notify("El servidor tuvo un problema al guardar la búsqueda. Intentá de nuevo en unos minutos");
+        }
+
+        notify(data.message || data.desc || "No pudimos guardar la búsqueda. Intentá de nuevo");
     }
 
     function goBack(){
