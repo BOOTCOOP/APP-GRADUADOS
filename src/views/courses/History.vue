@@ -18,8 +18,15 @@
       <template #default="{ items }">
         <ion-text>Inscripciones históricas</ion-text>
         <ion-list class="ion-margin-top">
+          <!--
+            Acá cada ítem ES una inscripción, así que el propio curso hace de
+            `inscribed`: ya trae `inscriptions[0].status` del endpoint. El
+            listado principal tiene que cruzar con `courses/own` porque mezcla
+            catálogo con inscripciones; el historial no.
+          -->
           <Course
             :course="course"
+            :inscribed="course"
             v-for="course in items"
             :key="course.id"
           ></Course>

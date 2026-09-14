@@ -6,6 +6,12 @@
       </ion-button>
     </template>
 
+    <!--
+      El orden (última fecha primero) lo manda la API. Antes se reordenaba acá
+      con sortByStartDate: además de duplicar la regla, ordenaba por la fecha
+      de INICIO y sobre la lista ya acumulada, así que al cargar una página
+      nueva sus talleres se intercalaban entre los de arriba.
+    -->
     <InfinitePagination
       fetch-data-store="workshops/history"
       :filters="filters"
@@ -18,9 +24,19 @@
       <template #default="{ items }">
         <ion-text>Inscripciones históricas</ion-text>
         <ion-list class="ion-margin-top">
+          <!--
+            Acá cada ítem ES una inscripción, así que el propio taller hace de
+            `inscribed`: ya trae `inscriptions[0].status` del endpoint. El
+            listado principal tiene que cruzar con `workshops/own` porque
+            mezcla catálogo con inscripciones; el historial no.
+
+            Sin esto la card no mostraba el estado y, peor, se creía disponible:
+            el botón decía "Inscribirse" sobre un taller terminado.
+          -->
           <Activity
             :activity="activity"
-            v-for="activity in sortByStartDate(items, 'desc')"
+            :inscribed="activity"
+            v-for="activity in items"
             :key="activity.id"
           ></Activity>
         </ion-list>
@@ -37,9 +53,6 @@ import { arrowBackOutline } from 'ionicons/icons'
 import Activity from './components/Activity.vue'
 import Skeleton from './Skeleton.vue'
 import InfinitePagination from '../app/components/pagination/InfinitePagination.vue'
-// Historial: mismo orden cronológico que el listado, pero invertido (lo más
-// reciente arriba), que es lo que se espera de un histórico.
-import { sortByStartDate } from '@/utils/activities'
 
 // Filtros para paginación (si son necesarios)
 const filters = ref({})
