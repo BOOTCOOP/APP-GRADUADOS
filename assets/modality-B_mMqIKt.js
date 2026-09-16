@@ -1,0 +1,1 @@
+import{U as e,V as t,mt as n}from"./icons-h5RDUzpl.js";function r(e){let t=(e==null?``:e).toLowerCase();return t.includes(`virtual`)||t.includes(`online`)||t.includes(`distancia`)?`virtual`:t.includes(`brid`)||t.includes(`mixta`)||t.includes(`combinada`)?`hibrida`:`presencial`}function i(r){return r===`virtual`?t:r===`hibrida`?n:e}export{r as n,i as t};
