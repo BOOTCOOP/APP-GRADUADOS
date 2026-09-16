@@ -1,6 +1,6 @@
 {
-  "version": "2.0.5",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.0.5.zip",
+  "version": "2.0.6",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.0.6.zip",
   "min_native_version": "1.2.0",
-  "notes": "Reorganización de pestañas en búsquedas laborales: Información (compañía, descripción, vacantes, sector, salario) y Requisitos (carrera, orientación/idioma, tipo de búsqueda, modalidad, horario, zona); eliminada pestaña La empresa y funcionalidad de favoritos"
+  "notes": "Removido menú 'Más' de búsquedas laborales (opciones de favoritos y crear búsqueda no disponibles)"
 }
