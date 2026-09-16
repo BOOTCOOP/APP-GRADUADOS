@@ -62,13 +62,6 @@
         >
           Requisitos
         </div>
-        <div
-          class="tab"
-          :class="{ selected: tab == 'about' }"
-          @click="tab = 'about'"
-        >
-          La empresa
-        </div>
         <!-- No hay solapa "Contacto" a propósito: el teléfono y el mail solo se
              alcanzan por el botón "Contactar" del pie, que es el que registra la
              postulación (ver applyAndOpenEmail). Mostrarlos como links acá
@@ -78,38 +71,30 @@
       <div class="ion-padding-top ion-margin-top content">
         <template v-if="tab == 'information'">
           <ion-text>
-            <!-- <p><strong>Posición: </strong> {{ job.title }}</p> -->
             <p><strong>Compañía: </strong> {{ job.company }}</p>
             <p>
               <strong>Descripción: </strong>
               <span v-html="job.description"></span>
             </p>
-            <p><strong>Duración: </strong> {{ job.duration }}</p>
+            <p><strong>Vacantes a cubrir: </strong> {{ job.vacancies_amount }}</p>
+            <p><strong>Sector dentro de la organización: </strong> {{ job.position }}</p>
+            <p><strong>Salario bruto aproximado: </strong> {{ job.salary_string }}</p>
           </ion-text>
         </template>
         <template v-if="tab == 'requirements'">
           <ion-text>
-            <p><strong>Sexo: </strong> {{ job.gender }}</p>
-            <p><strong>Edad: </strong> {{ job.age_from }} a {{ job.age_to }}</p>
-            <p><strong>Lugar de residencia: </strong> {{ job.residency }}</p>
-            <p><strong>Experiencia: </strong> {{ job.experience }}</p>
-            <p v-if="job.languages.length > 0">
-              <strong>Idiomas: </strong> {{ job.languages_string }}
+            <p><strong>Carrera: </strong> {{ job.career }}</p>
+            <p v-if="job.orientation">
+              <strong>Orientación: </strong> {{ job.orientation }}
             </p>
-            <p><strong>Nivel educativo: </strong> {{ job.education_level }}</p>
-            <p v-if="job.show_salary">
-              <strong>Salario: </strong> {{ job.salary_string }}
+            <p v-if="job.language && !job.orientation">
+              <strong>Idioma: </strong> {{ job.language }}
             </p>
-          </ion-text>
-        </template>
-        <template v-if="tab == 'about'">
-          <ion-text>
-            <!-- <p><strong>País: </strong> {{ job.country }}</p> -->
-            <p><strong>Provincia: </strong> {{ job.province }}</p>
-            <p><strong>Ciudad: </strong> {{ job.city }}</p>
-            <p><strong>Jerarquía: </strong> {{ job.position }}</p>
+            <p><strong>Tipo de búsqueda: </strong> {{ job.applicant_type }}</p>
             <p><strong>Modalidad: </strong> {{ job.modality }}</p>
-            <p><strong>Cant. vacantes: </strong> {{ job.vacancies_amount }}</p>
+            <p><strong>Horario de trabajo: </strong> {{ job.duration }}</p>
+            <p><strong>Zona geográfica: </strong> {{ job.zone }}</p>
+            <p><strong>Requisitos excluyentes: </strong> {{ job.experience }}</p>
           </ion-text>
         </template>
       </div>
@@ -141,22 +126,6 @@
         expand="full"
         @click="contact"
         >Contactar</ion-button
-      >
-      <ion-button
-        v-if="!job.has_user_favorite"
-        color="light-primary"
-        shape="round"
-        @click="saveFavorite"
-        expand="full"
-        >Guardar en favoritos</ion-button
-      >
-      <ion-button
-        v-else
-        color="light-primary"
-        shape="round"
-        expand="full"
-        @click="removeFavorite"
-        >Eliminar de favoritos</ion-button
       >
     </template>
   </graduados-app>
@@ -321,72 +290,6 @@ function saveProfileAndContact(firstname: string, lastname: string) {
     );
 }
 
-function saveFavorite() {
-  console.log("🔍 [MOBILE DEBUG] Iniciando saveFavorite");
-
-  store
-    .dispatch("jobs/addFavorite", job.value.id)
-    .then((response) => {
-      console.log("✅ [MOBILE DEBUG] Respuesta exitosa:", response);
-      job.value.has_user_favorite = true;
-      store.dispatch("ui/toastr/create", "Búsqueda guardada ✓");
-    })
-    .catch((error) => {
-      console.error("❌ [MOBILE DEBUG] Error:", error);
-      console.error("❌ [MOBILE DEBUG] Error status:", error.response?.status);
-
-      // Solo mostrar mensaje específico para error 419, sin retry
-      if (error.response?.status === 419) {
-        store.dispatch(
-          "ui/toastr/create",
-          "Error de sesión. Intenta reloguearte."
-        );
-      } else if (error.response?.status === 401) {
-        store.dispatch(
-          "ui/toastr/create",
-          "Sesión expirada. Inicia sesión nuevamente."
-        );
-      } else {
-        store.dispatch(
-          "ui/toastr/create",
-          `Error: ${error.response?.status || error.message}`
-        );
-      }
-    });
-}
-
-function removeFavorite() {
-  console.log("🔍 [MOBILE DEBUG] Iniciando removeFavorite");
-
-  store
-    .dispatch("jobs/removeFavorite", job.value.id)
-    .then((response) => {
-      console.log("✅ [MOBILE DEBUG] Remove exitoso:", response);
-      job.value.has_user_favorite = false;
-      store.dispatch("ui/toastr/create", "Búsqueda eliminada de favoritos ✓");
-    })
-    .catch((error) => {
-      console.error("❌ [MOBILE DEBUG] Error en remove:", error);
-      console.error("❌ [MOBILE DEBUG] Error status:", error.response?.status);
-
-      if (error.response?.status === 419) {
-        store.dispatch(
-          "ui/toastr/create",
-          "Error de sesión. Intenta reloguearte."
-        );
-      } else if (error.response?.status === 401) {
-        store.dispatch(
-          "ui/toastr/create",
-          "Sesión expirada. Inicia sesión nuevamente."
-        );
-      } else {
-        store.dispatch(
-          "ui/toastr/create",
-          `Error: ${error.response?.status || error.message}`
-        );
-      }
-    });
-}
 </script>
 
 <style scoped>

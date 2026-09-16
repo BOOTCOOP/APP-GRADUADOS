@@ -94,37 +94,6 @@ export default {
       })
     },
 
-    // Favorites
-    favorites(ctx, filters = {}) {
-      return new Promise((resolve, reject) => {
-        axios
-          .get(`jobs/favorites`, {params: filters})
-          .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
-    },
-
-    addFavorite(ctx, data) {
-      const id = data.id || data.job?.id || data;
-      
-      return new Promise((resolve, reject) => {
-        axios
-          .post(`jobs/favorites/${id}`)
-          .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
-    },
-
-    removeFavorite(ctx, data) {
-      const id = data.id || data.job?.id || data;
-
-      return new Promise((resolve, reject) => {
-        axios
-          .delete(`jobs/favorites/${id}`)
-          .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
-    },
 
   },
 }
