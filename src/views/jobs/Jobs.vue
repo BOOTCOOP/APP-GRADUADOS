@@ -1,14 +1,5 @@
 <template>
   <graduados-app header-title="Búsqueda laboral" :header-show-back-button="true">
-    <template #header-end>
-      <ion-button color="dark" @click="showOptions">
-        <ion-icon
-          :ios="ellipsisHorizontalCircleOutline"
-          :md="ellipsisHorizontalCircleOutline"
-        ></ion-icon>
-        <ion-text class="ion-margin-start">Más</ion-text>
-      </ion-button>
-    </template>
 
     <ion-content :fullscreen="true">
       <InfinitePagination
@@ -46,7 +37,6 @@
 import {
   IonList,
   IonIcon,
-  IonText,
   IonButton,
   IonContent,
   useIonRouter,
@@ -56,10 +46,6 @@ import Job from "./components/Job.vue";
 import Skeleton from "./Skeleton.vue";
 import { ref } from "vue";
 import {
-  ellipsisHorizontalCircleOutline,
-  heartOutline,
-  addCircleOutline,
-  albumsOutline,
   filterOutline,
 } from "ionicons/icons";
 import { useStore } from "vuex";
@@ -144,29 +130,4 @@ const filteredJobs = (jobs: any[]) => {
 //   filters.value = newFilters;
 // };
 
-function showOptions() {
-  store.dispatch("ui/action/show", [
-    {
-      text: "Favoritos",
-      icon: heartOutline,
-      handler: () => {
-        router.push({ name: "jobs.favorites" });
-      },
-    },
-    {
-      text: "Crear búsqueda",
-      icon: addCircleOutline,
-      handler: () => {
-        router.push({ name: "jobs.create" });
-      },
-    },
-    {
-      text: "Mis publicaciones",
-      icon: albumsOutline,
-      handler: () => {
-        router.push({ name: "jobs.own" });
-      },
-    },
-  ]);
-}
 </script>
