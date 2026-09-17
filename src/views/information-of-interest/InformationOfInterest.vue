@@ -1,28 +1,5 @@
 <template>
-  <graduados-app header-title="Información de interés" :header-show-back-button="true">  
-    <!-- Búsqueda y filtros -->
-    <div class="search-filter-container ion-margin-bottom">
-      <FormSearchBar 
-        v-model="searchQuery"
-        placeholder="Buscar información de interés..."
-        class="search-bar"
-      />
-      
-      <ion-button 
-        size="small" 
-        fill="outline" 
-        color="primary"
-        @click="openCategoryFilter"
-        class="filter-button"
-      >
-        <ion-icon slot="start" :icon="filterOutline"></ion-icon>
-        Categorías
-        <ion-badge color="primary" v-if="selectedCategory !== 'all'" class="filter-badge">
-          1
-        </ion-badge>
-      </ion-button>
-    </div>
-
+  <graduados-app header-title="Información de interés" :header-show-back-button="true">
     <InfinitePagination fetch-data-store="interests/fetchAll">
         <template #skeleton>
           <ion-card class="interest-card" v-for="i in [1,2,3,4,5,6,7]" :key="i">
@@ -46,7 +23,7 @@
 
         <template #default="{ items }">
           <!-- Mostrar por categorías -->
-          <div v-for="(categoryItems, categoryName) in categorizedItems(filteredItems(items))" 
+          <div v-for="(categoryItems, categoryName) in categorizedItems(items)"
                :key="categoryName" 
                class="category-section">
             
@@ -108,9 +85,9 @@
           </div>
 
           <!-- Mensaje si no hay resultados -->
-          <div v-if="filteredItems(items).length === 0" class="no-results">
+          <div v-if="items.length === 0" class="no-results">
             <ion-text color="medium">
-              <p>No se encontró información que coincida con tu búsqueda.</p>
+              <p>No hay información de interés disponible por el momento.</p>
             </ion-text>
           </div>
         </template>
@@ -119,33 +96,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { 
-  IonText, 
-  IonCard, 
-  IonCardContent, 
-  IonSkeletonText, 
-  IonIcon, 
-  IonButton, 
-  IonBadge, 
-  actionSheetController 
+import {
+  IonText,
+  IonCard,
+  IonCardContent,
+  IonSkeletonText,
+  IonIcon,
+  IonBadge
 } from '@ionic/vue';
-import { 
-  openOutline, 
-  filterOutline, 
+import {
+  openOutline,
   libraryOutline,
   businessOutline,
-  scaleOutline,
   documentTextOutline,
   schoolOutline,
   informationCircleOutline
 } from 'ionicons/icons';
 import InfinitePagination from '../app/components/pagination/InfinitePagination.vue';
-import FormSearchBar from '../app/components/form/FormSearchBar.vue';
-
-// Estados reactivos
-const searchQuery = ref('');
-const selectedCategory = ref('all');
 
 // Función para categorizar elementos automáticamente
 function categorizeItem(item: any): string {
@@ -160,18 +127,16 @@ function categorizeItem(item: any): string {
     return 'Bibliotecas';
   }
   
-  // Organismos Públicos
-  const publicOrgKeywords = ['organismo', 'ministerio', 'secretaría', 'gobierno', 'estado', 'público', 'nacional', 'municipal', 'provincial', 'afip', 'anses', 'registro civil'];
+  // Organismos Públicos (incluye tribunales y demás organismos del Poder Judicial:
+  // eran una categoría aparte, pero con tan pocos enlaces no se justificaba)
+  const publicOrgKeywords = [
+    'organismo', 'ministerio', 'secretaría', 'gobierno', 'estado', 'público', 'nacional', 'municipal', 'provincial', 'afip', 'anses', 'registro civil',
+    'tribunal', 'juzgado', 'corte', 'justicia', 'judicial', 'sentencia', 'jurisprudencia', 'fuero', 'cámara',
+  ];
   if (publicOrgKeywords.some(keyword => fullText.includes(keyword))) {
     return 'Organismos Públicos';
   }
-  
-  // Tribunales
-  const courtKeywords = ['tribunal', 'juzgado', 'corte', 'justicia', 'judicial', 'sentencia', 'jurisprudencia', 'fuero', 'cámara'];
-  if (courtKeywords.some(keyword => fullText.includes(keyword))) {
-    return 'Tribunales';
-  }
-  
+
   // Documentación
   const docKeywords = ['documentación', 'documento', 'formulario', 'certificado', 'constancia', 'trámite', 'gestión', 'solicitud', 'reglamento', 'normativa'];
   if (docKeywords.some(keyword => fullText.includes(keyword))) {
@@ -192,7 +157,6 @@ function getCategoryIcon(categoryName: string): string {
   switch (categoryName) {
     case 'Bibliotecas': return libraryOutline;
     case 'Organismos Públicos': return businessOutline;
-    case 'Tribunales': return scaleOutline;
     case 'Documentación': return documentTextOutline;
     case 'UBA Derecho': return schoolOutline;
     default: return informationCircleOutline;
@@ -204,47 +168,17 @@ function getCategoryColor(categoryName: string): string {
   switch (categoryName) {
     case 'Bibliotecas': return 'secondary';
     case 'Organismos Públicos': return 'primary';
-    case 'Tribunales': return 'danger';
     case 'Documentación': return 'warning';
     case 'UBA Derecho': return 'success';
     default: return 'medium';
   }
 }
 
-// Función para filtrar elementos
-function filteredItems(items: any[]) {
-  if (!items) return [];
-  
-  let filtered = items;
-  
-  // Filtro por búsqueda
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase().trim();
-    filtered = filtered.filter((item: any) => {
-      return (
-        item.title?.toLowerCase().includes(query) ||
-        item.content?.toLowerCase().includes(query) ||
-        item.url?.toLowerCase().includes(query)
-      );
-    });
-  }
-  
-  // Filtro por categoría
-  if (selectedCategory.value !== 'all') {
-    filtered = filtered.filter((item: any) => {
-      const category = categorizeItem(item);
-      return category === selectedCategory.value;
-    });
-  }
-  
-  return filtered;
-}
-
 // Función para agrupar elementos por categorías
 function categorizedItems(items: any[]) {
   const categories: { [key: string]: any[] } = {};
-  
-  items.forEach((item: any) => {
+
+  (items || []).forEach((item: any) => {
     const category = categorizeItem(item);
     if (!categories[category]) {
       categories[category] = [];
@@ -254,7 +188,7 @@ function categorizedItems(items: any[]) {
   
   // Ordenar las categorías según prioridad
   const orderedCategories: { [key: string]: any[] } = {};
-  const categoryOrder = ['Bibliotecas', 'Organismos Públicos', 'Tribunales', 'Documentación', 'UBA Derecho', 'General'];
+  const categoryOrder = ['Bibliotecas', 'Organismos Públicos', 'Documentación', 'UBA Derecho', 'General'];
   
   categoryOrder.forEach(categoryName => {
     if (categories[categoryName] && categories[categoryName].length > 0) {
@@ -263,24 +197,6 @@ function categorizedItems(items: any[]) {
   });
   
   return orderedCategories;
-}
-
-// Función para mostrar filtros de categorías
-async function openCategoryFilter() {
-  const actionSheet = await actionSheetController.create({
-    header: 'Filtrar por categoría',
-    buttons: [
-      { text: 'Todas las categorías', handler: () => { selectedCategory.value = 'all'; } },
-      { text: 'Bibliotecas', handler: () => { selectedCategory.value = 'Bibliotecas'; } },
-      { text: 'Organismos Públicos', handler: () => { selectedCategory.value = 'Organismos Públicos'; } },
-      { text: 'Tribunales', handler: () => { selectedCategory.value = 'Tribunales'; } },
-      { text: 'Documentación', handler: () => { selectedCategory.value = 'Documentación'; } },
-      { text: 'UBA Derecho', handler: () => { selectedCategory.value = 'UBA Derecho'; } },
-      { text: 'General', handler: () => { selectedCategory.value = 'General'; } },
-      { text: 'Cancelar', role: 'cancel' }
-    ]
-  });
-  await actionSheet.present();
 }
 
 // Función para obtener descripción resumida
@@ -292,32 +208,6 @@ function getShortDescription(content: string): string {
 </script>
 
 <style scoped>
-/* Contenedor de búsqueda y filtros.
-   Sin padding horizontal propio: el layout (.page-body) ya aporta los 16px, y
-   sumar ambos dejaba 32px de gutter en un celular angosto. */
-.search-filter-container {
-  display: flex;
-  gap: var(--app-spacing-sm);
-  align-items: center;
-  padding: 0;
-}
-
-.search-bar {
-  flex: 1;
-  min-width: 0;
-  margin-bottom: 0 !important;
-}
-
-.filter-button {
-  flex-shrink: 0;
-  min-height: var(--app-tap-target); /* misma altura que la barra de búsqueda */
-}
-
-.filter-badge {
-  margin-left: 4px;
-  font-size: 10px;
-}
-
 /* Sección de categorías */
 .category-section {
   margin-bottom: 24px;
