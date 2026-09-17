@@ -11,36 +11,49 @@
       :items="myActivities"
     ></MyActivities>
 
-    <!-- Barra de búsqueda y filtros -->
-    <div class="search-filter-container ion-margin-bottom">
-      <FormSearchBar
-        v-model="searchQuery"
-        placeholder="Buscar talleres y jornadas por nombre, descripción o docente..."
-        class="search-bar"
-      />
+    <!--
+      Búsqueda y filtro de modalidad. Los dos se resuelven en la API (van como
+      `search` y `filters[modality]`): resolverlos acá alcanzaba sólo a los
+      talleres ya descargados, así que buscar algo del final del período no lo
+      encontraba y "Virtual" escondía talleres virtuales de las páginas que
+      todavía no habían bajado.
 
-      <ion-button
-        size="small"
-        fill="outline"
-        color="primary"
-        @click="openFilters"
-        class="filter-button"
+      Se fueron los filtros de categoría y de mes: la categoría la adivinaba la
+      app por palabras clave del título (el legacy no tiene ese dato) y el mes
+      se sacaba de la fecha ya traída.
+    -->
+    <div class="search-filter-container">
+      <FormSearchBar
+        placeholder="Buscar por nombre, descripción o docente..."
+        @updated="(value) => (searchQuery = value)"
+      />
+    </div>
+
+    <div class="filter-group ion-margin-bottom">
+      <p class="filter-group__label" id="filtro-modalidad-label">Modalidad</p>
+      <div
+        class="filters-container"
+        role="group"
+        aria-labelledby="filtro-modalidad-label"
       >
-        <ion-icon slot="start" :icon="filterOutline"></ion-icon>
-        Filtros
-        <ion-badge
-          color="primary"
-          v-if="activeFiltersCount > 0"
-          class="filter-badge"
+        <button
+          v-for="opcion in MODALIDADES"
+          :key="opcion.value"
+          type="button"
+          class="filter-chip"
+          :class="{ 'is-active': selectedModality === opcion.value }"
+          :aria-pressed="selectedModality === opcion.value"
+          @click="setModality(opcion.value)"
         >
-          {{ activeFiltersCount }}
-        </ion-badge>
-      </ion-button>
+          {{ opcion.label }}
+        </button>
+      </div>
     </div>
 
     <InfinitePagination
       fetch-data-store="workshops/fetchAll"
       :filters="filters"
+      :search-value="searchQuery"
     >
       <template #skeleton>
         <Skeleton></Skeleton>
@@ -57,9 +70,11 @@
       <template #default="{ items }">
         <ion-text>Próximos talleres y jornadas</ion-text>
         <ion-list class="ion-margin-top">
+          <!-- `items` va tal cual: filtrar u ordenar acá rompe la paginación
+               (ver el comentario de arriba y el de History.vue). -->
           <Activity
             :activity="activity"
-            v-for="activity in filteredActivities(items)"
+            v-for="activity in items"
             :key="activity.id"
             :inscribed="myActivities.find((a) => a.id == activity.id)"
           ></Activity>
@@ -82,17 +97,12 @@ import {
   IonIcon,
   IonText,
   IonList,
-  IonBadge,
   useIonRouter,
-  actionSheetController,
 } from "@ionic/vue";
 import { ref, computed, watch } from "vue";
 import { useCurrentUser } from "@/uses/currentUser";
 import { useStore } from "vuex";
-import { filterOutline, schoolOutline } from "ionicons/icons";
-import { parseApiDate } from "@/libs/dates";
-import { modalityKind } from "@/utils/modality";
-import { sortByStartDate } from "@/utils/activities";
+import { schoolOutline } from "ionicons/icons";
 
 import MyActivities from "./components/MyActivities.vue";
 import Activity from "./components/Activity.vue";
@@ -109,389 +119,30 @@ const { count: cartCount } = useEnrollmentCart();
 
 // const perView = 1;
 
-const searchQuery = ref("");
-const selectedCategory = ref("all");
-const selectedModality = ref("all");
-const selectedMonth = ref("all");
+/*
+ * Sólo las dos modalidades que existen en el legacy (`graduados_modalidad`).
+ * Antes había también "Híbrida", que no está en la tabla: elegirla vaciaba la
+ * lista siempre.
+ */
+const MODALIDADES = [
+  { value: "all", label: "Todas" },
+  { value: "presencial", label: "Presencial" },
+  { value: "virtual", label: "Virtual" },
+] as const;
 
-const filters = ref({
-  // TODO: Falta el diseño de Rodri
-});
+const searchQuery = ref("");
+const selectedModality = ref<string>("all");
+
+// Lo que viaja a la API. InfinitePagination observa este objeto: al cambiarlo
+// vuelve a pedir desde la página 1, que es justo lo que tiene que pasar cuando
+// cambia un filtro.
+const filters = computed(() => ({ modality: selectedModality.value }));
 
 const myActivities = ref<any[]>([]);
 const store = useStore();
 
-// Computadas para filtros
-const activeFiltersCount = computed(() => {
-  let count = 0;
-  if (selectedCategory.value !== "all") count++;
-  if (selectedModality.value !== "all") count++;
-  if (selectedMonth.value !== "all") count++;
-  return count;
-});
-
-// Función para abrir filtros
-async function openFilters() {
-  const actionSheet = await actionSheetController.create({
-    header: "Filtrar talleres y jornadas",
-    cssClass: "custom-action-sheet",
-    buttons: [
-      {
-        text: "Por Temática",
-        handler: () => openCategoryFilter(),
-      },
-      {
-        text: "Por Modalidad",
-        handler: () => openModalityFilter(),
-      },
-      {
-        text: "Por Mes",
-        handler: () => openMonthFilter(),
-      },
-      {
-        text: "Limpiar Filtros",
-        handler: () => clearAllFilters(),
-      },
-      {
-        text: "Cancelar",
-        role: "cancel",
-      },
-    ],
-  });
-  await actionSheet.present();
-}
-
-// Filtros específicos
-async function openCategoryFilter() {
-  const actionSheet = await actionSheetController.create({
-    header: "Filtrar por Temática",
-    buttons: [
-      {
-        text: "Todas las temáticas",
-        handler: () => {
-          selectedCategory.value = "all";
-        },
-      },
-      {
-        text: "Legal",
-        handler: () => {
-          selectedCategory.value = "legal";
-        },
-      },
-      {
-        text: "Académico",
-        handler: () => {
-          selectedCategory.value = "academico";
-        },
-      },
-      {
-        text: "Profesional",
-        handler: () => {
-          selectedCategory.value = "profesional";
-        },
-      },
-      {
-        text: "Tecnología",
-        handler: () => {
-          selectedCategory.value = "tecnologia";
-        },
-      },
-      {
-        text: "Gestión",
-        handler: () => {
-          selectedCategory.value = "gestion";
-        },
-      },
-      { text: "Cancelar", role: "cancel" },
-    ],
-  });
-  await actionSheet.present();
-}
-
-async function openModalityFilter() {
-  const actionSheet = await actionSheetController.create({
-    header: "Filtrar por Modalidad",
-    buttons: [
-      {
-        text: "Todas las modalidades",
-        handler: () => {
-          selectedModality.value = "all";
-        },
-      },
-      {
-        text: "Presencial",
-        handler: () => {
-          selectedModality.value = "presencial";
-        },
-      },
-      {
-        text: "Virtual",
-        handler: () => {
-          selectedModality.value = "virtual";
-        },
-      },
-      {
-        text: "Híbrida",
-        handler: () => {
-          selectedModality.value = "hibrida";
-        },
-      },
-      { text: "Cancelar", role: "cancel" },
-    ],
-  });
-  await actionSheet.present();
-}
-
-async function openMonthFilter() {
-  const actionSheet = await actionSheetController.create({
-    header: "Filtrar por Mes",
-    buttons: [
-      {
-        text: "Todos los meses",
-        handler: () => {
-          selectedMonth.value = "all";
-        },
-      },
-      {
-        text: "Enero",
-        handler: () => {
-          selectedMonth.value = "01";
-        },
-      },
-      {
-        text: "Febrero",
-        handler: () => {
-          selectedMonth.value = "02";
-        },
-      },
-      {
-        text: "Marzo",
-        handler: () => {
-          selectedMonth.value = "03";
-        },
-      },
-      {
-        text: "Abril",
-        handler: () => {
-          selectedMonth.value = "04";
-        },
-      },
-      {
-        text: "Mayo",
-        handler: () => {
-          selectedMonth.value = "05";
-        },
-      },
-      {
-        text: "Junio",
-        handler: () => {
-          selectedMonth.value = "06";
-        },
-      },
-      {
-        text: "Julio",
-        handler: () => {
-          selectedMonth.value = "07";
-        },
-      },
-      {
-        text: "Agosto",
-        handler: () => {
-          selectedMonth.value = "08";
-        },
-      },
-      {
-        text: "Septiembre",
-        handler: () => {
-          selectedMonth.value = "09";
-        },
-      },
-      {
-        text: "Octubre",
-        handler: () => {
-          selectedMonth.value = "10";
-        },
-      },
-      {
-        text: "Noviembre",
-        handler: () => {
-          selectedMonth.value = "11";
-        },
-      },
-      {
-        text: "Diciembre",
-        handler: () => {
-          selectedMonth.value = "12";
-        },
-      },
-      { text: "Cancelar", role: "cancel" },
-    ],
-  });
-  await actionSheet.present();
-}
-
-function clearAllFilters() {
-  selectedCategory.value = "all";
-  selectedModality.value = "all";
-  selectedMonth.value = "all";
-}
-
-// Función de filtrado por búsqueda. Devuelve siempre la lista ordenada
-// cronológicamente por fecha de inicio (ver sortByStartDate).
-function filteredActivities(items: any[]) {
-  let filteredItems = items;
-
-  // Aplicar búsqueda
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase().trim();
-    filteredItems = filteredItems.filter((activity: any) => {
-      return (
-        activity.title?.toLowerCase().includes(query) ||
-        activity.content?.toLowerCase().includes(query) ||
-        activity.teachers?.toLowerCase().includes(query) ||
-        activity.description?.toLowerCase().includes(query)
-      );
-    });
-  }
-
-  // Aplicar filtros de categoría
-  if (selectedCategory.value !== "all") {
-    filteredItems = filteredItems.filter((activity: any) => {
-      const category = categorizeActivity(activity);
-      return category === selectedCategory.value;
-    });
-  }
-
-  // Aplicar filtros de modalidad
-  if (selectedModality.value !== "all") {
-    filteredItems = filteredItems.filter((activity: any) => {
-      const modality = extractModality(activity);
-      return modality === selectedModality.value;
-    });
-  }
-
-  // Aplicar filtros de mes
-  if (selectedMonth.value !== "all") {
-    filteredItems = filteredItems.filter((activity: any) => {
-      const activityMonth = extractMonth(activity);
-      return activityMonth === selectedMonth.value;
-    });
-  }
-
-  return sortByStartDate(filteredItems);
-}
-
-// Función para categorizar talleres automáticamente
-function categorizeActivity(activity: any): string {
-  const title = activity.title?.toLowerCase() || "";
-  const content = activity.content?.toLowerCase() || "";
-  const description = activity.description?.toLowerCase() || "";
-  const teachers = activity.teachers?.toLowerCase() || "";
-
-  const fullText = `${title} ${content} ${description} ${teachers}`;
-
-  // Legal
-  const legalKeywords = [
-    "derecho",
-    "legal",
-    "jurídico",
-    "jurisprudencia",
-    "abogado",
-    "tribunal",
-    "corte",
-    "legislación",
-    "normativa",
-    "código",
-    "ley",
-    "decreto",
-    "constitucional",
-    "procesal",
-    "civil",
-    "penal",
-    "laboral",
-    "comercial",
-  ];
-  if (legalKeywords.some((keyword) => fullText.includes(keyword))) {
-    return "legal";
-  }
-
-  // Académico
-  const academicKeywords = [
-    "investigación",
-    "académico",
-    "tesis",
-    "maestría",
-    "doctorado",
-    "universidad",
-    "facultad",
-    "cátedra",
-    "seminario",
-    "metodología",
-    "científico",
-    "estudio",
-    "análisis",
-    "teoría",
-  ];
-  if (academicKeywords.some((keyword) => fullText.includes(keyword))) {
-    return "academico";
-  }
-
-  // Tecnología
-  const techKeywords = [
-    "tecnología",
-    "digital",
-    "informática",
-    "software",
-    "programación",
-    "datos",
-    "sistema",
-    "plataforma",
-    "web",
-    "aplicación",
-    "internet",
-    "ciberseguridad",
-    "ia",
-    "inteligencia artificial",
-  ];
-  if (techKeywords.some((keyword) => fullText.includes(keyword))) {
-    return "tecnologia";
-  }
-
-  // Gestión
-  const managementKeywords = [
-    "gestión",
-    "administración",
-    "management",
-    "liderazgo",
-    "recursos",
-    "proyectos",
-    "estrategia",
-    "planificación",
-    "organización",
-    "dirección",
-  ];
-  if (managementKeywords.some((keyword) => fullText.includes(keyword))) {
-    return "gestion";
-  }
-
-  // Profesional (por defecto)
-  return "profesional";
-}
-
-// El listado ahora devuelve `modality` desde el backend; el texto del taller
-// queda solo como fallback para los que no tienen modalidad cargada.
-function extractModality(activity: any): string {
-  if (activity.modality) return modalityKind(activity.modality);
-
-  return modalityKind(`${activity.title ?? ""} ${activity.content ?? ""}`);
-}
-
-// Función para extraer mes
-function extractMonth(activity: any): string {
-  const date = parseApiDate(activity.start);
-  if (!date) return "all";
-
-  return (date.getMonth() + 1).toString().padStart(2, "0");
+function setModality(value: string) {
+  selectedModality.value = value;
 }
 
 // "Mis actividades" requiere sesión: solo pedimos workshops/own con usuario
@@ -522,23 +173,62 @@ function goToHistory() {
   align-items: flex-end;
 }
 
-.search-bar {
+.search-filter-container > * {
   flex: 1;
-  margin-bottom: 0 !important;
+  min-width: 0;
 }
 
-.filter-button {
-  flex-shrink: 0;
-  min-height: 44px;
+/* Chips de modalidad: mismo control que en Cursos, para que los dos listados
+   se filtren igual. */
+.filter-group__label {
+  margin: 0 0 var(--app-spacing-sm, 8px);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--app-text-secondary);
 }
 
-.filter-badge {
-  margin-left: 4px;
-  font-size: 10px;
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-spacing-sm, 8px);
 }
 
-:global(.custom-action-sheet .action-sheet-group) {
-  max-height: 70vh;
-  overflow-y: auto;
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--app-radius-pill, 100px);
+  border: 1px solid var(--app-border-strong, rgba(23, 22, 28, 0.14));
+  background: var(--app-surface, #fff);
+  color: var(--app-text-body, #4a4a55);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--app-duration-fast, 120ms) var(--app-ease),
+    border-color var(--app-duration-fast, 120ms) var(--app-ease),
+    color var(--app-duration-fast, 120ms) var(--app-ease);
+}
+
+.filter-chip:hover {
+  border-color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
+}
+
+.filter-chip:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+.filter-chip.is-active,
+.filter-chip.is-active:hover {
+  background: var(--ion-color-primary);
+  border-color: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast, #fff);
+  font-weight: 600;
+  box-shadow: var(--app-shadow-primary, 0 4px 16px rgba(171, 73, 204, 0.22));
 }
 </style>
