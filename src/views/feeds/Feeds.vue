@@ -1,36 +1,12 @@
 <template>
   <graduados-app header-title="Noticias" :header-show-back-button="true">
-    <!-- Barra de búsqueda -->
-    <div class="search-container ion-padding-horizontal">
-      <FormSearchBar 
-        placeholder="Buscar noticias por palabra clave..."
-        @updated="handleSearchUpdate"
-      />
-    </div>
-
-    <!-- Filtros de categoría -->
-    <div class="filters-container ion-padding-horizontal">
-      <ion-button 
-        fill="outline" 
-        size="small" 
-        @click="showCategoryFilter"
-        class="filter-button"
-      >
-        <ion-icon :icon="funnelOutline" slot="start"></ion-icon>
-        {{ getCategoryLabel() }}
-      </ion-button>
-      
-      <div v-if="selectedCategory !== 'todas'" class="active-filter">
-        <ion-chip 
-          :color="getCategoryColor()" 
-          @click="clearCategoryFilter"
-        >
-          <ion-label>{{ getCategoryLabel() }}</ion-label>
-          <ion-icon :icon="closeOutline" size="small"></ion-icon>
-        </ion-chip>
-      </div>
-    </div>
-
+    <!--
+      Sin buscador ni filtro de categorías: las categorías no existen en el
+      origen (las noticias vienen del admin viejo de comunicaciones) — la app
+      las adivinaba por palabras clave del título — y tanto el filtro como la
+      búsqueda corrían sobre las noticias ya descargadas, no sobre las 300 y
+      pico que hay. Mismo criterio que se aplicó en Información de interés.
+    -->
     <InfinitePagination fetch-data-store="feeds/fetchAll">
       <template #skeleton>
         <ion-list>
@@ -53,61 +29,36 @@
         </ion-list>
       </template>
 
-      <template #default>
-        <div v-if="filteredNews.length === 0 && searchQuery" class="no-results">
-          <ion-icon :icon="searchOutline" size="large" color="medium"></ion-icon>
-          <ion-text color="medium">
-            <p>No se encontraron noticias que coincidan con "{{ searchQuery }}"</p>
-          </ion-text>
-        </div>
-
-        <div v-else-if="filteredNews.length === 0 && selectedCategory !== 'todas'" class="no-results">
-          <ion-icon :icon="funnelOutline" size="large" color="medium"></ion-icon>
-          <ion-text color="medium">
-            <p>No se encontraron noticias en la categoría "{{ getCategoryLabel() }}"</p>
-          </ion-text>
-        </div>
-
-        <!-- Estadísticas de resultados -->
-        <div v-if="filteredNews.length > 0" class="results-stats">
-          <ion-text color="medium">
-            <small>
-              Mostrando {{ filteredNews.length }} 
-              {{ filteredNews.length === 1 ? 'noticia' : 'noticias' }}
-              {{ selectedCategory !== 'todas' ? `en ${getCategoryLabel()}` : '' }}
-              {{ searchQuery ? `con "${searchQuery}"` : '' }}
-            </small>
-          </ion-text>
-        </div>
-
-        <ion-card 
-          :router-link="'/noticia/'+feed.slug" 
-          class="news-card" 
+      <!--
+        `items` es la lista que administra InfinitePagination: cada página que
+        baja con el scroll se agrega al final. Antes esta vista ignoraba el slot
+        y hacía su propio fetch en onMounted, así que mostraba siempre las 15
+        primeras noticias y el scroll infinito no servía para nada.
+      -->
+      <template #default="{ items }">
+        <ion-card
+          :router-link="'/noticia/'+feed.slug"
+          class="news-card"
           :class="{ 'featured-card': index < 3 }"
-          v-for="(feed, index) in filteredNews" 
+          v-for="(feed, index) in items"
           :key="feed.id"
         >
           <div class="card-header">
             <ion-thumbnail class="featured-image">
-              <img 
-                :alt="feed.title" 
-                :src="feed.thumb.absolute_path"
+              <img
+                :alt="feed.title"
+                :src="feed.thumb?.absolute_path || FALLBACK_IMAGE"
                 @error="handleImageError"
               />
             </ion-thumbnail>
-            <ion-chip 
-              :color="getCategoryColorForNews(feed.category)" 
-              class="category-chip"
-            >
-              <ion-label>{{ getCategoryLabelForNews(feed.category) }}</ion-label>
-            </ion-chip>
-            
-            <!-- Badge para noticias destacadas -->
+
+            <!-- Las tres primeras son las más recientes: la lista viene ordenada
+                 por fecha descendente desde la API. -->
             <div v-if="index < 3" class="featured-badge">
               <ion-icon :icon="starOutline" size="small"></ion-icon>
             </div>
           </div>
-          
+
           <div class="card-content">
             <div class="card-meta">
               <ion-icon :icon="timeOutline" size="small" color="medium"></ion-icon>
@@ -115,18 +66,17 @@
                 <small>{{ formatDate(feed.date) }}</small>
               </ion-text>
             </div>
-            
+
             <h2 class="card-title" :class="{ 'featured-title': index < 3 }">
               {{ feed.title }}
             </h2>
-            
+
             <div v-if="feed.content" class="card-summary">
               <ion-text color="medium">
                 {{ getNewsPreview(feed.content) }}
               </ion-text>
             </div>
 
-            <!-- Indicador de lectura -->
             <div class="read-more">
               <ion-text color="primary">
                 <small>Leer más</small>
@@ -141,270 +91,77 @@
 </template>
 
 <script setup lang="ts">
-import { IonSkeletonText, IonText, IonCard, IonList, IonItem, IonLabel, IonThumbnail, IonButton, IonIcon, IonChip } from '@ionic/vue';
-import { 
-  funnelOutline, 
-  closeOutline, 
-  searchOutline, 
-  timeOutline, 
-  starOutline, 
-  chevronForwardOutline 
+import { IonSkeletonText, IonText, IonCard, IonList, IonItem, IonLabel, IonThumbnail, IonIcon } from '@ionic/vue';
+import {
+  timeOutline,
+  starOutline,
+  chevronForwardOutline
 } from 'ionicons/icons';
-import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import InfinitePagination from '../app/components/pagination/InfinitePagination.vue';
-import FormSearchBar from '../app/components/form/FormSearchBar.vue';
 
-interface NewsItem {
-  id: number;
-  slug: string;
-  title: string;
-  content?: string;
-  date: string;
-  thumb: {
-    absolute_path: string;
-  };
-  category?: string;
+/*
+ * Portada por defecto. Las noticias vienen del legacy de comunicaciones y casi
+ * la mitad no tiene imagen cargada, así que el caso "sin thumb" es lo normal,
+ * no un error. Va con BASE_URL porque el build web se sirve bajo /APP-GRADUADOS/
+ * y la ruta absoluta `/assets/...` daba 404 ahí.
+ */
+const FALLBACK_IMAGE = import.meta.env.BASE_URL + 'assets/logo/logo.png';
+
+// Por si la URL existe pero el archivo ya no está en el servidor viejo.
+function handleImageError(event: Event): void {
+  const img = event.target as HTMLImageElement;
+  if (img.src.endsWith(FALLBACK_IMAGE)) return; // evita el bucle si falla el propio fallback
+  img.src = FALLBACK_IMAGE;
 }
 
-// Categorías disponibles
-const categories = [
-  { value: 'todas', label: 'Todas las noticias', color: 'primary' },
-  { value: 'academicas', label: 'Académicas', color: 'success' },
-  { value: 'eventos', label: 'Eventos', color: 'warning' },
-  { value: 'institucionales', label: 'Institucionales', color: 'tertiary' },
-  { value: 'graduados', label: 'Graduados', color: 'secondary' }
-];
-
-const store = useStore();
-const searchQuery = ref('');
-const allNews = ref<NewsItem[]>([]);
-const selectedCategory = ref('todas');
-
-// Funciones para manejar categorías
-function getCategoryLabel(): string {
-  const category = categories.find(cat => cat.value === selectedCategory.value);
-  return category ? category.label : 'Todas las noticias';
-}
-
-function getCategoryColor(): string {
-  const category = categories.find(cat => cat.value === selectedCategory.value);
-  return category ? category.color : 'primary';
-}
-
-function getCategoryColorForNews(categoryValue?: string): string {
-  const category = categories.find(cat => cat.value === categoryValue);
-  return category ? category.color : 'primary';
-}
-
-function getCategoryLabelForNews(categoryValue?: string): string {
-  const category = categories.find(cat => cat.value === categoryValue);
-  return category ? category.label : 'Institucional';
-}
-
-function clearCategoryFilter(): void {
-  selectedCategory.value = 'todas';
-}
-
-function showCategoryFilter(): void {
-  // Blur any focused element to prevent aria-hidden conflicts
-  try {
-    if (document.activeElement && document.activeElement !== document.body) {
-      (document.activeElement as HTMLElement).blur();
-    }
-  } catch (e) {
-    // Si falla, no es crítico - silencioso para producción
-  }
-  
-  const options = categories.map(category => ({
-    text: category.label,
-    handler: () => {
-      selectedCategory.value = category.value;
-    },
-  }));
-
-  // Agregar opción de cancelar
-  options.push({
-    text: 'Cancelar',
-    handler: () => {
-      // No hacer nada, solo cerrar
-    }
-  });
-
-  store.dispatch('ui/action/show', options);
-}
-
-// Función para formatear fecha
+// La API manda la fecha como DD/MM/YYYY; el resto contempla que algún día
+// llegue en ISO.
 function formatDate(dateString: string): string {
   try {
-    // Si la fecha viene en formato DD/MM/YYYY, la convertimos
     if (dateString.includes('/')) {
       const [day, month, year] = dateString.split('/');
       const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      
+
       if (isNaN(date.getTime())) {
-        return dateString; // Si no se puede parsear, devolver original
+        return dateString;
       }
-      
+
       return date.toLocaleDateString('es-AR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       });
     }
-    
-    // Si viene en formato ISO estándar
+
     const date = new Date(dateString);
-    
+
     if (isNaN(date.getTime())) {
-      return dateString; // Si no se puede parsear, devolver original
+      return dateString;
     }
-    
+
     return date.toLocaleDateString('es-AR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
   } catch {
-    return dateString; // En caso de error, devolver la fecha original
+    return dateString;
   }
 }
 
-// Función para crear preview del contenido
+// El contenido es HTML del admin viejo: se limpia y se recorta para el preview.
 function getNewsPreview(content: string): string {
   if (!content) return '';
-  
-  // Remover tags HTML y obtener solo texto
+
   const cleanText = content.replace(/<[^>]*>/g, '');
-  
-  // Limitar a 150 caracteres
-  return cleanText.length > 150 
+
+  return cleanText.length > 150
     ? cleanText.substring(0, 150) + '...'
     : cleanText;
 }
-
-// Función para manejar errores de imagen
-function handleImageError(event: Event): void {
-  const img = event.target as HTMLImageElement;
-  img.src = '/assets/logo/logo.png'; // Imagen por defecto
-}
-
-// Función para categorizar automáticamente las noticias
-function categorizeNews(feed: NewsItem): string {
-  const text = (feed.title + ' ' + (feed.content || '')).toLowerCase();
-  
-  // Palabras clave para cada categoría
-  const keywords = {
-    eventos: ['evento', 'charla', 'congreso', 'seminario', 'jornada', 'taller', 'conferencia', 'simposio', 'encuentro', 'feria'],
-    academicas: ['académico', 'doctorado', 'maestría', 'carrera', 'curso', 'programa', 'educación', 'investigación', 'tesis', 'cátedra', 'facultad'],
-    institucionales: ['institucional', 'universidad', 'uba', 'derecho', 'autoridades', 'resolución', 'normativa', 'convenio', 'protocolo'],
-    graduados: ['graduado', 'egresado', 'alumni', 'título', 'diploma', 'profesional', 'colegio', 'matricula']
-  };
-  
-  for (const [category, words] of Object.entries(keywords)) {
-    if (words.some(word => text.includes(word))) {
-      return category;
-    }
-  }
-  
-  return 'institucionales'; // Categoría por defecto
-}
-
-// Función para manejar la búsqueda
-function handleSearchUpdate(query: string) {
-  searchQuery.value = query.toLowerCase().trim();
-}
-
-// Computed para filtrar noticias
-const filteredNews = computed(() => {
-  let filtered = allNews.value;
-  
-  // Filtrar por categoría
-  if (selectedCategory.value !== 'todas') {
-    filtered = filtered.filter(feed => feed.category === selectedCategory.value);
-  }
-  
-  // Filtrar por búsqueda
-  if (searchQuery.value) {
-    filtered = filtered.filter((feed: NewsItem) => {
-      const title = feed.title?.toLowerCase() || '';
-      const content = feed.content?.toLowerCase() || '';
-      
-      return title.includes(searchQuery.value) || content.includes(searchQuery.value);
-    });
-  }
-  
-  return filtered;
-});
-
-// Cargar noticias al montar el componente
-onMounted(async () => {
-  try {
-    const response = await store.dispatch('feeds/fetchAll');
-    const newsData = response.data.data || [];
-    
-    // Categorizar automáticamente cada noticia
-    allNews.value = newsData.map((feed: NewsItem) => ({
-      ...feed,
-      category: categorizeNews(feed)
-    }));
-  } catch (error) {
-    allNews.value = [];
-  }
-});
 </script>
 
 <style scoped>
-/* Los `background: white` + `border-bottom: #e0e0e0` fijos hacían que estas dos
-   barras fueran las únicas partes de la app que no seguían los tokens de tema. */
-.search-container {
-  background: transparent;
-  margin-bottom: var(--app-spacing-sm);
-}
-
-.filters-container {
-  padding: 0 0 var(--app-spacing-sm);
-  display: flex;
-  align-items: center;
-  gap: var(--app-spacing-sm);
-}
-
-.filter-button {
-  --border-radius: 20px;
-  /* 32px quedaba por debajo del mínimo táctil recomendado (44px). */
-  height: var(--app-tap-target);
-}
-
-.active-filter {
-  display: flex;
-  align-items: center;
-}
-
-.active-filter ion-chip {
-  margin: 0;
-  cursor: pointer;
-}
-
-.no-results {
-  text-align: center;
-  padding: 32px 16px;
-}
-
-.no-results ion-icon {
-  margin-bottom: 16px;
-}
-
-.results-stats {
-  padding: var(--app-spacing-sm) var(--app-spacing-md);
-  background: var(--app-surface-alt);
-  border-left: 4px solid var(--ion-color-primary);
-  /* Sin margin horizontal: el layout ya pone 16px de cada lado y sumados
-     dejaban 32px de gutter. */
-  margin: 0 0 var(--app-spacing-md);
-  border-radius: 0 8px 8px 0;
-}
-
-/* Nuevos estilos para tarjetas mejoradas */
 .news-card {
   margin: 0 0 var(--app-spacing-md);
   overflow: hidden;
@@ -452,16 +209,6 @@ onMounted(async () => {
 
 .news-card:hover .featured-image img {
   transform: scale(1.05);
-}
-
-.category-chip {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  --border-radius: 12px;
-  font-size: 0.75rem;
-  z-index: 2;
-  backdrop-filter: blur(8px);
 }
 
 .featured-badge {

@@ -34,7 +34,10 @@
       ></ion-skeleton-text>
     </div>
     <div v-if="feed && loaded">
+      <!-- Casi la mitad de las noticias del legacy no tiene imagen: ahí no va
+           placeholder, simplemente no se muestra la portada. -->
       <ion-thumbnail
+        v-if="feed.thumb?.absolute_path"
         style="width: 100%; height: auto"
         class="ion-margin-bottom"
       >
@@ -77,7 +80,7 @@ interface FeedItem {
   content: string;
   date: string;
   thumb: {
-    absolute_path: string;
+    absolute_path: string | null;
   };
 }
 
