@@ -7,7 +7,11 @@
         </template>
 
         <!-- Sección de Mis Cursos -->
-        <MyCourses v-if="validMyCourses.length > 0" :items="validMyCourses"></MyCourses>
+        <MyEnrollments
+            title="Mis Cursos Inscriptos"
+            :items="validMyCourses"
+            route-name="courses.show"
+        />
 
         <!-- Sección de Búsqueda y Filtros -->
         <div class="search-filter-section">
@@ -128,7 +132,7 @@ import { useCurrentUser } from '@/uses/currentUser';
 import { modalityKind } from '@/utils/modality';
 import { sortByCourseNumber } from '@/utils/courses';
 
-import MyCourses from "./components/MyCourses.vue";
+import MyEnrollments from "@/components/MyEnrollments.vue";
 import Course from "./components/Course.vue";
 import Skeleton from "./Skeleton.vue";
 import InfinitePagination from "../app/components/pagination/InfinitePagination.vue";

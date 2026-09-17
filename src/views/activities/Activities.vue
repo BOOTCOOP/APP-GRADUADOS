@@ -6,10 +6,11 @@
       </ion-button>
     </template>
 
-    <MyActivities
-      v-if="myActivities.length > 0"
+    <MyEnrollments
+      title="Mis Talleres Inscriptos"
       :items="myActivities"
-    ></MyActivities>
+      route-name="activities.show"
+    />
 
     <!--
       Búsqueda y filtro de modalidad. Los dos se resuelven en la API (van como
@@ -104,7 +105,7 @@ import { useCurrentUser } from "@/uses/currentUser";
 import { useStore } from "vuex";
 import { schoolOutline } from "ionicons/icons";
 
-import MyActivities from "./components/MyActivities.vue";
+import MyEnrollments from "@/components/MyEnrollments.vue";
 import Activity from "./components/Activity.vue";
 import Skeleton from "./Skeleton.vue";
 import InfinitePagination from "../app/components/pagination/InfinitePagination.vue";
