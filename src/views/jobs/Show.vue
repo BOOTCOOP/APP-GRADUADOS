@@ -116,9 +116,79 @@
       />
     </div>
 
+    <!--
+      Paso intermedio antes del cliente de correo: tocar "Contactar" y ver que
+      se abre Gmail de la nada no explica que la postulación se hace mandando
+      el CV por mail. Es un toque más, pero deja claro qué mandar, a quién y
+      hasta cuándo. La postulación se registra igual al tocar "Contactar", como
+      antes: este modal no cambia el tracking.
+    -->
+    <ion-modal :is-open="showEmailModal" @didDismiss="showEmailModal = false">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Cómo postularte</ion-title>
+          <ion-buttons slot="end">
+            <ion-button aria-label="Cerrar" @click="showEmailModal = false">
+              <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <p class="apply-intro">
+          Para completar tu postulación, enviá tu CV por correo electrónico a la
+          dirección de la búsqueda. El envío lo hacés desde tu propia aplicación
+          de correo.
+        </p>
+
+        <p v-if="job.selection_process" class="apply-note">
+          {{ job.selection_process }}
+        </p>
+
+        <!-- Copiable: en el celular, pasar el mail a otra app a mano es la
+             parte más molesta de postularse. -->
+        <p class="apply-label">Enviá tu CV a:</p>
+        <button type="button" class="apply-email" @click="copyEmail">
+          <ion-icon :icon="mailOutline" aria-hidden="true"></ion-icon>
+          <span class="apply-email__value">{{ job.email }}</span>
+          <ion-icon
+            class="apply-email__copy"
+            :icon="copyOutline"
+            aria-hidden="true"
+          ></ion-icon>
+        </button>
+
+        <template v-if="job.valid_until">
+          <p class="apply-label">Por favor hasta el:</p>
+          <p class="apply-value">{{ job.valid_until }}</p>
+        </template>
+
+        <p class="apply-label">Con el siguiente asunto:</p>
+        <p class="apply-subject">{{ job.title }}</p>
+
+        <p class="apply-sworn">
+          <strong>Declaración jurada:</strong> la postulación implica una
+          declaración jurada sobre la corrección y veracidad de los datos
+          proporcionados, así como sobre el cumplimiento de los requisitos.
+        </p>
+      </ion-content>
+
+      <ion-footer class="ion-padding ion-no-border">
+        <div class="apply-actions">
+          <ion-button fill="outline" shape="round" @click="showEmailModal = false">
+            Cerrar
+          </ion-button>
+          <ion-button shape="round" @click="openContactEmail">
+            Abrir correo
+          </ion-button>
+        </div>
+      </ion-footer>
+    </ion-modal>
+
     <template #footer v-if="!loading && !job.from_auth">
-      <!-- Contactar: abre teléfono o mail y, cuando es por mail, registra la
-           postulación en el sistema de graduados (ver applyAndOpenEmail). -->
+      <!-- Contactar: abre teléfono o, cuando es por mail, registra la
+           postulación y muestra el modal de arriba (ver applyAndOpenEmail). -->
       <ion-button
         class="ion-margin-bottom"
         color="primary"
@@ -138,8 +208,18 @@ import {
   IonImg,
   IonSkeletonText,
   IonButton,
+  IonButtons,
+  IonIcon,
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonFooter,
   alertController,
+  toastController,
 } from "@ionic/vue";
+import { closeOutline, copyOutline, mailOutline } from "ionicons/icons";
 import { ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
@@ -152,6 +232,7 @@ const store = useStore();
 const profile = useProfile();
 const job = ref<any>({});
 const tab = ref("information");
+const showEmailModal = ref(false);
 
 onMounted(() => {
   const id = route.params.slug;
@@ -216,7 +297,7 @@ async function applyAndOpenEmail() {
   }
 
   registerApplication();
-  openContactEmail();
+  showEmailModal.value = true;
 }
 
 // Registra la postulación en el sistema de graduados de forma silenciosa:
@@ -228,8 +309,32 @@ function registerApplication() {
   store.dispatch("jobs/apply", job.value.id).catch(() => undefined);
 }
 
+// El asunto va precargado con el título de la búsqueda, que es justo el que
+// el modal le pide a la persona que use.
 function openContactEmail() {
-  window.open(`mailto:${job.value.email}`, "_system");
+  const subject = encodeURIComponent(job.value.title ?? "");
+
+  showEmailModal.value = false;
+  window.open(`mailto:${job.value.email}?subject=${subject}`, "_system");
+}
+
+async function copyEmail() {
+  try {
+    await navigator.clipboard.writeText(job.value.email);
+
+    const toast = await toastController.create({
+      message: "Correo copiado al portapapeles",
+      duration: 2000,
+      position: "bottom",
+      color: "success",
+      icon: copyOutline,
+    });
+    await toast.present();
+  } catch {
+    // Sin permiso de portapapeles (o contexto no seguro) queda el mail a la
+    // vista para copiarlo a mano: no tiene sentido cortar la postulación.
+    store.dispatch("ui/toastr/create", "No pudimos copiar el correo");
+  }
 }
 
 async function promptCompleteProfile(user: any) {
@@ -280,7 +385,7 @@ function saveProfileAndContact(firstname: string, lastname: string) {
     .update({ firstname, lastname })
     .then(() => {
       registerApplication();
-      openContactEmail();
+      showEmailModal.value = true;
     })
     .catch(() =>
       store.dispatch(
@@ -327,5 +432,103 @@ ion-thumbnail {
 .content {
   font-size: 14px;
   color: var(--ion-color-step-550);
+}
+/* ── Modal "Cómo postularte" ─────────────────────── */
+.apply-intro {
+  margin: 0 0 var(--app-spacing-md, 12px);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--app-text-body, #4a4a55);
+}
+
+.apply-note {
+  margin: 0 0 var(--app-spacing-md, 12px);
+  padding: var(--app-spacing-sm, 8px) var(--app-spacing-md, 12px);
+  background: var(--app-surface-alt);
+  border-left: 3px solid var(--ion-color-primary);
+  border-radius: var(--app-radius-sm, 8px);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--app-text-secondary);
+}
+
+.apply-label {
+  margin: var(--app-spacing-md, 12px) 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--app-text-secondary);
+}
+
+.apply-value,
+.apply-subject {
+  margin: 0;
+  font-size: 14px;
+  color: var(--app-text-title);
+}
+
+/* El asunto va en monoespaciada para que se lea como algo a copiar tal cual. */
+.apply-subject {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  padding: 6px 10px;
+  background: var(--app-surface-alt);
+  border-radius: var(--app-radius-sm, 8px);
+  display: inline-block;
+  word-break: break-word;
+}
+
+.apply-email {
+  display: flex;
+  align-items: center;
+  gap: var(--app-spacing-sm, 8px);
+  width: 100%;
+  padding: var(--app-spacing-md, 12px);
+  background: var(--app-surface-alt);
+  border: 1px dashed var(--app-border-strong, rgba(23, 22, 28, 0.14));
+  border-radius: var(--app-radius-md, 12px);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.apply-email ion-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--ion-color-primary);
+}
+
+.apply-email__value {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+  /* Los mails largos no tienen espacios donde cortar. */
+  overflow-wrap: anywhere;
+}
+
+.apply-email__copy {
+  color: var(--app-text-secondary) !important;
+}
+
+.apply-sworn {
+  margin: var(--app-spacing-lg, 16px) 0 0;
+  padding-top: var(--app-spacing-md, 12px);
+  border-top: 1px solid var(--app-border);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--app-text-secondary);
+}
+
+.apply-actions {
+  display: flex;
+  gap: var(--app-spacing-sm, 8px);
+}
+
+.apply-actions ion-button {
+  flex: 1;
 }
 </style>
