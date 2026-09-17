@@ -16,12 +16,19 @@
                       color="primary"
                       aria-label="Abrir menú"
                     ></ion-menu-button>
+                    <!--
+                      Sin @click propio: ion-back-button YA navega solo (hacia
+                      atrás, o a `default-href` si no hay historial). Tenía
+                      además un @click que hacía router.back(), así que un solo
+                      toque lanzaba dos navegaciones en el mismo tick y
+                      vue-router abortaba una — de ahí que a veces el primer
+                      toque no hiciera nada y hubiera que tocar dos veces.
+                    -->
                     <ion-back-button
                       v-if="showBackButton"
                       color="primary"
                       text=""
                       aria-label="Volver"
-                      @click="goBack"
                       default-href="/"
                     ></ion-back-button>
                 </slot>
@@ -118,15 +125,6 @@ const gotoHome = () => {
   router.replace({name:'home'})
 }
 
-// Función para ir atrás
-const goBack = () => {
-  if (router.canGoBack()) {
-    router.back();
-  } else {
-    // Si no puede ir atrás, ir al home
-    router.replace({name:'home'});
-  }
-}
 </script>
 
 <style>
@@ -176,5 +174,15 @@ const goBack = () => {
   /* Con FAB visible reservamos su alto para que no tape la última fila/card */
   .page-body--fab {
     padding-bottom: calc(84px + var(--ion-safe-area-bottom, 0px));
+  }
+
+  /*
+   * Área táctil del "atrás": la flecha es chica y el blanco real quedaba justo
+   * en el mínimo, así que un toque un poco corrido no daba en nada y parecía
+   * que el botón no respondía. 48px es el mínimo que recomienda Android.
+   */
+  ion-header ion-back-button {
+    min-width: 48px;
+    min-height: 48px;
   }
 </style>
