@@ -1,6 +1,6 @@
 {
-  "version": "2.0.6",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.0.6.zip",
+  "version": "2.1.0",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.1.0.zip",
   "min_native_version": "1.2.0",
-  "notes": "Removido menú 'Más' de búsquedas laborales (opciones de favoritos y crear búsqueda no disponibles)"
+  "notes": "Noticias del Centro (antes vacías), teléfonos y correo en Contacto, banner del próximo curso/taller inscripto con 'Ver más', fix del scroll y de los filtros en Talleres, y arreglo del botón de atrás"
 }
