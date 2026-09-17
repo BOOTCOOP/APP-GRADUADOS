@@ -71,6 +71,16 @@ export function whatsappShareUrl(text: string): string {
 export const GRADUADOS_EMAIL = 'graduados@derecho.uba.ar'
 
 /**
+ * Teléfonos de la oficina del Centro. Cada entrada lleva el número tal como se
+ * muestra y el mismo número normalizado para el link `tel:`, porque el discador
+ * ignora paréntesis y guiones pero NO los espacios en algunos Android.
+ */
+export const GRADUADOS_PHONES = [
+  { label: '(5411) 5287-7023', tel: '+541152877023' },
+  { label: '(5411) 5287-7024', tel: '+541152877024' },
+] as const
+
+/**
  * Base de la app web pública (GitHub Pages, la misma base `/APP-GRADUADOS/` que
  * arma `vite.config.ts` para el build web).
  *
@@ -118,6 +128,15 @@ export function openWhatsapp(): void {
 /** Canal de novedades del Centro en WhatsApp (suscripción, no chat). */
 export function openWhatsappChannel(): void {
   openExternal(WHATSAPP_CHANNEL_URL)
+}
+
+/**
+ * Abre el discador del teléfono con el número ya cargado (no llama sola: el SO
+ * muestra el número y la persona decide). En la web de escritorio el `tel:` lo
+ * toma el handler que tenga configurado el navegador, o no hace nada.
+ */
+export function openPhone(tel: string): void {
+  openExternal(`tel:${tel}`)
 }
 
 /** Consultas por mail: abre el cliente de correo con la casilla del Centro. */

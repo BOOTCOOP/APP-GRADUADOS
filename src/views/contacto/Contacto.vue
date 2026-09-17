@@ -46,6 +46,51 @@
         </button>
       </section>
 
+      <!-- Teléfonos y correo de la oficina -->
+      <section class="direct">
+        <h2 class="section-title">Teléfonos y correo</h2>
+
+        <!--
+          Acá sí son <a> con href real (y no <button> como los de arriba): el
+          long-press sigue ofreciendo "copiar número" / "copiar dirección", que es
+          lo que la gente hace cuando quiere pasarle el dato a otro. El tap lo
+          resolvemos igual que el resto de los enlaces, con openExternal, porque
+          dejar que el WebView siga el href solo funciona de forma despareja
+          entre Android e iOS.
+        -->
+        <a
+          v-for="phone in GRADUADOS_PHONES"
+          :key="phone.tel"
+          class="link-row"
+          :href="`tel:${phone.tel}`"
+          @click.prevent="callPhone(phone.tel)"
+        >
+          <span class="link-icon phone">
+            <ion-icon :icon="callOutline" aria-hidden="true"></ion-icon>
+          </span>
+          <span class="link-text">
+            <span class="link-title">{{ phone.label }}</span>
+            <span class="link-sub">Tocá para llamar</span>
+          </span>
+          <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
+        </a>
+
+        <a
+          class="link-row"
+          :href="`mailto:${GRADUADOS_EMAIL}`"
+          @click.prevent="sendMail()"
+        >
+          <span class="link-icon mail">
+            <ion-icon :icon="mailOutline" aria-hidden="true"></ion-icon>
+          </span>
+          <span class="link-text">
+            <span class="link-title">{{ GRADUADOS_EMAIL }}</span>
+            <span class="link-sub">Tocá para escribirnos</span>
+          </span>
+          <ion-icon class="link-chevron" :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
+        </a>
+      </section>
+
       <!-- Redes sociales -->
       <section class="socials">
         <h2 class="section-title">Seguinos en redes</h2>
@@ -93,7 +138,9 @@ import {
   logoFacebook,
   logoInstagram,
   chevronForwardOutline,
-  megaphoneOutline
+  megaphoneOutline,
+  callOutline,
+  mailOutline
 } from 'ionicons/icons';
 
 import { IonIcon } from '@ionic/vue';
@@ -103,6 +150,10 @@ import {
   openWhatsapp,
   openWhatsappChannel,
   openYoutubeChannel,
+  openPhone,
+  openGraduadosMail,
+  GRADUADOS_PHONES,
+  GRADUADOS_EMAIL,
   FACEBOOK_URL,
   TWITTER_URL,
   INSTAGRAM_URL,
@@ -130,6 +181,18 @@ function goToWhatsappChannel() {
 function goToYoutube() {
   tapFeedback();
   openYoutubeChannel();
+}
+
+// Abre el discador con el número cargado; la llamada la inicia la persona.
+function callPhone(tel: string) {
+  tapFeedback();
+  openPhone(tel);
+}
+
+// Abre el cliente de correo con la casilla del Centro como destinatario.
+function sendMail() {
+  tapFeedback();
+  openGraduadosMail();
 }
 
 // Funciones para redes sociales
@@ -167,10 +230,18 @@ function goToInstagram() {
   color: var(--app-text-secondary);
 }
 
-/* ── Enlaces de interés ─────────────────────────── */
-.links {
+/* ── Enlaces de interés / teléfonos y correo ─────── */
+.links,
+.direct {
   display: flex;
   flex-direction: column;
+}
+
+/* Las filas de teléfono y mail son <a>, no <button>: sin esto heredarían el
+   subrayado y el color de link del navegador. */
+.direct .link-row {
+  text-decoration: none;
+  color: inherit;
 }
 
 .link-row {
@@ -241,6 +312,16 @@ function goToInstagram() {
   color: #D90000;
 }
 
+/* Teléfono y mail no tienen color de marca: van con el primario de la app. */
+.link-icon.phone,
+.link-icon.mail {
+  background: var(--app-primary-soft);
+}
+.link-icon.phone ion-icon,
+.link-icon.mail ion-icon {
+  color: var(--ion-color-primary);
+}
+
 .link-text {
   display: flex;
   flex-direction: column;
@@ -254,6 +335,9 @@ function goToInstagram() {
   font-weight: 700;
   color: var(--app-text-title);
   line-height: 1.3;
+  /* La dirección de mail es una sola palabra larga: sin esto empuja la fila y
+     desborda la card en un celular angosto. */
+  overflow-wrap: anywhere;
 }
 
 .link-sub {
