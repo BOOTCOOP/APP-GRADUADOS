@@ -124,66 +124,84 @@
       antes: este modal no cambia el tracking.
     -->
     <ion-modal :is-open="showEmailModal" @didDismiss="showEmailModal = false">
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Cómo postularte</ion-title>
-          <ion-buttons slot="end">
-            <ion-button aria-label="Cerrar" @click="showEmailModal = false">
-              <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+      <!--
+        El ion-page NO es decorativo: sin él, ion-content se come todo el alto
+        del modal y el ion-footer (con "Abrir correo") queda fuera de la vista.
+      -->
+      <ion-page>
+        <ion-header>
+          <ion-toolbar>
+            <ion-title>Cómo postularte</ion-title>
+            <ion-buttons slot="end">
+              <ion-button aria-label="Cerrar" @click="showEmailModal = false">
+                <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+
+        <ion-content class="ion-padding">
+          <p class="apply-intro">
+            Para completar tu postulación, enviá tu CV por correo electrónico a la
+            dirección de la búsqueda. El envío lo hacés desde tu propia aplicación
+            de correo.
+          </p>
+
+          <p v-if="job.selection_process" class="apply-note">
+            {{ job.selection_process }}
+          </p>
+
+          <!-- Copiable: en el celular, pasar el mail a otra app a mano es la
+               parte más molesta de postularse. -->
+          <p class="apply-label">Enviá tu CV a:</p>
+          <button type="button" class="apply-email" @click="copyEmail">
+            <ion-icon :icon="mailOutline" aria-hidden="true"></ion-icon>
+            <span class="apply-email__value">{{ job.email }}</span>
+            <ion-icon
+              class="apply-email__copy"
+              :icon="copyOutline"
+              aria-hidden="true"
+            ></ion-icon>
+          </button>
+
+          <template v-if="job.valid_until">
+            <p class="apply-label">Por favor hasta el:</p>
+            <p class="apply-value">{{ job.valid_until }}</p>
+          </template>
+
+          <p class="apply-label">Con el siguiente asunto:</p>
+          <button type="button" class="apply-copyable" @click="copySubject">
+            <span class="apply-subject">{{ job.title }}</span>
+            <ion-icon
+              class="apply-copyable__icon"
+              :icon="copyOutline"
+              aria-hidden="true"
+            ></ion-icon>
+          </button>
+
+          <p class="apply-sworn">
+            <strong>Declaración jurada:</strong> la postulación implica una
+            declaración jurada sobre la corrección y veracidad de los datos
+            proporcionados, así como sobre el cumplimiento de los requisitos.
+          </p>
+        </ion-content>
+
+        <ion-footer class="ion-padding ion-no-border">
+          <div class="apply-actions">
+            <ion-button
+              fill="outline"
+              shape="round"
+              @click="showEmailModal = false"
+            >
+              Cerrar
             </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-
-      <ion-content class="ion-padding">
-        <p class="apply-intro">
-          Para completar tu postulación, enviá tu CV por correo electrónico a la
-          dirección de la búsqueda. El envío lo hacés desde tu propia aplicación
-          de correo.
-        </p>
-
-        <p v-if="job.selection_process" class="apply-note">
-          {{ job.selection_process }}
-        </p>
-
-        <!-- Copiable: en el celular, pasar el mail a otra app a mano es la
-             parte más molesta de postularse. -->
-        <p class="apply-label">Enviá tu CV a:</p>
-        <button type="button" class="apply-email" @click="copyEmail">
-          <ion-icon :icon="mailOutline" aria-hidden="true"></ion-icon>
-          <span class="apply-email__value">{{ job.email }}</span>
-          <ion-icon
-            class="apply-email__copy"
-            :icon="copyOutline"
-            aria-hidden="true"
-          ></ion-icon>
-        </button>
-
-        <template v-if="job.valid_until">
-          <p class="apply-label">Por favor hasta el:</p>
-          <p class="apply-value">{{ job.valid_until }}</p>
-        </template>
-
-        <p class="apply-label">Con el siguiente asunto:</p>
-        <p class="apply-subject">{{ job.title }}</p>
-
-        <p class="apply-sworn">
-          <strong>Declaración jurada:</strong> la postulación implica una
-          declaración jurada sobre la corrección y veracidad de los datos
-          proporcionados, así como sobre el cumplimiento de los requisitos.
-        </p>
-      </ion-content>
-
-      <ion-footer class="ion-padding ion-no-border">
-        <div class="apply-actions">
-          <ion-button fill="outline" shape="round" @click="showEmailModal = false">
-            Cerrar
-          </ion-button>
-          <ion-button shape="round" @click="openContactEmail">
-            Abrir correo
-          </ion-button>
-        </div>
-      </ion-footer>
+            <ion-button shape="round" @click="openContactEmail">
+              <ion-icon slot="start" :icon="mailOutline"></ion-icon>
+              Abrir correo
+            </ion-button>
+          </div>
+        </ion-footer>
+      </ion-page>
     </ion-modal>
 
     <template #footer v-if="!loading && !job.from_auth">
@@ -216,6 +234,7 @@ import {
   IonTitle,
   IonContent,
   IonFooter,
+  IonPage,
   alertController,
   toastController,
 } from "@ionic/vue";
@@ -318,12 +337,20 @@ function openContactEmail() {
   window.open(`mailto:${job.value.email}?subject=${subject}`, "_system");
 }
 
-async function copyEmail() {
+function copyEmail() {
+  return copyToClipboard(job.value.email, "Correo copiado al portapapeles");
+}
+
+function copySubject() {
+  return copyToClipboard(job.value.title, "Asunto copiado al portapapeles");
+}
+
+async function copyToClipboard(text: string, message: string) {
   try {
-    await navigator.clipboard.writeText(job.value.email);
+    await navigator.clipboard.writeText(text ?? "");
 
     const toast = await toastController.create({
-      message: "Correo copiado al portapapeles",
+      message,
       duration: 2000,
       position: "bottom",
       color: "success",
@@ -331,9 +358,9 @@ async function copyEmail() {
     });
     await toast.present();
   } catch {
-    // Sin permiso de portapapeles (o contexto no seguro) queda el mail a la
+    // Sin permiso de portapapeles (o contexto no seguro) el dato queda a la
     // vista para copiarlo a mano: no tiene sentido cortar la postulación.
-    store.dispatch("ui/toastr/create", "No pudimos copiar el correo");
+    store.dispatch("ui/toastr/create", "No pudimos copiar el texto");
   }
 }
 
@@ -470,13 +497,34 @@ ion-thumbnail {
 
 /* El asunto va en monoespaciada para que se lea como algo a copiar tal cual. */
 .apply-subject {
+  flex: 1;
+  min-width: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 13px;
-  padding: 6px 10px;
-  background: var(--app-surface-alt);
-  border-radius: var(--app-radius-sm, 8px);
-  display: inline-block;
+  color: var(--app-text-title);
+  text-align: left;
   word-break: break-word;
+}
+
+/* Mismo gesto que el mail: tocar el asunto lo copia. */
+.apply-copyable {
+  display: flex;
+  align-items: center;
+  gap: var(--app-spacing-sm, 8px);
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--app-surface-alt);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm, 8px);
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.apply-copyable__icon {
+  flex-shrink: 0;
+  font-size: 16px;
+  color: var(--app-text-secondary);
 }
 
 .apply-email {
