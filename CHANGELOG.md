@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-09-17
+
+Bundle OTA sobre la 2.0.1 de tienda. Solo código web: no cambia el shell nativo
+(`versionName` sigue en 2.0.1) ni el `latest_version` del backend.
+
+⚠️ **Requiere el deploy de la API** (commits `3095d2d` y `aef0d71` de
+api-graduados): las noticias y el filtro de modalidad de Talleres salen de
+endpoints nuevos. Sin ese deploy, Noticias sigue vacía y el filtro no filtra.
+Además, `COMUNICACIONES_ASSETS_BASE_URL` en el `.env` del server tiene que
+apuntar a `https://www.derecho.uba.ar/comunicaciones` o las noticias se ven sin
+imagen.
+
+### Added
+- **Teléfonos y correo del Centro en Contacto**: (5411) 5287-7023, 5287-7024 y graduados@derecho.uba.ar. Los teléfonos abren el discador con el número cargado y el correo abre el cliente de mail; el long-press sigue ofreciendo "copiar"
+- **Banner del próximo curso/taller inscripto con "Ver más"**, que abre un modal con todos los inscriptos vigentes ordenados por fecha de inicio
+- **Aviso de CV en Búsquedas laborales**: el mismo texto del sitio web (el Centro no recepciona los CV ni participa de la selección), en versión compacta
+- **Modal intermedio al postularse**: explica que la postulación se hace enviando el CV por correo, con la dirección copiable, la fecha límite, el asunto sugerido y la declaración jurada. El registro de la postulación no cambia: sigue ocurriendo al tocar "Contactar"
+
+### Fixed
+- **Noticias no mostraba nada**: la app leía la tabla propia `feeds`, que nunca se pobló. Ahora trae las noticias del admin de comunicaciones (sección Graduados) y pagina de verdad — antes la vista ignoraba el slot de `InfinitePagination` y se quedaba en las 15 primeras
+- **Talleres saltaba al scrollear**: la vista reordenaba por fecha de inicio lo ya descargado mientras la API paginaba por otro criterio, así que los talleres de cada página nueva se intercalaban entre los de arriba. El orden ahora lo manda la API (vigentes primero, terminados al final)
+- **Los filtros de Talleres solo alcanzaban a lo descargado**: "Virtual" escondía talleres virtuales de las páginas siguientes. Queda un único filtro por modalidad, resuelto en la API, y la búsqueda también pasa a la API
+- **El botón de atrás del header respondía al segundo toque**: `ion-back-button` ya navega solo y además tenía un `@click` con `router.back()`, así que un toque lanzaba dos navegaciones y vue-router abortaba una. El área táctil sube a los 48px que recomienda Android
+- **Beneficios mostraba "% de descuento" sin número** cuando el porcentaje no está cargado, que es el caso del único beneficio publicado
+- La card de "Mis cursos inscriptos" se veía cortada: tenía alto fijo de 70px con 50px de padding, así que un título de dos líneas empujaba la fecha fuera de la card
+
+### Changed
+- **Información de interés**: el link de Tribunales pasa a Organismos Públicos y se elimina esa categoría; se van el buscador y el filtro de categorías
+- **Noticias**: se van el buscador y el filtro de categorías, que clasificaba por palabras clave del título (el origen no tiene categorías)
+- **Beneficios**: se elimina la sección "Cómo utilizar este beneficio", que eran tres pasos fijos iguales para todos los beneficios, y el emoji 📅 pasa a ser un ícono de la app
+
 ## [2.0.4] - 2026-09-13
 
 Bundle OTA sobre la 2.0.1 de tienda. Solo código web: no cambia el shell nativo
