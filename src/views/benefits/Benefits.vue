@@ -39,7 +39,11 @@
               </div>
               <p class="benefit-description">{{ benefit.description }}</p>
               <div class="benefit-dates">
-                <div class="date-icon">📅</div>
+                <ion-icon
+                  class="date-icon"
+                  :icon="calendarOutline"
+                  aria-hidden="true"
+                ></ion-icon>
                 <div class="date-info">
                   <div class="date-label">Válido desde:</div>
                   <div class="date-value">
@@ -62,9 +66,12 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from "vue";
 import { useStore } from "vuex";
+import { IonIcon } from "@ionic/vue";
+import { calendarOutline } from "ionicons/icons";
 
 export default defineComponent({
   name: "Benefits",
+  components: { IonIcon },
   setup() {
     const store = useStore();
     const loading = ref(true);
@@ -140,6 +147,7 @@ export default defineComponent({
       getImageUrl,
       formatDate,
       hasDiscount,
+      calendarOutline,
       loadBenefits,
     };
   },
@@ -303,9 +311,13 @@ export default defineComponent({
   border-radius: var(--app-radius-sm);
 }
 
+/* ion-icon en vez del emoji 📅: el emoji lo dibuja la fuente del sistema, así
+   que cambiaba de aspecto entre Android y iOS y no seguía el color de la app. */
 .date-icon {
   font-size: 18px;
   margin-right: var(--app-spacing-sm);
+  color: var(--ion-color-primary);
+  flex-shrink: 0;
 }
 
 .date-info {

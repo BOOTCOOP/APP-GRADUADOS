@@ -67,38 +67,6 @@
           </div>
         </div>
 
-        <div class="benefit-section">
-          <h2 class="section-title">Cómo utilizar este beneficio</h2>
-          <div class="usage-steps">
-            <div class="step">
-              <div class="step-number">1</div>
-              <div class="step-content">
-                <h3 class="step-title">Presenta tu credencial</h3>
-                <p class="step-description">
-                  Muestra tu credencial de graduado en el establecimiento.
-                </p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="step-number">2</div>
-              <div class="step-content">
-                <h3 class="step-title">Menciona el beneficio</h3>
-                <p class="step-description">
-                  Indica que deseas utilizar el beneficio para graduados.
-                </p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="step-number">3</div>
-              <div class="step-content">
-                <h3 class="step-title">Disfruta tu descuento</h3>
-                <p class="step-description">
-                  El descuento se aplicará automáticamente a tu compra.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="benefit-actions">
@@ -350,52 +318,6 @@ export default defineComponent({
   height: 40px;
   background: #ddd;
   margin: 0 20px;
-}
-
-.usage-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.step {
-  display: flex;
-  align-items: flex-start;
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 15px;
-}
-
-.step-number {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: #3498db;
-  color: white;
-  border-radius: 50%;
-  font-weight: 700;
-  margin-right: 15px;
-  flex-shrink: 0;
-}
-
-.step-content {
-  flex: 1;
-}
-
-.step-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 5px 0;
-}
-
-.step-description {
-  font-size: 14px;
-  color: #555;
-  margin: 0;
-  line-height: 1.5;
 }
 
 .benefit-actions {
