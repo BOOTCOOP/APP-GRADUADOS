@@ -29,7 +29,9 @@
             </div>
             <div class="benefit-content">
               <h3 class="benefit-title">{{ benefit.title }}</h3>
-              <div class="benefit-discount">
+              <!-- El porcentaje es opcional en el alta: sin él se veía
+                   "% de descuento" sin número. -->
+              <div v-if="hasDiscount(benefit)" class="benefit-discount">
                 <span class="discount-value"
                   >{{ benefit.discount_percentage }}%</span
                 >
@@ -100,6 +102,14 @@ export default defineComponent({
       return date.toLocaleDateString("es-ES");
     }
 
+    // `discount_percentage` es nullable en el alta: hay beneficios que son un
+    // acceso o una promoción sin porcentaje. Un 0 tampoco se muestra.
+    function hasDiscount(benefit: any): boolean {
+      const value = Number(benefit?.discount_percentage);
+
+      return Number.isFinite(value) && value > 0;
+    }
+
     async function loadBenefits() {
       loading.value = true;
       error.value = null;
@@ -129,6 +139,7 @@ export default defineComponent({
       error,
       getImageUrl,
       formatDate,
+      hasDiscount,
       loadBenefits,
     };
   },
