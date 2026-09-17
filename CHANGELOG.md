@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-09-17
+
+Bundle OTA sobre la 2.0.1 de tienda. Solo código web.
+
+### Fixed
+- **El modal de postulación no mostraba el botón para abrir el correo**: dentro de un `ion-modal`, header/content/footer tienen que colgar de un `ion-page`. Sin él, `ion-content` ocupa todo el alto y el `ion-footer` queda fuera de la vista, así que el modal introducido en la 2.1.0 quedaba sin salida hacia la app de correo
+
+### Added
+- El **asunto sugerido se copia al tocarlo**, igual que la dirección de correo. (El asunto ya viajaba precargado en el `mailto:` desde la 2.1.0, pero con el botón invisible no había forma de comprobarlo)
+
 ## [2.1.0] - 2026-09-17
 
 Bundle OTA sobre la 2.0.1 de tienda. Solo código web: no cambia el shell nativo
