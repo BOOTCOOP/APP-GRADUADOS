@@ -160,7 +160,7 @@ const FILTROS = [
 // El backend no filtra por modalidad, así que se resuelve acá sobre la página
 // ya traída — mismo criterio que Activities.vue para talleres.
 const MODALIDADES = [
-    { value: 'all', label: 'Todas las modalidades' },
+    { value: 'all', label: 'Todas' },
     { value: 'presencial', label: 'Presencial' },
     { value: 'virtual', label: 'Virtual' },
     { value: 'hibrida', label: 'Híbrida' },
@@ -226,7 +226,7 @@ const filtrosDisponibles = computed(() =>
 // la API devolviendo cursos; el mensaje tiene que decir cuál aflojar.
 const emptyFilterMessage = computed(() => {
     if (selectedModality.value !== 'all') {
-        return 'Ningún curso coincide con la modalidad elegida. Probá con “Todas las modalidades”.';
+        return 'Ningún curso coincide con la modalidad elegida. Probá con todas las modalidades.';
     }
 
     if (selectedFilter.value === 'disponibles') {
