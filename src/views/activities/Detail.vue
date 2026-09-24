@@ -168,10 +168,13 @@
           shape="round"
           expand="full"
           color="primary"
-          :disabled="!canEnrollNow()"
+          :disabled="!canEnrollNow() || enrolling"
         >
-          <ion-icon :icon="schoolOutline" slot="start"></ion-icon>
-          {{ getEnrollButtonText() }}
+          <ion-spinner v-if="enrolling" name="crescent"></ion-spinner>
+          <template v-else>
+            <ion-icon :icon="schoolOutline" slot="start"></ion-icon>
+            {{ getEnrollButtonText() }}
+          </template>
         </ion-button>
         <div class="cart-action" v-if="canEnrollNow()">
           <EnrollmentCartToggle :item="cartItem" size="default" />
@@ -233,6 +236,7 @@ import {
   IonIcon,
   IonButton,
   IonList,
+  IonSpinner,
   useIonRouter,
 } from '@ionic/vue'
 import {
@@ -445,7 +449,14 @@ const unenroll = () =>
         .catch(() => refreshWorkshop()),
   })
 
+// El alta puede tardar unos segundos: sin feedback el botón parecía no
+// responder, se volvía a tocar y recién el segundo request (instantáneo,
+// porque la inscripción ya existía) navegaba al éxito.
+const enrolling = ref(false)
+
 const enroll = function () {
+  if (enrolling.value) return
+  enrolling.value = true
   store
     .dispatch('workshops/enroll', workshop.value?.id)
     .then(() => {
@@ -453,9 +464,12 @@ const enroll = function () {
       ionRouter.navigate(`/talleres/${route}`, 'forward', 'replace')
     })
     .catch(() => refreshWorkshop())
+    .finally(() => (enrolling.value = false))
 }
 
 const preEnroll = function () {
+  if (enrolling.value) return
+  enrolling.value = true
   store
     .dispatch('workshops/preEnroll', workshop.value?.id)
     .then((response) => {
@@ -466,6 +480,7 @@ const preEnroll = function () {
       )
     })
     .catch(() => refreshWorkshop())
+    .finally(() => (enrolling.value = false))
 }
 
 onMounted(() => {
