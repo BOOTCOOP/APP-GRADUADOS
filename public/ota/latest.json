@@ -1,6 +1,6 @@
 {
-  "version": "2.1.2",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.1.2.zip",
+  "version": "2.1.3",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.1.3.zip",
   "min_native_version": "1.2.0",
-  "notes": "Se quita el tipo de usuario 'Otros' del registro y del perfil, spinner al inscribirse a un taller, el correo de postulación ahora abre con el destinatario cargado, y las noticias dejan de tener destacadas"
+  "notes": "Los cursos que todavía deben el pago se muestran como 'Preinscripto' en vez de 'Ya estás inscripto'"
 }

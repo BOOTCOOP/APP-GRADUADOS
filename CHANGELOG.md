@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.3] - 2026-09-24
+
+Bundle OTA sobre la 2.0.1 de tienda. Solo código web.
+
+⚠️ **Requiere el deploy de la API** (commits `02eb786` y `4b1f84c` de
+api-graduados): el flag `is_preinscribed` y el precio en 0 para graduados UBA
+salen de ahí. Sin ese deploy el detalle sigue diciendo "Ya estás inscripto".
+
+### Fixed
+- **Un curso que todavía debe el pago ya no figura como "Ya estás inscripto"**: quien no es graduado UBA queda preinscripto hasta que el Centro verifica el pago. El detalle muestra "Preinscripto · pendiente de pago" y la card del listado el chip "Preinscripto". Los graduados UBA, que no pagan, siguen viendo la inscripción confirmada
+
 ## [2.1.2] - 2026-09-24
 
 Bundle OTA sobre la 2.0.1 de tienda. Solo código web.
