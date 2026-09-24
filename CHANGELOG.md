@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2026-09-24
+
+Bundle OTA sobre la 2.0.1 de tienda. Solo código web.
+
+### Changed
+- **Se quita el tipo de usuario "Otros"** del registro y del cambio de tipo del perfil: quedan Graduado (UBA), Graduado (otra universidad) y Título en trámite (UBA)
+- **Noticias ya no destaca las tres primeras**: el borde, el badge de estrella y el título más grande marcaban como "destacadas" a las tres más recientes, que es solo el orden de la lista
+- El filtro de modalidad de Cursos dice "Todas" en vez de "Todas las modalidades", y el mensaje de lista vacía acompaña
+
+### Fixed
+- **Inscribirse a un taller no daba señal de vida**: el alta puede tardar unos segundos y el botón quedaba igual, así que se volvía a tocar y recién el segundo intento navegaba al éxito. Ahora muestra un spinner y queda bloqueado mientras se procesa
+- **El "Abrir correo" de una postulación no llevaba el destinatario**: el `mailto:` se abría con `window.open(..., '_system')` y la dirección salía cruda del campo legacy, que se carga a mano y llega con espacios, con dos direcciones o envuelta en texto ("Enviar su CV a: x@y.com"). Ahora se navega con `window.location.href` —como ya hace SocialShare— y se extrae la dirección antes de armar el enlace
+- Las búsquedas laborales **sin correo publicado** dejan de ofrecer "Abrir correo" y lo avisan, en vez de abrir el cliente de correo vacío
+
 ## [2.1.1] - 2026-09-17
 
 Bundle OTA sobre la 2.0.1 de tienda. Solo código web.
