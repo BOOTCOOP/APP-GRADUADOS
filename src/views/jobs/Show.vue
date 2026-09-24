@@ -154,15 +154,27 @@
           <!-- Copiable: en el celular, pasar el mail a otra app a mano es la
                parte más molesta de postularse. -->
           <p class="apply-label">Enviá tu CV a:</p>
-          <button type="button" class="apply-email" @click="copyEmail">
+          <button
+            v-if="contactEmail"
+            type="button"
+            class="apply-email"
+            @click="copyEmail"
+          >
             <ion-icon :icon="mailOutline" aria-hidden="true"></ion-icon>
-            <span class="apply-email__value">{{ job.email }}</span>
+            <span class="apply-email__value">{{ contactEmail }}</span>
             <ion-icon
               class="apply-email__copy"
               :icon="copyOutline"
               aria-hidden="true"
             ></ion-icon>
           </button>
+
+          <!-- Hay búsquedas cargadas sin dirección: mejor decirlo que abrir el
+               cliente de correo vacío. -->
+          <p v-else class="apply-note">
+            Esta búsqueda no tiene una dirección de correo publicada.
+            Escribinos a graduados@derecho.uba.ar y te orientamos.
+          </p>
 
           <template v-if="job.valid_until">
             <p class="apply-label">Por favor hasta el:</p>
@@ -195,7 +207,11 @@
             >
               Cerrar
             </ion-button>
-            <ion-button shape="round" @click="openContactEmail">
+            <ion-button
+              v-if="contactEmail"
+              shape="round"
+              @click="openContactEmail"
+            >
               <ion-icon slot="start" :icon="mailOutline"></ion-icon>
               Abrir correo
             </ion-button>
@@ -239,7 +255,7 @@ import {
   toastController,
 } from "@ionic/vue";
 import { closeOutline, copyOutline, mailOutline } from "ionicons/icons";
-import { ref, onMounted } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import SocialShare from "@/components/SocialShare.vue";
@@ -328,17 +344,35 @@ function registerApplication() {
   store.dispatch("jobs/apply", job.value.id).catch(() => undefined);
 }
 
-// El asunto va precargado con el título de la búsqueda, que es justo el que
-// el modal le pide a la persona que use.
+/*
+ * Dirección a la que se manda el CV, saneada. El campo del legacy se carga a
+ * mano, así que llega con espacios alrededor, a veces con varias direcciones y
+ * a veces envuelto en texto ("Enviar su CV a: x@y.com"). Cualquiera de esos
+ * casos arma un `mailto:` inválido y el cliente de correo lo abre SIN
+ * destinatario, que es como se veía el bug.
+ */
+const contactEmail = computed<string>(() => {
+  const raw = String(job.value?.email ?? "");
+  const found = raw.match(/[^\s<>()[\],;:"]+@[^\s<>()[\],;:"]+\.[a-z]{2,}/i);
+
+  return (found ? found[0] : raw).trim();
+});
+
+/*
+ * `window.location.href` y no `window.open(..., '_system')`: es lo que ya usa
+ * SocialShare para mandar un mail y el camino que el WebView de Capacitor
+ * entrega al SO con la URL entera. El asunto va precargado con el título de la
+ * búsqueda, que es el que el modal pide usar.
+ */
 function openContactEmail() {
   const subject = encodeURIComponent(job.value.title ?? "");
 
   showEmailModal.value = false;
-  window.open(`mailto:${job.value.email}?subject=${subject}`, "_system");
+  window.location.href = `mailto:${contactEmail.value}?subject=${subject}`;
 }
 
 function copyEmail() {
-  return copyToClipboard(job.value.email, "Correo copiado al portapapeles");
+  return copyToClipboard(contactEmail.value, "Correo copiado al portapapeles");
 }
 
 function copySubject() {
