@@ -39,8 +39,7 @@
         <ion-card
           :router-link="'/noticia/'+feed.slug"
           class="news-card"
-          :class="{ 'featured-card': index < 3 }"
-          v-for="(feed, index) in items"
+          v-for="feed in items"
           :key="feed.id"
         >
           <div class="card-header">
@@ -51,12 +50,6 @@
                 @error="handleImageError"
               />
             </ion-thumbnail>
-
-            <!-- Las tres primeras son las más recientes: la lista viene ordenada
-                 por fecha descendente desde la API. -->
-            <div v-if="index < 3" class="featured-badge">
-              <ion-icon :icon="starOutline" size="small"></ion-icon>
-            </div>
           </div>
 
           <div class="card-content">
@@ -67,7 +60,7 @@
               </ion-text>
             </div>
 
-            <h2 class="card-title" :class="{ 'featured-title': index < 3 }">
+            <h2 class="card-title">
               {{ feed.title }}
             </h2>
 
@@ -94,7 +87,6 @@
 import { IonSkeletonText, IonText, IonCard, IonList, IonItem, IonLabel, IonThumbnail, IonIcon } from '@ionic/vue';
 import {
   timeOutline,
-  starOutline,
   chevronForwardOutline
 } from 'ionicons/icons';
 import InfinitePagination from '../app/components/pagination/InfinitePagination.vue';
@@ -168,15 +160,6 @@ function getNewsPreview(content: string): string {
   position: relative;
 }
 
-.featured-card {
-  border: 2px solid var(--ion-color-primary);
-  box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.2);
-}
-
-.featured-card:hover {
-  box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.3);
-}
-
 /*
  * Banda de imagen por relación de aspecto en vez de 200px fijos: en un celular
  * chico esos 200px se comían casi media pantalla por card, y en uno ancho la
@@ -187,11 +170,6 @@ function getNewsPreview(content: string): string {
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-}
-
-.featured-card .card-header {
-  /* La destacada un poco más panorámica para diferenciarse */
-  aspect-ratio: 3 / 2;
 }
 
 .featured-image {
@@ -209,20 +187,6 @@ function getNewsPreview(content: string): string {
 
 .news-card:hover .featured-image img {
   transform: scale(1.05);
-}
-
-.featured-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: var(--ion-color-warning);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  font-size: 0.7rem;
-  z-index: 2;
 }
 
 .card-content {
@@ -243,12 +207,6 @@ function getNewsPreview(content: string): string {
   line-height: 1.3;
   color: var(--ion-color-dark);
   transition: color 0.2s;
-}
-
-.featured-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--ion-color-primary);
 }
 
 .card-title:hover {
