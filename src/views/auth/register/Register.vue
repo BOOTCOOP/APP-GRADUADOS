@@ -315,6 +315,8 @@ const disputeReasonText = computed(() => {
     return 'Tu DNI figura más de una vez en el padrón. Dejanos un contacto y lo resolvemos.'
   if (disputeReason.value === 'no_email')
     return 'No encontramos un email asociado a tu DNI en el padrón. Dejanos un contacto.'
+  if (disputeReason.value === 'categoria_otros')
+    return 'Necesitamos confirmar tu categoría en el padrón. Dejanos un contacto y lo resolvemos.'
   return 'No pudiste resolverlo automáticamente. Dejanos un contacto y te ayudamos.'
 })
 
