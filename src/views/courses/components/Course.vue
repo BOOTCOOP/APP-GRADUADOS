@@ -80,9 +80,21 @@
                     <ion-icon :icon="chevronForwardOutline" aria-hidden="true"></ion-icon>
                 </span>
 
+                <!-- Preinscripción que espera el pago (status 1): no se la
+                     muestra como "Inscripto". -->
+                <ion-chip
+                    v-if="inscribed && hasValidInscriptionStatus && isPreinscribed"
+                    color="warning"
+                    size="small"
+                    class="status-chip status-chip--pending"
+                >
+                    <ion-icon :icon="timeOutline"></ion-icon>
+                    <ion-label>Preinscripto</ion-label>
+                </ion-chip>
+
                 <!-- Badge de inscripción si está inscripto (lado derecho) -->
                 <ion-chip
-                    v-if="inscribed && hasValidInscriptionStatus"
+                    v-else-if="inscribed && hasValidInscriptionStatus"
                     color="success"
                     size="small"
                     class="status-chip"
@@ -166,6 +178,7 @@ interface Course {
 interface Inscribed {
     inscriptions: Array<{
         status: {
+            id?: number;
             class: string;
             value: string;
         };
@@ -196,6 +209,12 @@ const modalityIcon = computed(() => resolveModalityIcon(modalityKind.value));
 // justo en el caso que más importa (ver nota en Courses.vue).
 const hasValidInscriptionStatus = computed(() =>
     Boolean(props.inscribed?.inscriptions?.[0]?.status?.value)
+);
+
+// status 1 = PENDIENTE: preinscripción que todavía debe el pago (la API nunca
+// lo manda para graduados UBA, que no pagan).
+const isPreinscribed = computed(() =>
+    props.inscribed?.inscriptions?.[0]?.status?.id === 1
 );
 
 // La ventana que manda la API es del período, no del curso: uno que ya tuvo
@@ -348,5 +367,11 @@ function showDetail() {
     /* Es una etiqueta de estado, no un control: no debe capturar el tap de la
        card ni mostrar cursor de click. */
     pointer-events: none;
+}
+
+.status-chip--pending {
+    --background: rgba(255, 196, 9, 0.18);
+    --color: #8a6100;
+    border-color: var(--ion-color-warning);
 }
 </style>

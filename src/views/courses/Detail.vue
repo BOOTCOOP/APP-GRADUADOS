@@ -177,6 +177,20 @@
           <span v-else>INSCRIPCIÓN</span>
         </ion-button>
 
+        <!-- Anotado pero debe el pago (nunca un graduado UBA): no es una
+             inscripción confirmada, así que no se la presenta como tal. -->
+        <ion-button
+          v-else-if="course.is_enrolled && course.is_preinscribed"
+          shape="round"
+          expand="full"
+          color="warning"
+          class="main-action-btn"
+          disabled
+        >
+          <ion-icon :icon="timeOutline" slot="start"></ion-icon>
+          Preinscripto · pendiente de pago
+        </ion-button>
+
         <!-- Si ya está inscripto -->
         <ion-button
           v-else-if="course.is_enrolled"
@@ -263,6 +277,10 @@
                 >Al hacer clic en "INSCRIPCIÓN" te registrarás en este
                 curso.</small
               >
+            </p>
+            <p v-else-if="course.is_enrolled && course.is_preinscribed">
+              <small>Tu lugar queda reservado como preinscripción. La inscripción
+                se confirma cuando el Centro verifique el pago.</small>
             </p>
             <p v-else-if="course.is_enrolled">
               <small>¡Felicitaciones! Ya estás inscripto en este curso.</small>
@@ -401,6 +419,9 @@ async function enroll() {
     // Actualizar el estado del curso
     course.value.is_enrolled = true;
     course.value.can_enroll = false;
+    // Recién anotado nadie registró el pago todavía: queda preinscripto si le
+    // toca pagar (el precio ya viene en 0 para los graduados UBA).
+    course.value.is_preinscribed = Boolean(coursePriceLabel.value);
 
     // Mostrar mensaje de éxito
     const alert = await alertController.create({
