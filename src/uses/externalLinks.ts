@@ -102,6 +102,26 @@ export function publicUrl(path = '/'): string {
   return `${PUBLIC_WEB_URL}${withSlash === '/' ? '' : withSlash}`
 }
 
+/**
+ * Sitio de la Facultad, de donde salen las noticias (admin viejo de
+ * comunicaciones). Sus notas traen links relativos ("../empleos/") porque la
+ * página publica `<base href="https://www.derecho.uba.ar">`; en la app no hay
+ * esa base y tocarlos no llevaba a ningún lado. Se resuelven contra esta.
+ */
+export const LEGACY_SITE_URL = 'https://www.derecho.uba.ar/'
+
+/**
+ * Link de una nota del sitio legacy hecho absoluto. Los absolutos, `mailto:` y
+ * `tel:` pasan tal cual; null si no se puede armar una URL.
+ */
+export function legacySiteUrl(href: string): string | null {
+  try {
+    return new URL(href.trim(), LEGACY_SITE_URL).href
+  } catch {
+    return null
+  }
+}
+
 export const FACEBOOK_URL = 'https://www.facebook.com/Centrodegraduadasygraduados'
 export const TWITTER_URL = 'https://x.com/graduadodchouba'
 export const INSTAGRAM_URL = 'https://www.instagram.com/centrodegraduados'

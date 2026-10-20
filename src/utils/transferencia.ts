@@ -15,8 +15,11 @@ export const TRANSFERENCIA = {
   swift: 'NACNARBA',
 } as const
 
-/** El comprobante va a contaduría; el título, al Centro de Graduados. */
-export const EMAIL_COMPROBANTE = 'contablepos@derecho.uba.ar'
+/**
+ * El comprobante y el título van los dos al Centro de Graduados (lo pidió el
+ * Centro en octubre de 2026; antes el comprobante iba a contablepos@).
+ */
+export const EMAIL_COMPROBANTE = 'graduados@derecho.uba.ar'
 export const EMAIL_CONTACTO = 'graduados@derecho.uba.ar'
 
 /** Las filas de la cuenta, listas para pintar como lista de etiqueta/valor. */

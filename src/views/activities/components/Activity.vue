@@ -67,7 +67,7 @@
                 <li>
                     <ion-icon :icon="calendarOutline" aria-hidden="true"></ion-icon>
                     <span>
-                        {{ formatDate(activity.start) }}
+                        {{ activity.schedule || formatDate(activity.start) }}
                         <em v-if="activity.beginning && !activity.is_ended">· {{ activity.beginning }}</em>
                     </span>
                 </li>
@@ -124,6 +124,8 @@ interface ActivityItem {
     teachers_count?: number;
     start?: string;
     beginning?: string;
+    /** Todas las clases con su horario ("viernes 25 de septiembre y viernes 02 de octubre de 17:00 a 19:00 hs"). */
+    schedule?: string | null;
     modality?: string;
     is_only_for_graduado_uba?: boolean;
     // Flags de disponibilidad (mismos que el detalle, ahora también en el listado)

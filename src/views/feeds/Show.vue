@@ -49,9 +49,21 @@
           ><small>{{ feed.date }}</small></ion-text
         >
         <h4 class="ion-no-margin">{{ feed.title }}</h4>
-        <div class="content ion-margin-top" v-html="feed.content"></div>
+        <div class="content ion-margin-top" v-html="feed.content" @click="onContentClick"></div>
       </ion-text>
-      
+
+      <!-- Grabación de la actividad: el link lo carga el Centro en /admin/noticias. -->
+      <ion-button
+        v-if="feed.video_url"
+        expand="block"
+        shape="round"
+        class="ion-margin-top"
+        @click="openExternal(feed.video_url)"
+      >
+        <ion-icon :icon="logoYoutube" slot="start" aria-hidden="true"></ion-icon>
+        Ver en YouTube
+      </ion-button>
+
       <!-- Componente de compartir social -->
       <SocialShare
         :share-data="{
@@ -66,14 +78,18 @@
 
 <script setup lang="ts">
 import {
+  IonButton,
+  IonIcon,
   IonSkeletonText,
   IonText,
   IonThumbnail,
 } from '@ionic/vue'
+import { logoYoutube } from 'ionicons/icons'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import SocialShare from '@/components/SocialShare.vue'
+import { legacySiteUrl, openExternal } from '@/uses/externalLinks'
 
 interface FeedItem {
   title: string;
@@ -82,6 +98,8 @@ interface FeedItem {
   thumb: {
     absolute_path: string | null;
   };
+  /** Video de YouTube de la actividad, si el Centro lo cargó. */
+  video_url?: string | null;
 }
 
 const loaded = ref(false)
@@ -99,6 +117,19 @@ const getPlainTextContent = (htmlContent: string): string => {
   
   // Obtener solo el texto, sin etiquetas HTML
   return temp.textContent || temp.innerText || ''
+}
+
+// Los links del cuerpo vienen del sitio de la Facultad y son relativos
+// ("../empleos/"): navegarlos dentro del WebView daba error. Se resuelven contra
+// el sitio y se abren afuera, como cualquier otro enlace externo.
+function onContentClick(event: MouseEvent) {
+  const link = (event.target as HTMLElement | null)?.closest('a')
+  const href = link?.getAttribute('href')
+  if (!href || href.startsWith('#')) return
+
+  event.preventDefault()
+  const url = legacySiteUrl(href)
+  if (url) openExternal(url)
 }
 
 onMounted(() => {

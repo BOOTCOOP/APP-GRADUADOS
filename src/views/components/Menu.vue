@@ -15,7 +15,7 @@
         </div>
         <div class="menu-user-info" v-if="isLoggedIn">
           <span class="menu-user-name">{{ user?.firstname }} {{ user?.lastname }}</span>
-          <span class="menu-user-sub">Graduado UBA Derecho</span>
+          <span v-if="userTypeLabel" class="menu-user-sub">{{ userTypeLabel }}</span>
         </div>
         <div class="menu-user-info" v-else>
           <span class="menu-user-name">Bienvenido/a</span>
@@ -149,6 +149,7 @@ import { openYoutubeChannel } from "@/uses/externalLinks";
 import { useNotifications } from "@/uses/notifications";
 import { applyOtaUpdateNow } from "@/uses/otaUpdate";
 import { checkStoreUpdate } from "@/uses/appUpdate";
+import { typeLabel } from "@/utils/userTypes";
 
 const route = useRoute();
 const router = useIonRouter();
@@ -170,6 +171,11 @@ const userInitials = computed(() => {
   const last = (user.value?.lastname ?? '').trim().charAt(0);
   return (first + last).toUpperCase();
 });
+
+// La categoría real del usuario, la misma que muestra "Mi cuenta". Estaba fija
+// en "Graduado UBA Derecho", así que quien es de otra universidad veía las dos
+// cosas a la vez. Se actualiza sola cuando refreshUser() trae el cambio aprobado.
+const userTypeLabel = computed(() => typeLabel(user.value?.type_id));
 
 // `url` = ruta interna; `action` = abre algo fuera de la app.
 const items = [

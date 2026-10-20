@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.4] - 2026-10-20
+
+Bundle OTA sobre la 2.0.1 de tienda. Solo código web.
+
+⚠️ **Requiere el deploy de la API** (commit `87b85ce` de api-graduados, con
+`php artisan migrate`): las fechas completas del taller (`schedule`), el
+"mañana" en vez de "en 5 horas" y el botón de YouTube salen de ahí. Sin ese
+deploy la card sigue mostrando solo la primera fecha y el botón no aparece.
+
+### Fixed
+- **El menú decía "Graduado UBA Derecho" a todos**: estaba fijo en el código. Ahora muestra la categoría real del perfil, la misma de "Mi cuenta"
+- **Los links de las noticias no abrían**: vienen del sitio de la Facultad como relativos (`../empleos/`) y dentro de la app no apuntaban a ningún lado. Ahora se resuelven contra `www.derecho.uba.ar` y se abren en el navegador
+- **Un taller de mañana figuraba "en 5 horas"** y los talleres de varias clases mostraban solo la primera fecha: la card lista todas las clases con su horario ("viernes 25 de septiembre y viernes 02 de octubre de 17:00 a 19:00 hs")
+
+### Changed
+- El comprobante de pago de los cursos se manda a **graduados@derecho.uba.ar** (antes contablepos@derecho.uba.ar)
+
+### Added
+- **"Ver en YouTube" en el detalle de las noticias** que tengan cargado el video en `/admin/noticias`
+
 ## [2.1.3] - 2026-09-24
 
 Bundle OTA sobre la 2.0.1 de tienda. Solo código web.
