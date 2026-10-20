@@ -1,6 +1,6 @@
 {
-  "version": "2.1.3",
-  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.1.3.zip",
+  "version": "2.1.4",
+  "url": "https://bootcoop.github.io/APP-GRADUADOS/ota/bundle-2.1.4.zip",
   "min_native_version": "1.2.0",
-  "notes": "Los cursos que todavía deben el pago se muestran como 'Preinscripto' en vez de 'Ya estás inscripto'"
+  "notes": "El menú muestra la categoría real, los links de Noticias abren, los talleres muestran todas sus fechas y el comprobante va a graduados@derecho.uba.ar"
 }
