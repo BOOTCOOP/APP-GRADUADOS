@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.5] - 2026-11-07
+
+Bundle OTA sobre la 2.0.1 de tienda. Solo código web, sin cambios visibles.
+
+### Removed
+- Acciones `courses()` y `workshops()` del store `inscriptions`: nadie las despachaba y apuntaban a `inscriptions/courses` e `inscriptions/workshops`, rutas que en la API nunca respondieron (las tapaba `inscriptions/{inscription}` y devolvían 404). La API las quita en el mismo movimiento.
+
 ## [2.1.4] - 2026-10-20
 
 Bundle OTA sobre la 2.0.1 de tienda. Solo código web.

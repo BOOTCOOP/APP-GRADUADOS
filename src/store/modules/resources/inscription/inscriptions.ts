@@ -6,26 +6,6 @@ export default {
   getters: {},
   mutations: {},
   actions: {
-    // Courses
-    courses() {
-      return new Promise((resolve, reject) => {
-        axios
-          .get(`inscriptions/courses`)
-          .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
-    },
-
-    // Workshops
-    workshops() {
-      return new Promise((resolve, reject) => {
-        axios
-          .get(`inscriptions/workshops`)
-          .then((response) => resolve(response))
-          .catch(error => reject(error))
-      })
-    },
-
     // Show
     fetch(ctx, id) {
       return new Promise((resolve, reject) => {
